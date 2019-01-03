@@ -11,6 +11,7 @@
 
 	// @codingStandardsIgnoreStart MediaWiki.WhiteSpace.SpaceBeforeSingleLineComment.NewLineComment
 	$themes = [
+		'discord' => 'Discord',
 		'wikimediaui' => 'WikimediaUI', // Do not change this line or you'll break `grunt add-theme`
 		'apex' => 'Apex',
 	];

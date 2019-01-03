@@ -159,6 +159,7 @@ Demo.static.pages = {};
  * @property {Object.<string,string>}
  */
 Demo.static.themes = {
+	discord: 'Discord',
 	wikimediaui: 'WikimediaUI', // Do not change this line or you'll break `grunt add-theme`
 	apex: 'Apex'
 };
