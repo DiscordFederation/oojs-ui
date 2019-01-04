@@ -15,7 +15,7 @@ OOUI is a component-based JavaScript UI library. Key features:
 It is the standard library for Web products at the Wikimedia Foundation, having been originally created for use by [VisualEditor](https://www.mediawiki.org/wiki/VisualEditor).
 
 
-Quick start
+Quick Start
 ----------
 
 The library is available on [npm](https://www.npmjs.com/package/oojs-ui). To install:
