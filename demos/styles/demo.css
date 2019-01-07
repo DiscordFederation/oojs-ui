@@ -4,15 +4,15 @@ html {
 }
 
 body {
-	color: #fff;  // Temporary
-	background-color: #36393f;  // Temporary
+	color: #fff;  /* Temporary */
+	background-color: #36393f;  /* Temporary */
 	margin: 0 1em;
 	padding: 0;
 	font-family: sans-serif;
 }
 
 a:link {
-	color: #7289da;  // Temporary
+	color: #7289da;  /* Temporary */
 }
 
 code,
@@ -116,7 +116,7 @@ p {
 
 .demo-link-example::after,
 .demo-console-toggle::after {
-	color: #7289da;  // Temporary
+	color: #7289da;  /* Temporary */
 	position: relative;
 	display: inline-block;
 	margin-right: -1.2em;
@@ -224,7 +224,7 @@ p {
 /* @noflip */
 .demo-console-label::before {
 	content: '→';
-	color: #7289da;  // Temporary
+	color: #7289da;  /* Temporary */
 	display: block;
 	position: absolute;
 	top: 0;
@@ -452,7 +452,7 @@ FieldLayout left & right aligned */
  */
 @supports ( position: fixed ) {
 	.demo-menu {
-		background-color: #36393f;  // Temporary
+		background-color: #36393f;  /* Temporary */
 		position: fixed;
 		left: 0;
 		right: 0;
