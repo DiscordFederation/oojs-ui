@@ -8,13 +8,13 @@
 			"global": true
 		},
 		"progressive": {
-			"color": "#36c"
+			"color": "#7289da"
 		},
 		"destructive": {
-			"color": "#d33"
+			"color": "#f04747"
 		},
 		"warning": {
-			"color": "#ff5d00"
+			"color": "#e67e22"
 		}
 	},
 	"images": {
