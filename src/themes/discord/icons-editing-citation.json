@@ -1,6 +1,7 @@
 {
 	"prefix": "oo-ui-icon",
 	"intro": "@import '../../../../src/styles/common';",
+	"defaultColor": "#fff",
 	"images": {
 		"book": {
 			"file":  {
