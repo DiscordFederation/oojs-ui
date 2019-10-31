@@ -1,7 +1,7 @@
 {
 	"selectorWithoutVariant": ".oo-ui-icon-{name}",
 	"selectorWithVariant": ".oo-ui-image-{variant}.oo-ui-icon-{name}",
-	"intro": "@import '../../../../src/styles/common';",
+	"intro": "@import '../../../../src/styles/common.less';",
 	"variants": {
 		"invert": {
 			"color": "#fff",
@@ -14,8 +14,14 @@
 		"destructive": {
 			"color": "#d33"
 		},
+		"error": {
+			"color": "#d33"
+		},
 		"warning": {
-			"color": "#ff5d00"
+			"color": "#fc3"
+		},
+		"success": {
+			"color": "#14866d"
 		}
 	},
 	"images": {
@@ -31,8 +37,26 @@
 				"rtl": "images/icons/articles-rtl.svg"
 			}
 		},
+		"articleAdd": {
+			"file": "images/icons/articleAdd.svg"
+		},
 		"articleCheck": {
 			"file": "images/icons/articleCheck.svg"
+		},
+		"articleDisambiguation": {
+			"file": {
+				"ltr": "images/icons/articleDisambiguation-ltr.svg",
+				"rtl": "images/icons/articleDisambiguation-rtl.svg"
+			}
+		},
+		"articleNotFound": {
+			"file": {
+				"ltr": "images/icons/articleNotFound-ltr.svg",
+				"rtl": "images/icons/articleNotFound-rtl.svg",
+				"lang": {
+					"he,yi": "images/icons/articleNotFound-ltr.svg"
+				}
+			}
 		},
 		"articleSearch": {
 			"file": "images/icons/articleSearch.svg"
@@ -66,6 +90,14 @@
 				}
 			}
 		},
+		"infoFilled": {
+			"file": {
+				"default": "images/icons/infoFilled.svg",
+				"lang": {
+					"ar": "images/icons/lightbulb.svg"
+				}
+			}
+		},
 		"robot": {
 			"file": "images/icons/robot.svg"
 		},
@@ -74,7 +106,11 @@
 				"ltr": "images/icons/tag-ltr.svg",
 				"rtl": "images/icons/tag-rtl.svg"
 			},
-			"variants": [ "destructive", "warning" ]
+			"variants": [
+				"destructive",
+				"error",
+				"warning"
+			]
 		},
 		"upload": {
 			"file": "images/icons/upload.svg"

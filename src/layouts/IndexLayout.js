@@ -1,9 +1,9 @@
 /**
  * IndexLayouts contain {@link OO.ui.TabPanelLayout tab panel layouts} as well as
- * {@link OO.ui.TabSelectWidget tabs} that allow users to easily navigate through the tab panels and
- * select which one to display. By default, only one tab panel is displayed at a time. When a user
- * navigates to a new tab panel, the index layout automatically focuses on the first focusable element,
- * unless the default setting is changed.
+ * {@link OO.ui.TabSelectWidget tabs} that allow users to easily navigate through the tab panels
+ * and select which one to display. By default, only one tab panel is displayed at a time. When a
+ * user navigates to a new tab panel, the index layout automatically focuses on the first focusable
+ * element, unless the default setting is changed.
  *
  * TODO: This class is similar to BookletLayout, we may want to refactor to reduce duplication
  *
@@ -27,15 +27,18 @@
  *     var index = new OO.ui.IndexLayout();
  *
  *     index.addTabPanels( [ tabPanel1, tabPanel2 ] );
- *     $( 'body' ).append( index.$element );
+ *     $( document.body ).append( index.$element );
  *
  * @class
  * @extends OO.ui.MenuLayout
  *
  * @constructor
  * @param {Object} [config] Configuration options
+ * @cfg {OO.ui.StackLayout} [contentPanel] Content stack (see MenuLayout)
  * @cfg {boolean} [continuous=false] Show all tab panels, one after another
- * @cfg {boolean} [autoFocus=true] Focus on the first focusable element when a new tab panel is displayed. Disabled on mobile.
+ * @cfg {boolean} [autoFocus=true] Focus on the first focusable element when a new tab panel is
+ *  displayed. Disabled on mobile.
+ * @cfg {boolean} [framed=true] Render the tabs with frames
  */
 OO.ui.IndexLayout = function OoUiIndexLayout( config ) {
 	// Configuration initialization
@@ -46,18 +49,22 @@ OO.ui.IndexLayout = function OoUiIndexLayout( config ) {
 
 	// Properties
 	this.currentTabPanelName = null;
-	this.tabPanels = {};
+	// Allow infused widgets to pass existing tabPanels
+	this.tabPanels = config.tabPanels || {};
 
 	this.ignoreFocus = false;
-	this.stackLayout = new OO.ui.StackLayout( {
+	this.stackLayout = this.contentPanel || new OO.ui.StackLayout( {
 		continuous: !!config.continuous,
 		expanded: this.expanded
 	} );
 	this.setContentPanel( this.stackLayout );
 	this.autoFocus = config.autoFocus === undefined || !!config.autoFocus;
 
-	this.tabSelectWidget = new OO.ui.TabSelectWidget();
-	this.tabPanel = new OO.ui.PanelLayout( {
+	// Allow infused widgets to pass an existing tabSelectWidget
+	this.tabSelectWidget = config.tabSelectWidget || new OO.ui.TabSelectWidget( {
+		framed: config.framed === undefined || config.framed
+	} );
+	this.tabPanel = this.menuPanel || new OO.ui.PanelLayout( {
 		expanded: this.expanded
 	} );
 	this.setMenuPanel( this.tabPanel );
@@ -65,10 +72,14 @@ OO.ui.IndexLayout = function OoUiIndexLayout( config ) {
 	this.toggleMenu( true );
 
 	// Events
-	this.stackLayout.connect( this, { set: 'onStackLayoutSet' } );
-	this.tabSelectWidget.connect( this, { select: 'onTabSelectWidgetSelect' } );
+	this.stackLayout.connect( this, {
+		set: 'onStackLayoutSet'
+	} );
+	this.tabSelectWidget.connect( this, {
+		select: 'onTabSelectWidgetSelect'
+	} );
 	if ( this.autoFocus ) {
-		// Event 'focus' does not bubble, but 'focusin' does
+		// Event 'focus' does not bubble, but 'focusin' does.
 		this.stackLayout.$element.on( 'focusin', this.onStackLayoutFocus.bind( this ) );
 	}
 
@@ -78,6 +89,8 @@ OO.ui.IndexLayout = function OoUiIndexLayout( config ) {
 	this.tabPanel.$element
 		.addClass( 'oo-ui-indexLayout-tabPanel' )
 		.append( this.tabSelectWidget.$element );
+
+	this.selectFirstSelectableTabPanel();
 };
 
 /* Setup */
@@ -87,7 +100,9 @@ OO.inheritClass( OO.ui.IndexLayout, OO.ui.MenuLayout );
 /* Events */
 
 /**
- * A 'set' event is emitted when a tab panel is {@link #setTabPanel set} to be displayed by the index layout.
+ * A 'set' event is emitted when a tab panel is {@link #setTabPanel set} to be displayed by the
+ * index layout.
+ *
  * @event set
  * @param {OO.ui.TabPanelLayout} tabPanel Current tab panel
  */
@@ -123,7 +138,8 @@ OO.ui.IndexLayout.prototype.onStackLayoutFocus = function ( e ) {
 	$target = $( e.target ).closest( '.oo-ui-tabPanelLayout' );
 	for ( name in this.tabPanels ) {
 		// Check for tab panel match, exclude current tab panel to find only tab panel changes
-		if ( this.tabPanels[ name ].$element[ 0 ] === $target[ 0 ] && name !== this.currentTabPanelName ) {
+		if ( this.tabPanels[ name ].$element[ 0 ] === $target[ 0 ] &&
+				name !== this.currentTabPanelName ) {
 			this.setTabPanel( name );
 			break;
 		}
@@ -173,7 +189,11 @@ OO.ui.IndexLayout.prototype.focus = function ( itemIndex ) {
 		return;
 	}
 	// Only change the focus if is not already in the current page
-	if ( !OO.ui.contains( tabPanel.$element[ 0 ], this.getElementDocument().activeElement, true ) ) {
+	if ( !OO.ui.contains(
+		tabPanel.$element[ 0 ],
+		this.getElementDocument().activeElement,
+		true
+	) ) {
 		tabPanel.focus();
 	}
 };
@@ -269,7 +289,7 @@ OO.ui.IndexLayout.prototype.getCurrentTabPanelName = function () {
 };
 
 /**
- * Add tab panels to the index layout
+ * Add tab panels to the index layout.
  *
  * When tab panels are added with the same names as existing tab panels, the existing tab panels
  * will be automatically removed before the new tab panels are added.
@@ -278,7 +298,7 @@ OO.ui.IndexLayout.prototype.getCurrentTabPanelName = function () {
  * @param {number} index Index of the insertion point
  * @fires add
  * @chainable
- * @return {OO.ui.BookletLayout} The layout, for chaining
+ * @return {OO.ui.IndexLayout} The layout, for chaining
  */
 OO.ui.IndexLayout.prototype.addTabPanels = function ( tabPanels, index ) {
 	var i, len, name, tabPanel, item, currentIndex,
@@ -332,7 +352,7 @@ OO.ui.IndexLayout.prototype.addTabPanels = function ( tabPanels, index ) {
  * @param {OO.ui.TabPanelLayout[]} tabPanels An array of tab panels to remove
  * @fires remove
  * @chainable
- * @return {OO.ui.BookletLayout} The layout, for chaining
+ * @return {OO.ui.IndexLayout} The layout, for chaining
  */
 OO.ui.IndexLayout.prototype.removeTabPanels = function ( tabPanels ) {
 	var i, len, name, tabPanel,
@@ -362,7 +382,7 @@ OO.ui.IndexLayout.prototype.removeTabPanels = function ( tabPanels ) {
  *
  * @fires remove
  * @chainable
- * @return {OO.ui.BookletLayout} The layout, for chaining
+ * @return {OO.ui.IndexLayout} The layout, for chaining
  */
 OO.ui.IndexLayout.prototype.clearTabPanels = function () {
 	var i, len,
@@ -403,9 +423,10 @@ OO.ui.IndexLayout.prototype.setTabPanel = function ( name ) {
 			if ( previousTabPanel ) {
 				previousTabPanel.setActive( false );
 				// Blur anything focused if the next tab panel doesn't have anything focusable.
-				// This is not needed if the next tab panel has something focusable (because once it is focused
-				// this blur happens automatically). If the layout is non-continuous, this check is
-				// meaningless because the next tab panel is not visible yet and thus can't hold focus.
+				// This is not needed if the next tab panel has something focusable (because once
+				// it is focused this blur happens automatically). If the layout is non-continuous,
+				// this check is meaningless because the next tab panel is not visible yet and thus
+				// can't hold focus.
 				if (
 					this.autoFocus &&
 					!OO.ui.isMobile() &&
@@ -422,8 +443,9 @@ OO.ui.IndexLayout.prototype.setTabPanel = function ( name ) {
 			tabPanel.setActive( true );
 			this.stackLayout.setItem( tabPanel );
 			if ( !this.stackLayout.continuous && previousTabPanel ) {
-				// This should not be necessary, since any inputs on the previous tab panel should have been
-				// blurred when it was hidden, but browsers are not very consistent about this.
+				// This should not be necessary, since any inputs on the previous tab panel should
+				// have been blurred when it was hidden, but browsers are not very consistent about
+				// this.
 				$focused = previousTabPanel.$element.find( ':focus' );
 				if ( $focused.length ) {
 					$focused[ 0 ].blur();
@@ -438,7 +460,7 @@ OO.ui.IndexLayout.prototype.setTabPanel = function ( name ) {
  * Select the first selectable tab panel.
  *
  * @chainable
- * @return {OO.ui.BookletLayout} The layout, for chaining
+ * @return {OO.ui.IndexLayout} The layout, for chaining
  */
 OO.ui.IndexLayout.prototype.selectFirstSelectableTabPanel = function () {
 	if ( !this.tabSelectWidget.findSelectedItem() ) {

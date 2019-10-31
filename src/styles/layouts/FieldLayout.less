@@ -1,4 +1,4 @@
-@import '../common';
+@import '../common.less';
 
 .oo-ui-fieldLayout {
 	display: block;
@@ -59,8 +59,9 @@
 	.oo-ui-fieldLayout-help {
 		float: right;
 
-		> .oo-ui-popupWidget > .oo-ui-popupWidget-popup {
-			z-index: 1;
+		// In PHP mode this just behaves as a help tooltip
+		&:not( .oo-ui-popupButtonWidget ) > .oo-ui-buttonElement-button {
+			cursor: help;
 		}
 	}
 

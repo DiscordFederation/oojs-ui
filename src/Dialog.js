@@ -1,7 +1,7 @@
 /**
  * The Dialog class serves as the base class for the other types of dialogs.
  * Unless extended to include controls, the rendered dialog box is a simple window
- * that users can close by hitting the ‘Esc’ key. Dialog windows are used with OO.ui.WindowManager,
+ * that users can close by hitting the Escape key. Dialog windows are used with OO.ui.WindowManager,
  * which opens, closes, and controls the presentation of the window. See the
  * [OOUI documentation on MediaWiki] [1] for more information.
  *
@@ -15,7 +15,8 @@
  *     MyDialog.prototype.initialize = function () {
  *         MyDialog.parent.prototype.initialize.call( this );
  *         this.content = new OO.ui.PanelLayout( { padded: true, expanded: false } );
- *         this.content.$element.append( '<p>A simple dialog window. Press \'Esc\' to close.</p>' );
+ *         this.content.$element.append( '<p>A simple dialog window. Press Escape key to ' +
+ *             'close.</p>' );
  *         this.$body.append( this.content.$element );
  *     };
  *     MyDialog.prototype.getBodyHeight = function () {
@@ -26,7 +27,7 @@
  *     } );
  *     // Create and append a window manager, which opens and closes the window.
  *     var windowManager = new OO.ui.WindowManager();
- *     $( 'body' ).append( windowManager.$element );
+ *     $( document.body ).append( windowManager.$element );
  *     windowManager.addWindows( [ myDialog ] );
  *     // Open the window!
  *     windowManager.openWindow( myDialog );
@@ -91,9 +92,10 @@ OO.ui.Dialog.static.name = '';
 /**
  * The dialog title.
  *
- * The title can be specified as a plaintext string, a {@link OO.ui.mixin.LabelElement Label} node, or a function
- * that will produce a Label node or string. The title can also be specified with data passed to the
- * constructor (see #getSetupProcess). In this case, the static value will be overridden.
+ * The title can be specified as a plaintext string, a {@link OO.ui.mixin.LabelElement Label} node,
+ * or a function that will produce a Label node or string. The title can also be specified with data
+ * passed to the constructor (see #getSetupProcess). In this case, the static value will be
+ * overridden.
  *
  * @abstract
  * @static
@@ -105,8 +107,8 @@ OO.ui.Dialog.static.title = '';
 /**
  * An array of configured {@link OO.ui.ActionWidget action widgets}.
  *
- * Actions can also be specified with data passed to the constructor (see #getSetupProcess). In this case, the static
- * value will be overridden.
+ * Actions can also be specified with data passed to the constructor (see #getSetupProcess). In this
+ * case, the static value will be overridden.
  *
  * [2]: https://www.mediawiki.org/wiki/OOUI/Windows/Process_Dialogs#Action_sets
  *
@@ -117,7 +119,7 @@ OO.ui.Dialog.static.title = '';
 OO.ui.Dialog.static.actions = [];
 
 /**
- * Close the dialog when the 'Esc' key is pressed.
+ * Close the dialog when the Escape key is pressed.
  *
  * @static
  * @abstract
@@ -190,9 +192,10 @@ OO.ui.Dialog.prototype.getActions = function () {
 /**
  * Get a process for taking action.
  *
- * When you override this method, you can create a new OO.ui.Process and return it, or add additional
- * accept steps to the process the parent method provides using the {@link OO.ui.Process#first 'first'}
- * and {@link OO.ui.Process#next 'next'} methods of OO.ui.Process.
+ * When you override this method, you can create a new OO.ui.Process and return it, or add
+ * additional accept steps to the process the parent method provides using the
+ * {@link OO.ui.Process#first 'first'} and {@link OO.ui.Process#next 'next'} methods of
+ * OO.ui.Process.
  *
  * @param {string} [action] Symbolic name of action
  * @return {OO.ui.Process} Action process

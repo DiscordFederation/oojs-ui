@@ -10,23 +10,21 @@
  *     @example
  *     // A RadioSelectWidget with RadioOptions.
  *     var option1 = new OO.ui.RadioOptionWidget( {
- *         data: 'a',
- *         label: 'Selected radio option'
- *     } );
- *
- *     var option2 = new OO.ui.RadioOptionWidget( {
- *         data: 'b',
- *         label: 'Unselected radio option'
- *     } );
- *
- *     var radioSelect=new OO.ui.RadioSelectWidget( {
- *         items: [ option1, option2 ]
- *      } );
+ *             data: 'a',
+ *             label: 'Selected radio option'
+ *         } ),
+ *         option2 = new OO.ui.RadioOptionWidget( {
+ *             data: 'b',
+ *             label: 'Unselected radio option'
+ *         } );
+ *         radioSelect = new OO.ui.RadioSelectWidget( {
+ *             items: [ option1, option2 ]
+ *         } );
  *
  *     // Select 'option 1' using the RadioSelectWidget's selectItem() method.
  *     radioSelect.selectItem( option1 );
  *
- *     $( 'body' ).append( radioSelect.$element );
+ *     $( document.body ).append( radioSelect.$element );
  *
  * [1]: https://www.mediawiki.org/wiki/OOUI/Widgets/Selects_and_Options
 

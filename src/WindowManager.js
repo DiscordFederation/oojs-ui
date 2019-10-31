@@ -1,7 +1,8 @@
 /**
- * Window managers are used to open and close {@link OO.ui.Window windows} and control their presentation.
- * Managed windows are mutually exclusive. If a new window is opened while a current window is opening
- * or is opened, the current window will be closed and any ongoing {@link OO.ui.Process process} will be cancelled. Windows
+ * Window managers are used to open and close {@link OO.ui.Window windows} and control their
+ * presentation. Managed windows are mutually exclusive. If a new window is opened while a current
+ * window is opening or is opened, the current window will be closed and any on-going
+ * {@link OO.ui.Process process} will be cancelled. Windows
  * themselves are persistent and—rather than being torn down when closed—can be repopulated with the
  * pertinent data and reused.
  *
@@ -12,11 +13,13 @@
  * {@link OO.ui.Window#open open} method is used, and the window manager begins to open the window.
  *
  * - an `opening` event is emitted with an `opening` promise
- * - the #getSetupDelay method is called and the returned value is used to time a pause in execution before the
- *   window’s {@link OO.ui.Window#method-setup setup} method is called which executes OO.ui.Window#getSetupProcess.
+ * - the #getSetupDelay method is called and the returned value is used to time a pause in execution
+ *   before the window’s {@link OO.ui.Window#method-setup setup} method is called which executes
+ *   OO.ui.Window#getSetupProcess.
  * - a `setup` progress notification is emitted from the `opening` promise
- * - the #getReadyDelay method is called the returned value is used to time a pause in execution before the
- *   window’s {@link OO.ui.Window#method-ready ready} method is called which executes OO.ui.Window#getReadyProcess.
+ * - the #getReadyDelay method is called the returned value is used to time a pause in execution
+ *   before the window’s {@link OO.ui.Window#method-ready ready} method is called which executes
+ *   OO.ui.Window#getReadyProcess.
  * - a `ready` progress notification is emitted from the `opening` promise
  * - the `opening` promise is resolved with an `opened` promise
  *
@@ -27,13 +30,13 @@
  * to close the window.
  *
  * - the `opened` promise is resolved with `closing` promise and a `closing` event is emitted
- * - the #getHoldDelay method is called and the returned value is used to time a pause in execution before
- *   the window's {@link OO.ui.Window#getHoldProcess getHoldProcess} method is called on the
+ * - the #getHoldDelay method is called and the returned value is used to time a pause in execution
+ *   before the window's {@link OO.ui.Window#getHoldProcess getHoldProcess} method is called on the
  *   window and its result executed
  * - a `hold` progress notification is emitted from the `closing` promise
- * - the #getTeardownDelay() method is called and the returned value is used to time a pause in execution before
- *   the window's {@link OO.ui.Window#getTeardownProcess getTeardownProcess} method is called on the
- *   window and its result executed
+ * - the #getTeardownDelay() method is called and the returned value is used to time a pause in
+ *   execution before the window's {@link OO.ui.Window#getTeardownProcess getTeardownProcess} method
+ *   is called on the window and its result executed
  * - a `teardown` progress notification is emitted from the `closing` promise
  * - the `closing` promise is resolved. The window is now closed
  *
@@ -100,9 +103,10 @@ OO.mixinClass( OO.ui.WindowManager, OO.EventEmitter );
  *
  * @event opening
  * @param {OO.ui.Window} win Window that's being opened
- * @param {jQuery.Promise} opened A promise resolved with a value when the window is opened successfully.
- *  This promise also emits `setup` and `ready` notifications. When this promise is resolved, the first
- *  argument of the value is an 'closed' promise, the second argument is the opening data.
+ * @param {jQuery.Promise} opened A promise resolved with a value when the window is opened
+ *  successfully. This promise also emits `setup` and `ready` notifications. When this promise is
+ *  resolved, the first argument of the value is an 'closed' promise, the second argument is the
+ *  opening data.
  * @param {Object} data Window opening data
  */
 
@@ -111,9 +115,9 @@ OO.mixinClass( OO.ui.WindowManager, OO.EventEmitter );
  *
  * @event closing
  * @param {OO.ui.Window} win Window that's being closed
- * @param {jQuery.Promise} closed A promise resolved with a value when the window is closed successfully.
- *  This promise also emits `hold` and `teardown` notifications. When this promise is resolved, the first
- *  argument of its value is the closing data.
+ * @param {jQuery.Promise} closed A promise resolved with a value when the window is closed
+ *  successfully. This promise also emits `hold` and `teardown` notifications. When this promise is
+ *  resolved, the first argument of its value is the closing data.
  * @param {Object} data Window closing data
  */
 
@@ -190,7 +194,7 @@ OO.ui.WindowManager.prototype.afterWindowResize = function () {
 
 		// Restore focus to the original element if it has changed.
 		// When a layout change is made on resize inputs lose focus
-		// on Android (Chrome and Firefox). See T162127.
+		// on Android (Chrome and Firefox), see T162127.
 		if ( currentFocusedElement !== document.activeElement ) {
 			currentFocusedElement.focus();
 		}
@@ -260,7 +264,8 @@ OO.ui.WindowManager.prototype.getSetupDelay = function () {
 };
 
 /**
- * Get the number of milliseconds to wait after setup has finished before executing the ‘ready’ process.
+ * Get the number of milliseconds to wait after setup has finished before executing the ‘ready’
+ * process.
  *
  * @param {OO.ui.Window} win Window being opened
  * @param {Object} [data] Window opening data
@@ -271,7 +276,8 @@ OO.ui.WindowManager.prototype.getReadyDelay = function () {
 };
 
 /**
- * Get the number of milliseconds to wait after closing has begun before executing the 'hold' process.
+ * Get the number of milliseconds to wait after closing has begun before executing the 'hold'
+ * process.
  *
  * @param {OO.ui.Window} win Window being closed
  * @param {Object} [data] Window closing data
@@ -296,9 +302,9 @@ OO.ui.WindowManager.prototype.getTeardownDelay = function () {
 /**
  * Get a window by its symbolic name.
  *
- * If the window is not yet instantiated and its symbolic name is recognized by a factory, it will be
- * instantiated and added to the window manager automatically. Please see the [OOUI documentation on MediaWiki][3]
- * for more information about using factories.
+ * If the window is not yet instantiated and its symbolic name is recognized by a factory, it will
+ * be instantiated and added to the window manager automatically. Please see the [OOUI documentation
+ * on MediaWiki][3] for more information about using factories.
  * [3]: https://www.mediawiki.org/wiki/OOUI/Windows/Window_managers
  *
  * @param {string} name Symbolic name of the window
@@ -348,12 +354,12 @@ OO.ui.WindowManager.prototype.getCurrentWindow = function () {
  *
  * @param {OO.ui.Window|string} win Window object or symbolic name of window to open
  * @param {Object} [data] Window opening data
- * @param {jQuery|null} [data.$returnFocusTo] Element to which the window will return focus when closed.
- *  Defaults the current activeElement. If set to null, focus isn't changed on close.
+ * @param {jQuery|null} [data.$returnFocusTo] Element to which the window will return focus when
+ *  closed. Defaults the current activeElement. If set to null, focus isn't changed on close.
  * @return {OO.ui.WindowInstance} A lifecycle object representing this particular
- *  opening of the window. For backwards-compatibility, then object is also a Thenable that is resolved
- *  when the window is done opening, with nested promise for when closing starts. This behaviour
- *  is deprecated and is not compatible with jQuery 3. See T163510.
+ *  opening of the window. For backwards-compatibility, then object is also a Thenable that is
+ *  resolved when the window is done opening, with nested promise for when closing starts. This
+ *  behaviour is deprecated and is not compatible with jQuery 3, see T163510.
  * @fires opening
  */
 OO.ui.WindowManager.prototype.openWindow = function ( win, data, lifecycle, compatOpening ) {
@@ -417,7 +423,9 @@ OO.ui.WindowManager.prototype.openWindow = function ( win, data, lifecycle, comp
 			manager.toggleGlobalEvents( true );
 			manager.toggleAriaIsolation( true );
 		}
-		manager.$returnFocusTo = data.$returnFocusTo !== undefined ? data.$returnFocusTo : $( document.activeElement );
+		manager.$returnFocusTo = data.$returnFocusTo !== undefined ?
+			data.$returnFocusTo :
+			$( document.activeElement );
 		manager.currentWindow = win;
 		manager.lifecycle = lifecycle;
 		manager.preparingToOpen = null;
@@ -432,16 +440,23 @@ OO.ui.WindowManager.prototype.openWindow = function ( win, data, lifecycle, comp
 						compatOpening.notify( { state: 'ready' } );
 						lifecycle.deferreds.opened.resolve( data );
 						compatOpening.resolve( manager.compatOpened.promise(), data );
-					}, function () {
+						manager.togglePreventIosScrolling( true );
+					}, function ( err ) {
 						lifecycle.deferreds.opened.reject();
 						compatOpening.reject();
 						manager.closeWindow( win );
+						setTimeout( function () {
+							throw err;
+						} );
 					} );
 				}, manager.getReadyDelay() );
-			}, function () {
+			}, function ( err ) {
 				lifecycle.deferreds.opened.reject();
 				compatOpening.reject();
 				manager.closeWindow( win );
+				setTimeout( function () {
+					throw err;
+				} );
 			} );
 		}, manager.getSetupDelay() );
 	} );
@@ -455,8 +470,8 @@ OO.ui.WindowManager.prototype.openWindow = function ( win, data, lifecycle, comp
  * @param {OO.ui.Window|string} win Window object or symbolic name of window to close
  * @param {Object} [data] Window closing data
  * @return {OO.ui.WindowInstance} A lifecycle object representing this particular
- *  opening of the window. For backwards-compatibility, the object is also a Thenable that is resolved
- *  when the window is done closing, see T163510.
+ *  opening of the window. For backwards-compatibility, the object is also a Thenable that is
+ *  resolved when the window is done closing, see T163510.
  * @fires closing
  */
 OO.ui.WindowManager.prototype.closeWindow = function ( win, data ) {
@@ -522,6 +537,7 @@ OO.ui.WindowManager.prototype.closeWindow = function ( win, data ) {
 		compatOpened = manager.compatOpened;
 		manager.compatOpened = null;
 		compatOpened.resolve( compatClosing.promise(), data );
+		manager.togglePreventIosScrolling( false );
 		setTimeout( function () {
 			win.hold( data ).then( function () {
 				compatClosing.notify( { state: 'hold' } );
@@ -557,7 +573,7 @@ OO.ui.WindowManager.prototype.closeWindow = function ( win, data ) {
  *
  * This function can be called in two manners:
  *
- * 1. `.addWindows( [ windowA, windowB, ... ] )` (where `windowA`, `windowB` are OO.ui.Window objects)
+ * 1. `.addWindows( [ winA, winB, ... ] )` (where `winA`, `winB` are OO.ui.Window objects)
  *
  *    This syntax registers windows under the symbolic names defined in their `.static.name`
  *    properties. For example, if `windowA.constructor.static.name` is `'nameA'`, calling
@@ -566,7 +582,7 @@ OO.ui.WindowManager.prototype.closeWindow = function ( win, data ) {
  *
  *    This is the recommended way, as it allows for an easier switch to using a window factory.
  *
- * 2. `.addWindows( { nameA: windowA, nameB: windowB, ... } )`
+ * 2. `.addWindows( { nameA: winA, nameB: winB, ... } )`
  *
  *    This syntax registers windows under the explicitly given symbolic names. In this example,
  *    calling `.openWindow( 'nameA' )` afterwards will open the window `windowA`, regardless of what
@@ -577,7 +593,7 @@ OO.ui.WindowManager.prototype.closeWindow = function ( win, data ) {
  * Example:
  *
  *     var windowManager = new OO.ui.WindowManager();
- *     $( 'body' ).append( windowManager.$element );
+ *     $( document.body ).append( windowManager.$element );
  *
  *     // Add a window under the default name: see OO.ui.MessageDialog.static.name
  *     windowManager.addWindows( [ new OO.ui.MessageDialog() ] );
@@ -624,9 +640,9 @@ OO.ui.WindowManager.prototype.addWindows = function ( windows ) {
 /**
  * Remove the specified windows from the windows manager.
  *
- * Windows will be closed before they are removed. If you wish to remove all windows, you may wish to use
- * the #clearWindows method instead. If you no longer need the window manager and want to ensure that it no
- * longer listens to events, use the #destroy method.
+ * Windows will be closed before they are removed. If you wish to remove all windows, you may wish
+ * to use the #clearWindows method instead. If you no longer need the window manager and want to
+ * ensure that it no longer listens to events, use the #destroy method.
  *
  * @param {string[]} names Symbolic names of windows to remove
  * @return {jQuery.Promise} Promise resolved when window is closed and removed
@@ -657,9 +673,9 @@ OO.ui.WindowManager.prototype.removeWindows = function ( names ) {
 /**
  * Remove all windows from the window manager.
  *
- * Windows will be closed before they are removed. Note that the window manager, though not in use, will still
- * listen to events. If the window manager will not be used again, you may wish to use the #destroy method instead.
- * To remove just a subset of windows, use the #removeWindows method.
+ * Windows will be closed before they are removed. Note that the window manager, though not in use,
+ * will still listen to events. If the window manager will not be used again, you may wish to use
+ * the #destroy method instead. To remove just a subset of windows, use the #removeWindows method.
  *
  * @return {jQuery.Promise} Promise resolved when all windows are closed and removed
  */
@@ -692,6 +708,47 @@ OO.ui.WindowManager.prototype.updateWindowSize = function ( win ) {
 
 	this.emit( 'resize', win );
 
+	return this;
+};
+
+/**
+ * Prevent scrolling of the document on iOS devices that don't respect `body { overflow: hidden; }`.
+ *
+ * This function is called when the window is opened (ready), and so the background is covered up,
+ * and the user won't see that we're doing weird things to the scroll position.
+ *
+ * @private
+ * @param {boolean} on
+ * @chainable
+ * @return {OO.ui.WindowManager} The manager, for chaining
+ */
+OO.ui.WindowManager.prototype.togglePreventIosScrolling = function ( on ) {
+	var
+		isIos = /ipad|iphone|ipod/i.test( navigator.userAgent ),
+		$body = $( this.getElementDocument().body ),
+		scrollableRoot = OO.ui.Element.static.getRootScrollableElement( $body[ 0 ] ),
+		stackDepth = $body.data( 'windowManagerGlobalEvents' ) || 0;
+
+	// Only if this is the first/last WindowManager (see #toggleGlobalEvents)
+	if ( !isIos || stackDepth !== 1 ) {
+		return this;
+	}
+
+	if ( on ) {
+		// We can't apply this workaround for non-fullscreen dialogs, because the user would see the
+		// scroll position change. If they have content that needs scrolling, you're out of luck…
+		// Always remember the scroll position in case dialog is closed with different size.
+		this.iosOrigScrollPosition = scrollableRoot.scrollTop;
+		if ( this.getCurrentWindow().getSize() === 'full' ) {
+			$body.add( $body.parent() ).addClass( 'oo-ui-windowManager-ios-modal-ready' );
+		}
+	} else {
+		// Always restore ability to scroll in case dialog was opened with different size.
+		$body.add( $body.parent() ).removeClass( 'oo-ui-windowManager-ios-modal-ready' );
+		if ( this.getCurrentWindow().getSize() === 'full' ) {
+			scrollableRoot.scrollTop = this.iosOrigScrollPosition;
+		}
+	}
 	return this;
 };
 
@@ -767,7 +824,7 @@ OO.ui.WindowManager.prototype.toggleAriaIsolation = function ( isolate ) {
 			this.$element.removeAttr( 'aria-hidden' );
 
 			// Hide everything other than the window manager from screen readers
-			this.$ariaHidden = $( 'body' )
+			this.$ariaHidden = $( document.body )
 				.children()
 				.not( 'script' )
 				.not( $topLevelElement )
@@ -788,9 +845,9 @@ OO.ui.WindowManager.prototype.toggleAriaIsolation = function ( isolate ) {
 /**
  * Destroy the window manager.
  *
- * Destroying the window manager ensures that it will no longer listen to events. If you would like to
- * continue using the window manager, but wish to remove all windows from it, use the #clearWindows method
- * instead.
+ * Destroying the window manager ensures that it will no longer listen to events. If you would like
+ * to continue using the window manager, but wish to remove all windows from it, use the
+ * #clearWindows method instead.
  */
 OO.ui.WindowManager.prototype.destroy = function () {
 	this.toggleGlobalEvents( false );

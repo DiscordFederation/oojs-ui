@@ -4,11 +4,11 @@
  * {@link OO.ui.RadioSelectWidget radio selects}, and {@link OO.ui.MenuSelectWidget
  * menu selects}.
  *
- * This class should be used together with OO.ui.OptionWidget or OO.ui.DecoratedOptionWidget. For more
- * information, please see the [OOUI documentation on MediaWiki][1].
+ * This class should be used together with OO.ui.OptionWidget or OO.ui.DecoratedOptionWidget. For
+ * more information, please see the [OOUI documentation on MediaWiki][1].
  *
  *     @example
- *     // Example of a select widget with three options
+ *     // A select widget with three options.
  *     var select = new OO.ui.SelectWidget( {
  *         items: [
  *             new OO.ui.OptionWidget( {
@@ -25,7 +25,7 @@
  *             } )
  *         ]
  *     } );
- *     $( 'body' ).append( select.$element );
+ *     $( document.body ).append( select.$element );
  *
  * [1]: https://www.mediawiki.org/wiki/OOUI/Widgets/Selects_and_Options
  *
@@ -40,6 +40,7 @@
  *  Options are created with {@link OO.ui.OptionWidget OptionWidget} classes. See
  *  the [OOUI documentation on MediaWiki] [2] for examples.
  *  [2]: https://www.mediawiki.org/wiki/OOUI/Widgets/Selects_and_Options
+ * @cfg {boolean} [multiselect] Allow for multiple selections
  */
 OO.ui.SelectWidget = function OoUiSelectWidget( config ) {
 	// Configuration initialization
@@ -49,11 +50,14 @@ OO.ui.SelectWidget = function OoUiSelectWidget( config ) {
 	OO.ui.SelectWidget.parent.call( this, config );
 
 	// Mixin constructors
-	OO.ui.mixin.GroupWidget.call( this, $.extend( {}, config, { $group: this.$element } ) );
+	OO.ui.mixin.GroupWidget.call( this, $.extend( {
+		$group: this.$element
+	}, config ) );
 
 	// Properties
 	this.pressed = false;
 	this.selecting = null;
+	this.multiselect = !!config.multiselect;
 	this.onDocumentMouseUpHandler = this.onDocumentMouseUp.bind( this );
 	this.onDocumentMouseMoveHandler = this.onDocumentMouseMove.bind( this );
 	this.onDocumentKeyDownHandler = this.onDocumentKeyDown.bind( this );
@@ -75,7 +79,7 @@ OO.ui.SelectWidget = function OoUiSelectWidget( config ) {
 
 	// Initialization
 	this.$element
-		.addClass( 'oo-ui-selectWidget oo-ui-selectWidget-depressed' )
+		.addClass( 'oo-ui-selectWidget oo-ui-selectWidget-unpressed' )
 		.attr( 'role', 'listbox' );
 	this.setFocusOwner( this.$element );
 	if ( Array.isArray( config.items ) ) {
@@ -110,15 +114,19 @@ OO.mixinClass( OO.ui.SelectWidget, OO.ui.mixin.GroupWidget );
 /**
  * @event select
  *
- * A `select` event is emitted when the selection is modified programmatically with the #selectItem method.
+ * A `select` event is emitted when the selection is modified programmatically with the #selectItem
+ * method.
  *
- * @param {OO.ui.OptionWidget|null} item Selected item
+ * @param {OO.ui.OptionWidget[]|OO.ui.OptionWidget|null} items Currently selected items
  */
 
 /**
  * @event choose
+ *
  * A `choose` event is emitted when an item is chosen with the #chooseItem method.
+ *
  * @param {OO.ui.OptionWidget} item Chosen item
+ * @param {boolean} selected Item is selected
  */
 
 /**
@@ -139,6 +147,27 @@ OO.mixinClass( OO.ui.SelectWidget, OO.ui.mixin.GroupWidget );
  * @param {OO.ui.OptionWidget[]} items Removed items
  */
 
+/* Static methods */
+
+/**
+ * Normalize text for filter matching
+ *
+ * @param {string} text Text
+ * @return {string} Normalized text
+ */
+OO.ui.SelectWidget.static.normalizeForMatching = function ( text ) {
+	// Replace trailing whitespace, normalize multiple spaces and make case insensitive
+	var normalized = text.trim().replace( /\s+/, ' ' ).toLowerCase();
+
+	// Normalize Unicode
+	// eslint-disable-next-line no-restricted-properties
+	if ( normalized.normalize ) {
+		// eslint-disable-next-line no-restricted-properties
+		normalized = normalized.normalize();
+	}
+	return normalized;
+};
+
 /* Methods */
 
 /**
@@ -158,12 +187,13 @@ OO.ui.SelectWidget.prototype.onFocus = function ( event ) {
 	} else {
 		if ( event.target.tabIndex === -1 ) {
 			// One of the options got focussed (and the event bubbled up here).
-			// They can't be tabbed to, but they can be activated using accesskeys.
+			// They can't be tabbed to, but they can be activated using access keys.
 			// OptionWidgets and focusable UI elements inside them have tabindex="-1" set.
 			item = this.findTargetItem( event );
 		} else {
-			// There is something actually user-focusable in one of the labels of the options, and the
-			// user focussed it (e.g. by tabbing to it). Do nothing (especially, don't change the focus).
+			// There is something actually user-focusable in one of the labels of the options, and
+			// the user focussed it (e.g. by tabbing to it). Do nothing (especially, don't change
+			// the focus).
 			return;
 		}
 	}
@@ -177,7 +207,7 @@ OO.ui.SelectWidget.prototype.onFocus = function ( event ) {
 	}
 
 	if ( event.target !== this.$element[ 0 ] ) {
-		this.$focusOwner.focus();
+		this.$focusOwner.trigger( 'focus' );
 	}
 };
 
@@ -186,7 +216,7 @@ OO.ui.SelectWidget.prototype.onFocus = function ( event ) {
  *
  * @private
  * @param {jQuery.Event} e Mouse down event
- * @return {undefined/boolean} False to prevent default if event is handled
+ * @return {undefined|boolean} False to prevent default if event is handled
  */
 OO.ui.SelectWidget.prototype.onMouseDown = function ( e ) {
 	var item;
@@ -209,7 +239,7 @@ OO.ui.SelectWidget.prototype.onMouseDown = function ( e ) {
  *
  * @private
  * @param {MouseEvent} e Mouse up event
- * @return {undefined/boolean} False to prevent default if event is handled
+ * @return {undefined|boolean} False to prevent default if event is handled
  */
 OO.ui.SelectWidget.prototype.onDocumentMouseUp = function ( e ) {
 	var item;
@@ -233,12 +263,6 @@ OO.ui.SelectWidget.prototype.onDocumentMouseUp = function ( e ) {
 	return false;
 };
 
-// Deprecated alias since 0.28.3
-OO.ui.SelectWidget.prototype.onMouseUp = function () {
-	OO.ui.warnDeprecation( 'onMouseUp is deprecated, use onDocumentMouseUp instead' );
-	this.onDocumentMouseUp.apply( this, arguments );
-};
-
 /**
  * Handle document mouse move events.
  *
@@ -257,18 +281,12 @@ OO.ui.SelectWidget.prototype.onDocumentMouseMove = function ( e ) {
 	}
 };
 
-// Deprecated alias since 0.28.3
-OO.ui.SelectWidget.prototype.onMouseMove = function () {
-	OO.ui.warnDeprecation( 'onMouseMove is deprecated, use onDocumentMouseMove instead' );
-	this.onDocumentMouseMove.apply( this, arguments );
-};
-
 /**
  * Handle mouse over events.
  *
  * @private
  * @param {jQuery.Event} e Mouse over event
- * @return {undefined/boolean} False to prevent default if event is handled
+ * @return {undefined|boolean} False to prevent default if event is handled
  */
 OO.ui.SelectWidget.prototype.onMouseOver = function ( e ) {
 	var item;
@@ -287,7 +305,7 @@ OO.ui.SelectWidget.prototype.onMouseOver = function ( e ) {
  *
  * @private
  * @param {jQuery.Event} e Mouse over event
- * @return {undefined/boolean} False to prevent default if event is handled
+ * @return {undefined|boolean} False to prevent default if event is handled
  */
 OO.ui.SelectWidget.prototype.onMouseLeave = function () {
 	if ( !this.isDisabled() ) {
@@ -305,12 +323,16 @@ OO.ui.SelectWidget.prototype.onMouseLeave = function () {
 OO.ui.SelectWidget.prototype.onDocumentKeyDown = function ( e ) {
 	var nextItem,
 		handled = false,
-		currentItem = this.findHighlightedItem() || this.findSelectedItem();
+		selected = this.findSelectedItems(),
+		currentItem = this.findHighlightedItem() || (
+			Array.isArray( selected ) ? selected[ 0 ] : selected
+		),
+		firstItem = this.getItems()[ 0 ];
 
 	if ( !this.isDisabled() && this.isVisible() ) {
 		switch ( e.keyCode ) {
 			case OO.ui.Keys.ENTER:
-				if ( currentItem && currentItem.constructor.static.highlightable ) {
+				if ( currentItem ) {
 					// Was only highlighted, now let's select it. No-op if already selected.
 					this.chooseItem( currentItem );
 					handled = true;
@@ -319,18 +341,20 @@ OO.ui.SelectWidget.prototype.onDocumentKeyDown = function ( e ) {
 			case OO.ui.Keys.UP:
 			case OO.ui.Keys.LEFT:
 				this.clearKeyPressBuffer();
-				nextItem = this.findRelativeSelectableItem( currentItem, -1 );
+				nextItem = currentItem ?
+					this.findRelativeSelectableItem( currentItem, -1 ) : firstItem;
 				handled = true;
 				break;
 			case OO.ui.Keys.DOWN:
 			case OO.ui.Keys.RIGHT:
 				this.clearKeyPressBuffer();
-				nextItem = this.findRelativeSelectableItem( currentItem, 1 );
+				nextItem = currentItem ?
+					this.findRelativeSelectableItem( currentItem, 1 ) : firstItem;
 				handled = true;
 				break;
 			case OO.ui.Keys.ESCAPE:
 			case OO.ui.Keys.TAB:
-				if ( currentItem && currentItem.constructor.static.highlightable ) {
+				if ( currentItem ) {
 					currentItem.setHighlighted( false );
 				}
 				this.unbindDocumentKeyDownListener();
@@ -356,12 +380,6 @@ OO.ui.SelectWidget.prototype.onDocumentKeyDown = function ( e ) {
 	}
 };
 
-// Deprecated alias since 0.28.3
-OO.ui.SelectWidget.prototype.onKeyDown = function () {
-	OO.ui.warnDeprecation( 'onKeyDown is deprecated, use onDocumentKeyDown instead' );
-	this.onDocumentKeyDown.apply( this, arguments );
-};
-
 /**
  * Bind document key down listener.
  *
@@ -369,12 +387,6 @@ OO.ui.SelectWidget.prototype.onKeyDown = function () {
  */
 OO.ui.SelectWidget.prototype.bindDocumentKeyDownListener = function () {
 	this.getElementDocument().addEventListener( 'keydown', this.onDocumentKeyDownHandler, true );
-};
-
-// Deprecated alias since 0.28.3
-OO.ui.SelectWidget.prototype.bindKeyDownListener = function () {
-	OO.ui.warnDeprecation( 'bindKeyDownListener is deprecated, use bindDocumentKeyDownListener instead' );
-	this.bindDocumentKeyDownListener.apply( this, arguments );
 };
 
 /**
@@ -386,12 +398,6 @@ OO.ui.SelectWidget.prototype.unbindDocumentKeyDownListener = function () {
 	this.getElementDocument().removeEventListener( 'keydown', this.onDocumentKeyDownHandler, true );
 };
 
-// Deprecated alias since 0.28.3
-OO.ui.SelectWidget.prototype.unbindKeyDownListener = function () {
-	OO.ui.warnDeprecation( 'unbindKeyDownListener is deprecated, use unbindDocumentKeyDownListener instead' );
-	this.unbindDocumentKeyDownListener.apply( this, arguments );
-};
-
 /**
  * Scroll item into view, preventing spurious mouse highlight actions from happening.
  *
@@ -399,8 +405,8 @@ OO.ui.SelectWidget.prototype.unbindKeyDownListener = function () {
  */
 OO.ui.SelectWidget.prototype.scrollItemIntoView = function ( item ) {
 	var widget = this;
-	// Chromium's Blink engine will generate spurious 'mouseover' events during programmatic scrolling
-	// and around 100-150 ms after it is finished.
+	// Chromium's Blink engine will generate spurious 'mouseover' events during programmatic
+	// scrolling and around 100-150 ms after it is finished.
 	this.blockMouseOverEvents++;
 	item.scrollElementIntoView().done( function () {
 		setTimeout( function () {
@@ -427,10 +433,10 @@ OO.ui.SelectWidget.prototype.clearKeyPressBuffer = function () {
  *
  * @protected
  * @param {KeyboardEvent} e Key press event
- * @return {undefined/boolean} False to prevent default if event is handled
+ * @return {undefined|boolean} False to prevent default if event is handled
  */
 OO.ui.SelectWidget.prototype.onDocumentKeyPress = function ( e ) {
-	var c, filter, item;
+	var c, filter, item, selected;
 
 	if ( !e.charCode ) {
 		if ( e.keyCode === OO.ui.Keys.BACKSPACE && this.keyPressBuffer !== '' ) {
@@ -452,7 +458,10 @@ OO.ui.SelectWidget.prototype.onDocumentKeyPress = function ( e ) {
 	}
 	this.keyPressBufferTimer = setTimeout( this.clearKeyPressBuffer.bind( this ), 1500 );
 
-	item = this.findHighlightedItem() || this.findSelectedItem();
+	selected = this.findSelectedItems();
+	item = this.findHighlightedItem() || (
+		Array.isArray( selected ) ? selected[ 0 ] : selected
+	);
 
 	if ( this.keyPressBuffer === c ) {
 		// Common (if weird) special case: typing "xxxx" will cycle through all
@@ -481,42 +490,41 @@ OO.ui.SelectWidget.prototype.onDocumentKeyPress = function ( e ) {
 	e.stopPropagation();
 };
 
-// Deprecated alias since 0.28.3
-OO.ui.SelectWidget.prototype.onKeyPress = function () {
-	OO.ui.warnDeprecation( 'onKeyPress is deprecated, use onDocumentKeyPress instead' );
-	this.onDocumentKeyPress.apply( this, arguments );
-};
-
 /**
  * Get a matcher for the specific string
  *
  * @protected
- * @param {string} s String to match against items
- * @param {boolean} [exact=false] Only accept exact matches
+ * @param {string} query String to match against items
+ * @param {string} [mode='prefix'] Matching mode: 'substring', 'prefix', or 'exact'
  * @return {Function} function ( OO.ui.OptionWidget ) => boolean
  */
-OO.ui.SelectWidget.prototype.getItemMatcher = function ( s, exact ) {
-	var re;
+OO.ui.SelectWidget.prototype.getItemMatcher = function ( query, mode ) {
+	var normalizeForMatching = this.constructor.static.normalizeForMatching,
+		normalizedQuery = normalizeForMatching( query );
 
-	// eslint-disable-next-line no-restricted-properties
-	if ( s.normalize ) {
-		// eslint-disable-next-line no-restricted-properties
-		s = s.normalize();
+	// Support deprecated exact=true argument
+	if ( mode === true ) {
+		mode = 'exact';
 	}
-	s = exact ? s.trim() : s.replace( /^\s+/, '' );
-	re = '^\\s*' + s.replace( /([\\{}()|.?*+\-^$[\]])/g, '\\$1' ).replace( /\s+/g, '\\s+' );
-	if ( exact ) {
-		re += '\\s*$';
-	}
-	re = new RegExp( re, 'i' );
+
 	return function ( item ) {
-		var matchText = item.getMatchText();
-		// eslint-disable-next-line no-restricted-properties
-		if ( matchText.normalize ) {
-			// eslint-disable-next-line no-restricted-properties
-			matchText = matchText.normalize();
+		var matchText = normalizeForMatching( item.getMatchText() );
+
+		if ( normalizedQuery === '' ) {
+			// Empty string matches all, except if we are in 'exact'
+			// mode, where it doesn't match at all
+			return mode !== 'exact';
 		}
-		return re.test( matchText );
+
+		switch ( mode ) {
+			case 'exact':
+				return matchText === normalizedQuery;
+			case 'substring':
+				return matchText.indexOf( normalizedQuery ) !== -1;
+			// 'prefix'
+			default:
+				return matchText.indexOf( normalizedQuery ) === 0;
+		}
 	};
 };
 
@@ -527,12 +535,6 @@ OO.ui.SelectWidget.prototype.getItemMatcher = function ( s, exact ) {
  */
 OO.ui.SelectWidget.prototype.bindDocumentKeyPressListener = function () {
 	this.getElementDocument().addEventListener( 'keypress', this.onDocumentKeyPressHandler, true );
-};
-
-// Deprecated alias since 0.28.3
-OO.ui.SelectWidget.prototype.bindKeyPressListener = function () {
-	OO.ui.warnDeprecation( 'bindKeyPressListener is deprecated, use bindDocumentKeyPressListener instead' );
-	this.bindDocumentKeyPressListener.apply( this, arguments );
 };
 
 /**
@@ -546,12 +548,6 @@ OO.ui.SelectWidget.prototype.bindKeyPressListener = function () {
 OO.ui.SelectWidget.prototype.unbindDocumentKeyPressListener = function () {
 	this.getElementDocument().removeEventListener( 'keypress', this.onDocumentKeyPressHandler, true );
 	this.clearKeyPressBuffer();
-};
-
-// Deprecated alias since 0.28.3
-OO.ui.SelectWidget.prototype.unbindKeyPressListener = function () {
-	OO.ui.warnDeprecation( 'unbindKeyPressListener is deprecated, use unbindDocumentKeyPressListener instead' );
-	this.unbindDocumentKeyPressListener.apply( this, arguments );
 };
 
 /**
@@ -582,19 +578,35 @@ OO.ui.SelectWidget.prototype.findTargetItem = function ( e ) {
 };
 
 /**
+ * Find all selected items, if there are any. If the widget allows for multiselect
+ * it will return an array of selected options. If the widget doesn't allow for
+ * multiselect, it will return the selected option or null if no item is selected.
+ *
+ * @return {OO.ui.OptionWidget[]|OO.ui.OptionWidget|null} If the widget is multiselect
+ *  then return an array of selected items (or empty array),
+ *  if the widget is not multiselect, return a single selected item, or `null`
+ *  if no item is selected
+ */
+OO.ui.SelectWidget.prototype.findSelectedItems = function () {
+	var selected = this.items.filter( function ( item ) {
+		return item.isSelected();
+	} );
+
+	return this.multiselect ?
+		selected :
+		selected[ 0 ] || null;
+};
+
+/**
  * Find selected item.
  *
- * @return {OO.ui.OptionWidget|null} Selected item, `null` if no item is selected
+ * @return {OO.ui.OptionWidget[]|OO.ui.OptionWidget|null} If the widget is multiselect
+ *  then return an array of selected items (or empty array),
+ *  if the widget is not multiselect, return a single selected item, or `null`
+ *  if no item is selected
  */
 OO.ui.SelectWidget.prototype.findSelectedItem = function () {
-	var i, len;
-
-	for ( i = 0, len = this.items.length; i < len; i++ ) {
-		if ( this.items[ i ].isSelected() ) {
-			return this.items[ i ];
-		}
-	}
-	return null;
+	return this.findSelectedItems();
 };
 
 /**
@@ -629,7 +641,7 @@ OO.ui.SelectWidget.prototype.togglePressed = function ( pressed ) {
 	if ( pressed !== this.pressed ) {
 		this.$element
 			.toggleClass( 'oo-ui-selectWidget-pressed', pressed )
-			.toggleClass( 'oo-ui-selectWidget-depressed', !pressed );
+			.toggleClass( 'oo-ui-selectWidget-unpressed', !pressed );
 		this.pressed = pressed;
 	}
 };
@@ -676,7 +688,7 @@ OO.ui.SelectWidget.prototype.highlightItem = function ( item ) {
 OO.ui.SelectWidget.prototype.getItemFromLabel = function ( label, prefix ) {
 	var i, item, found,
 		len = this.items.length,
-		filter = this.getItemMatcher( label, true );
+		filter = this.getItemMatcher( label, 'exact' );
 
 	for ( i = 0; i < len; i++ ) {
 		item = this.items[ i ];
@@ -687,7 +699,7 @@ OO.ui.SelectWidget.prototype.getItemFromLabel = function ( label, prefix ) {
 
 	if ( prefix ) {
 		found = null;
-		filter = this.getItemMatcher( label, false );
+		filter = this.getItemMatcher( label, 'prefix' );
 		for ( i = 0; i < len; i++ ) {
 			item = this.items[ i ];
 			if ( item instanceof OO.ui.OptionWidget && item.isSelectable() && filter( item ) ) {
@@ -741,6 +753,30 @@ OO.ui.SelectWidget.prototype.selectItemByData = function ( data ) {
 };
 
 /**
+ * Programmatically unselect an option by its reference. If the widget
+ * allows for multiple selections, there may be other items still selected;
+ * otherwise, no items will be selected.
+ * If no item is given, all selected items will be unselected.
+ *
+ * @param {OO.ui.OptionWidget} [item] Item to unselect
+ * @fires select
+ * @chainable
+ * @return {OO.ui.Widget} The widget, for chaining
+ */
+OO.ui.SelectWidget.prototype.unselectItem = function ( item ) {
+	if ( item ) {
+		item.setSelected( false );
+	} else {
+		this.items.forEach( function ( item ) {
+			item.setSelected( false );
+		} );
+	}
+
+	this.emit( 'select', this.findSelectedItems() );
+	return this;
+};
+
+/**
  * Programmatically select an option by its reference. If the `item` parameter is omitted,
  * all options will be deselected.
  *
@@ -753,14 +789,20 @@ OO.ui.SelectWidget.prototype.selectItem = function ( item ) {
 	var i, len, selected,
 		changed = false;
 
-	for ( i = 0, len = this.items.length; i < len; i++ ) {
-		selected = this.items[ i ] === item;
-		if ( this.items[ i ].isSelected() !== selected ) {
-			this.items[ i ].setSelected( selected );
-			changed = true;
+	if ( this.multiselect && item ) {
+		// Select the item directly
+		item.setSelected( true );
+	} else {
+		for ( i = 0, len = this.items.length; i < len; i++ ) {
+			selected = this.items[ i ] === item;
+			if ( this.items[ i ].isSelected() !== selected ) {
+				this.items[ i ].setSelected( selected );
+				changed = true;
+			}
 		}
 	}
 	if ( changed ) {
+		// TODO: When should a non-highlightable element be selected?
 		if ( item && !item.constructor.static.highlightable ) {
 			if ( item ) {
 				this.$focusOwner.attr( 'aria-activedescendant', item.getElementId() );
@@ -768,7 +810,7 @@ OO.ui.SelectWidget.prototype.selectItem = function ( item ) {
 				this.$focusOwner.removeAttr( 'aria-activedescendant' );
 			}
 		}
-		this.emit( 'select', item );
+		this.emit( 'select', this.findSelectedItems() );
 	}
 
 	return this;
@@ -821,20 +863,26 @@ OO.ui.SelectWidget.prototype.pressItem = function ( item ) {
  */
 OO.ui.SelectWidget.prototype.chooseItem = function ( item ) {
 	if ( item ) {
-		this.selectItem( item );
-		this.emit( 'choose', item );
+		if ( this.multiselect && item.isSelected() ) {
+			this.unselectItem( item );
+		} else {
+			this.selectItem( item );
+		}
+
+		this.emit( 'choose', item, item.isSelected() );
 	}
 
 	return this;
 };
 
 /**
- * Find an option by its position relative to the specified item (or to the start of the option array,
- * if item is `null`). The direction in which to search through the option array is specified with a
- * number: -1 for reverse (the default) or 1 for forward. The method will return an option, or
- * `null` if there are no options in the array.
+ * Find an option by its position relative to the specified item (or to the start of the option
+ * array, if item is `null`). The direction in which to search through the option array is specified
+ * with a number: -1 for reverse (the default) or 1 for forward. The method will return an option,
+ * or `null` if there are no options in the array.
  *
- * @param {OO.ui.OptionWidget|null} item Item to describe the start position, or `null` to start at the beginning of the array.
+ * @param {OO.ui.OptionWidget|null} item Item to describe the start position, or `null` to start at
+ *  the beginning of the array.
  * @param {number} direction Direction to move in: -1 to move backward, 1 to move forward
  * @param {Function} [filter] Only consider items for which this function returns
  *  true. Function takes an OO.ui.OptionWidget and returns a boolean.
@@ -952,7 +1000,7 @@ OO.ui.SelectWidget.prototype.clearItems = function () {
 /**
  * Set the DOM element which has focus while the user is interacting with this SelectWidget.
  *
- * Currently this is just used to set `aria-activedescendant` on it.
+ * This is used to set `aria-activedescendant` and `aria-expanded` on it.
  *
  * @protected
  * @param {jQuery} $focusOwner

@@ -5,7 +5,7 @@ OO.inheritClass( Demo.BookletDialog, OO.ui.ProcessDialog );
 Demo.BookletDialog.static.title = 'Booklet dialog';
 Demo.BookletDialog.static.actions = [
 	{ action: 'save', label: 'Done', flags: [ 'primary', 'progressive' ] },
-	{ action: 'cancel', label: 'Cancel', flags: [ 'safe', 'back' ] }
+	{ action: 'cancel', label: 'Cancel', flags: [ 'safe', 'close' ] }
 ];
 Demo.BookletDialog.prototype.getBodyHeight = function () {
 	return 250;
@@ -52,7 +52,9 @@ Demo.BookletDialog.prototype.initialize = function () {
 		new Demo.SamplePage( 'page-3', { label: 'Page 3', icon: 'window' } )
 	];
 	this.bookletLayout.addPages( this.pages );
-	this.bookletLayout.connect( this, { set: 'onBookletLayoutSet' } );
+	this.bookletLayout.connect( this, {
+		set: 'onBookletLayoutSet'
+	} );
 	this.bookletLayout.setPage( 'page-1' );
 
 	this.$body.append( this.bookletLayout.$element );

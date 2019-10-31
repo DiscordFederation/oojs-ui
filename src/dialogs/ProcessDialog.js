@@ -1,16 +1,17 @@
 /**
  * ProcessDialog windows encapsulate a {@link OO.ui.Process process} and all of the code necessary
  * to complete it. If the process terminates with an error, a customizable {@link OO.ui.Error error
- * interface} alerts users to the trouble, permitting the user to dismiss the error and try again when
- * relevant. The ProcessDialog class is always extended and customized with the actions and content
- * required for each process.
+ * interface} alerts users to the trouble, permitting the user to dismiss the error and try again
+ * when relevant. The ProcessDialog class is always extended and customized with the actions and
+ * content required for each process.
  *
  * The process dialog box consists of a header that visually represents the ‘working’ state of long
  * processes with an animation. The header contains the dialog title as well as
  * two {@link OO.ui.ActionWidget action widgets}:  a ‘safe’ action on the left (e.g., ‘Cancel’) and
  * a ‘primary’ action on the right (e.g., ‘Done’).
  *
- * Like other windows, the process dialog is managed by a {@link OO.ui.WindowManager window manager}.
+ * Like other windows, the process dialog is managed by a
+ * {@link OO.ui.WindowManager window manager}.
  * Please see the [OOUI documentation on MediaWiki][1] for more information and examples.
  *
  *     @example
@@ -30,7 +31,9 @@
  *     MyProcessDialog.prototype.initialize = function () {
  *         MyProcessDialog.parent.prototype.initialize.apply( this, arguments );
  *         this.content = new OO.ui.PanelLayout( { padded: true, expanded: false } );
- *         this.content.$element.append( '<p>This is a process dialog window. The header contains the title and two buttons: \'Cancel\' (a safe action) on the left and \'Done\' (a primary action)  on the right.</p>' );
+ *         this.content.$element.append( '<p>This is a process dialog window. The header ' +
+ *             'contains the title and two buttons: \'Cancel\' (a safe action) on the left and ' +
+ *             '\'Done\' (a primary action)  on the right.</p>' );
  *         this.$body.append( this.content.$element );
  *     };
  *     MyProcessDialog.prototype.getActionProcess = function ( action ) {
@@ -44,7 +47,7 @@
  *     };
  *
  *     var windowManager = new OO.ui.WindowManager();
- *     $( 'body' ).append( windowManager.$element );
+ *     $( document.body ).append( windowManager.$element );
  *
  *     var dialog = new MyProcessDialog();
  *     windowManager.addWindows( [ dialog ] );
@@ -68,6 +71,9 @@ OO.ui.ProcessDialog = function OoUiProcessDialog( config ) {
 
 	// Initialization
 	this.$element.addClass( 'oo-ui-processDialog' );
+	if ( OO.ui.isMobile() ) {
+		this.$element.addClass( 'oo-ui-isMobile' );
+	}
 };
 
 /* Setup */
@@ -120,9 +126,15 @@ OO.ui.ProcessDialog.prototype.initialize = function () {
 	this.$errorsTitle = $( '<div>' );
 
 	// Events
-	this.dismissButton.connect( this, { click: 'onDismissErrorButtonClick' } );
-	this.retryButton.connect( this, { click: 'onRetryButtonClick' } );
-	this.title.connect( this, { labelChange: 'fitLabel' } );
+	this.dismissButton.connect( this, {
+		click: 'onDismissErrorButtonClick'
+	} );
+	this.retryButton.connect( this, {
+		click: 'onRetryButtonClick'
+	} );
+	this.title.connect( this, {
+		labelChange: 'fitLabel'
+	} );
 
 	// Initialization
 	this.title.$element.addClass( 'oo-ui-processDialog-title' );
@@ -156,18 +168,23 @@ OO.ui.ProcessDialog.prototype.initialize = function () {
  * @inheritdoc
  */
 OO.ui.ProcessDialog.prototype.getActionWidgetConfig = function ( config ) {
-	var isMobile = OO.ui.isMobile();
+	function checkFlag( flag ) {
+		return config.flags === flag ||
+			( Array.isArray( config.flags ) && config.flags.indexOf( flag ) !== -1 );
+	}
 
-	// Default to unframed on mobile
-	config = $.extend( { framed: !isMobile }, config );
-	// Change back buttons to icon only on mobile
-	if (
-		isMobile &&
-		( config.flags === 'back' || ( Array.isArray( config.flags ) && config.flags.indexOf( 'back' ) !== -1 ) )
-	) {
+	config = $.extend( { framed: true }, config );
+	if ( checkFlag( 'close' ) ) {
+		// Change close buttons to icon only.
+		$.extend( config, {
+			icon: 'close',
+			invisibleLabel: true
+		} );
+	} else if ( checkFlag( 'back' ) ) {
+		// Change back buttons to icon only.
 		$.extend( config, {
 			icon: 'previous',
-			label: ''
+			invisibleLabel: true
 		} );
 	}
 
@@ -219,8 +236,9 @@ OO.ui.ProcessDialog.prototype.setDimensions = function () {
 
 	this.fitLabel();
 
-	// If there are many actions, they might be shown on multiple lines. Their layout can change when
-	// resizing the dialog and when changing the actions. Adjust the height of the footer to fit them.
+	// If there are many actions, they might be shown on multiple lines. Their layout can change
+	// when resizing the dialog and when changing the actions. Adjust the height of the footer to
+	// fit them.
 	dialog.$body.css( 'bottom', dialog.$foot.outerHeight( true ) );
 	// Wait for CSS transition to finish and do it again :(
 	setTimeout( function () {
@@ -257,17 +275,18 @@ OO.ui.ProcessDialog.prototype.fitLabel = function () {
 		navigationWidth = size.width - 20;
 	}
 
-	safeWidth = this.$safeActions.is( ':visible' ) ? this.$safeActions.width() : 0;
-	primaryWidth = this.$primaryActions.is( ':visible' ) ? this.$primaryActions.width() : 0;
+	safeWidth = this.$safeActions.width();
+	primaryWidth = this.$primaryActions.width();
 	biggerWidth = Math.max( safeWidth, primaryWidth );
 
 	labelWidth = this.title.$element.width();
 
-	if ( 2 * biggerWidth + labelWidth < navigationWidth ) {
+	if ( !OO.ui.isMobile() && 2 * biggerWidth + labelWidth < navigationWidth ) {
 		// We have enough space to center the label
 		leftWidth = rightWidth = biggerWidth;
 	} else {
-		// Let's hope we at least have enough space not to overlap, because we can't wrap the label…
+		// Let's hope we at least have enough space not to overlap, because we can't wrap
+		// the label.
 		if ( this.getDir() === 'ltr' ) {
 			leftWidth = safeWidth;
 			rightWidth = primaryWidth;
@@ -314,7 +333,7 @@ OO.ui.ProcessDialog.prototype.showErrors = function ( errors ) {
 	this.$errorItems = $( items );
 	if ( recoverable ) {
 		abilities[ this.currentAction ] = true;
-		// Copy the flags from the first matching action
+		// Copy the flags from the first matching action.
 		actions = this.actions.get( { actions: this.currentAction } );
 		if ( actions.length ) {
 			this.retryButton.clearFlags().setFlags( actions[ 0 ].getFlags() );
@@ -353,7 +372,7 @@ OO.ui.ProcessDialog.prototype.getTeardownProcess = function ( data ) {
 	// Parent method
 	return OO.ui.ProcessDialog.parent.prototype.getTeardownProcess.call( this, data )
 		.first( function () {
-			// Make sure to hide errors
+			// Make sure to hide errors.
 			this.hideErrors();
 			this.fitOnOpen = false;
 		}, this );

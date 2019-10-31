@@ -5,9 +5,11 @@
 		"wikimedia/jquery"
 	],
 	"rules": {
-		"max-len": "off",
-		"jquery/no-hide": "error",
-		"jquery/no-show": "error",
-		"jquery/no-toggle": "error"
-	}
+		"mediawiki/msg-doc": "error",
+		"no-jquery/no-visibility": "error",
+		"no-jquery/variable-pattern": "error"
+	},
+	"plugins": [
+		"mediawiki"
+	]
 }

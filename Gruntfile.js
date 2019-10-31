@@ -34,7 +34,6 @@ module.exports = function ( grunt ) {
 	grunt.loadNpmTasks( 'grunt-cssjanus' );
 	grunt.loadNpmTasks( 'grunt-exec' );
 	grunt.loadNpmTasks( 'grunt-file-exists' );
-	grunt.loadNpmTasks( 'grunt-jsonlint' );
 	grunt.loadNpmTasks( 'grunt-karma' );
 	grunt.loadNpmTasks( 'grunt-stylelint' );
 	grunt.loadNpmTasks( 'grunt-svgmin' );
@@ -145,6 +144,8 @@ module.exports = function ( grunt ) {
 		// paths
 		lessTargets = {
 			options: {
+				// Throw errors if we try to calculate mixed units, like `px` and `em` values.
+				strictUnits: true,
 				// Force LESS v3.0.0+ to let us use mixins before we later upgrade to @plugin
 				// architecture.
 				javascriptEnabled: true,
@@ -214,7 +215,9 @@ module.exports = function ( grunt ) {
 			tmp: 'dist/tmp'
 		},
 		fileExists: {
-			src: requiredFiles
+			src: requiredFiles.filter( function ( f ) {
+				return f.startsWith( 'src/' );
+			} )
 		},
 		tyops: {
 			options: {
@@ -244,6 +247,15 @@ module.exports = function ( grunt ) {
 					banner: ''
 				},
 				files: concatOmnibus
+			},
+			i18nMessages: {
+				options: {
+					banner: '',
+					process: true
+				},
+				files: {
+					'dist/tmp/src/core-messages.js': 'src/core-messages.js.txt'
+				}
 			},
 			demoCss: {
 				options: {
@@ -294,7 +306,7 @@ module.exports = function ( grunt ) {
 				flatten: true
 			},
 			imagesThemes: {
-				src: 'src/themes/*/images/**/*.{png,gif}',
+				src: 'src/themes/*/{*.json,images/**/*.{png,gif}}',
 				dest: 'dist/',
 				expand: true,
 				rename: strip( 'src/' )
@@ -355,8 +367,7 @@ module.exports = function ( grunt ) {
 		svgmin: {
 			options: {
 				js2svg: {
-					// eslint-disable-next-line no-tabs
-					indent: '	',
+					indent: '\t',
 					pretty: true
 				},
 				multipass: true,
@@ -430,19 +441,29 @@ module.exports = function ( grunt ) {
 
 		// Lint – Code
 		eslint: {
+			options: {
+				reportUnusedDisableDirectives: true,
+				extensions: [ '.js', '.json' ],
+				cache: true
+			},
 			dev: [
-				'*.js',
-				'{build,demos,src,tests}/**/*.js',
-				'!demos/{dist,node_modules,vendor}/**/*.js',
+				'**/*.{js,json}',
+				'!{coverage,dist,docs,node_modules,vendor,demos/{dist,node_modules,vendor}}/**',
 				'!tests/JSPHP.test.js'
-			]
-		},
-		jsonlint: {
-			all: [
-				'*.json',
-				'{build,demos,src,tests,i18n}/**/*.json',
-				'!demos/{dist,node_modules,vendor}/**/*.json'
-			]
+			],
+			html: {
+				options: {
+					// TODO: reportUnusedDisableDirectives doesn't work with plugin-html
+					// (https://github.com/BenoitZugmeyer/eslint-plugin-html/issues/111)
+					// Once that is fixed, merge dev and html
+					reportUnusedDisableDirectives: false
+				},
+				src: [
+					'**/*.html',
+					'!{coverage,dist,docs,node_modules,vendor,demos/{dist,node_modules,vendor}}/**',
+					'!tests/JSPHP.test.js'
+				]
+			}
 		},
 
 		// Lint – Styling
@@ -451,8 +472,7 @@ module.exports = function ( grunt ) {
 				syntax: 'less'
 			},
 			dev: [
-				'{demos,src}/**/*.css',
-				'{demos,src}/**/*.less',
+				'{demos,src}/**/*.{css,less}',
 				'!demos/dist/**',
 				'!demos/styles/demo.rtl.css',
 				'!demos/vendor/**'
@@ -536,7 +556,6 @@ module.exports = function ( grunt ) {
 			files: [
 				'<%= eslint.dev %>',
 				'<%= stylelint.dev %>',
-				'<%= jsonlint.all %>',
 				'src/**/*.less',
 				'php/**/*.php',
 				'.{stylelintrc,eslintrc.json}'
@@ -627,14 +646,6 @@ module.exports = function ( grunt ) {
 		}
 	} );
 
-	grunt.registerTask( 'enable-source-maps', function () {
-		// Only create Source maps when doing a git-build for testing and local
-		// development. Distributions for export should not, as the map would
-		// be pointing at "../src".
-		grunt.config.set( 'concat.js.options.sourceMap', true );
-		grunt.config.set( 'concat.js.options.sourceMapStyle', 'link' );
-	} );
-
 	grunt.registerTask( 'set-graphics', function ( graphics ) {
 		graphics = graphics || grunt.option( 'graphics' ) || 'mixed';
 		grunt.config.set(
@@ -685,7 +696,7 @@ module.exports = function ( grunt ) {
 		grunt.log.warn( 'You have built a no-frills, SVG-only, LTR-only version for development; some things will be broken.' );
 	} );
 
-	grunt.registerTask( 'build-code', [ 'concat:js' ] );
+	grunt.registerTask( 'build-code', [ 'concat:i18nMessages', 'concat:js' ] );
 	grunt.registerTask( 'build-styling', [
 		'colorizeSvg', 'set-graphics', 'less', 'cssjanus',
 		'concat:css', 'concat:demoCss',
@@ -702,23 +713,24 @@ module.exports = function ( grunt ) {
 		'clean:tmp', 'demos'
 	] );
 
-	grunt.registerTask( 'git-build', [ 'enable-source-maps', 'pre-git-build', 'build' ] );
+	grunt.registerTask( 'git-build', [ 'pre-git-build', 'build' ] );
 
 	// Quickly build a no-frills vector-only ltr-only version for development
 	grunt.registerTask( 'quick-build', [
 		'pre-git-build', 'clean:build', 'fileExists', 'tyops',
-		'concat:js',
+		'build-code',
 		'colorizeSvg', 'set-graphics:vector', 'less', 'concat:css',
 		'copy:imagesCommon', 'copy:imagesThemes',
 		'build-i18n', 'concat:omnibus', 'copy:demos', 'copy:fastcomposerdemos',
 		'note-quick-build'
 	] );
+	grunt.registerTask( 'quick-build-code', [ 'build-code', 'copy:demos' ] );
 
 	// Minification tasks for the npm publish step
 	grunt.registerTask( 'minify', [ 'uglify', 'svgmin:distSvgs', 'imagemin:distPngs', 'cssmin' ] );
 	grunt.registerTask( 'publish-build', [ 'build', 'minify' ] );
 
-	grunt.registerTask( 'lint', [ 'eslint', 'stylelint', 'jsonlint', 'banana' ] );
+	grunt.registerTask( 'lint', [ 'eslint', 'stylelint', 'banana' ] );
 
 	// Run this before opening "tests/index.php"
 	grunt.registerTask( 'prep-test', [ 'lint', 'git-build', 'build-tests' ] );
@@ -737,13 +749,11 @@ module.exports = function ( grunt ) {
 	} );
 	grunt.registerTask( 'add-theme', [ 'add-theme-check', 'string-replace' ] );
 
-	/* eslint-disable no-process-env */
 	if ( process.env.JENKINS_HOME ) {
 		grunt.registerTask( 'test', '_ci' );
 	} else {
 		grunt.registerTask( 'test', '_test' );
 	}
-	/* eslint-enable no-process-env */
 
 	grunt.registerTask( 'default', 'test' );
 };

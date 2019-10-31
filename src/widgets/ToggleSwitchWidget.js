@@ -5,20 +5,25 @@
  *
  *     @example
  *     // Toggle switches in the 'off' and 'on' position.
- *     var toggleSwitch1 = new OO.ui.ToggleSwitchWidget();
- *     var toggleSwitch2 = new OO.ui.ToggleSwitchWidget( {
- *         value: true
- *     } );
- *
- *     // Create a FieldsetLayout to layout and label switches
- *     var fieldset = new OO.ui.FieldsetLayout( {
- *        label: 'Toggle switches'
- *     } );
+ *     var toggleSwitch1 = new OO.ui.ToggleSwitchWidget(),
+ *         toggleSwitch2 = new OO.ui.ToggleSwitchWidget( {
+ *             value: true
+ *         } );
+ *         // Create a FieldsetLayout to layout and label switches.
+ *         fieldset = new OO.ui.FieldsetLayout( {
+ *             label: 'Toggle switches'
+ *         } );
  *     fieldset.addItems( [
- *         new OO.ui.FieldLayout( toggleSwitch1, { label: 'Off', align: 'top' } ),
- *         new OO.ui.FieldLayout( toggleSwitch2, { label: 'On', align: 'top' } )
+ *         new OO.ui.FieldLayout( toggleSwitch1, {
+ *             label: 'Off',
+ *             align: 'top'
+ *         } ),
+ *         new OO.ui.FieldLayout( toggleSwitch2, {
+ *             label: 'On',
+ *             align: 'top'
+ *         } )
  *     ] );
- *     $( 'body' ).append( fieldset.$element );
+ *     $( document.body ).append( fieldset.$element );
  *
  * @class
  * @extends OO.ui.ToggleWidget
@@ -70,7 +75,7 @@ OO.mixinClass( OO.ui.ToggleSwitchWidget, OO.ui.mixin.TabIndexedElement );
  *
  * @private
  * @param {jQuery.Event} e Mouse click event
- * @return {undefined/boolean} False to prevent default if event is handled
+ * @return {undefined|boolean} False to prevent default if event is handled
  */
 OO.ui.ToggleSwitchWidget.prototype.onClick = function ( e ) {
 	if ( !this.isDisabled() && e.which === OO.ui.MouseButtons.LEFT ) {
@@ -84,7 +89,7 @@ OO.ui.ToggleSwitchWidget.prototype.onClick = function ( e ) {
  *
  * @private
  * @param {jQuery.Event} e Key press event
- * @return {undefined/boolean} False to prevent default if event is handled
+ * @return {undefined|boolean} False to prevent default if event is handled
  */
 OO.ui.ToggleSwitchWidget.prototype.onKeyPress = function ( e ) {
 	if ( !this.isDisabled() && ( e.which === OO.ui.Keys.SPACE || e.which === OO.ui.Keys.ENTER ) ) {

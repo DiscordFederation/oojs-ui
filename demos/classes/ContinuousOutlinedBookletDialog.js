@@ -6,7 +6,7 @@ Demo.ContinuousOutlinedBookletDialog.static.title = 'Continuous outlined booklet
 Demo.ContinuousOutlinedBookletDialog.static.size = 'large';
 Demo.ContinuousOutlinedBookletDialog.static.actions = [
 	{ action: 'save', label: 'Done', flags: [ 'primary', 'progressive' ] },
-	{ action: 'cancel', label: 'Cancel', flags: [ 'safe', 'back' ] },
+	{ action: 'cancel', label: 'Cancel', flags: [ 'safe', 'close' ] },
 	{ action: 'toggle', label: 'Toggle menu' }
 ];
 Demo.ContinuousOutlinedBookletDialog.prototype.getBodyHeight = function () {
@@ -53,16 +53,19 @@ Demo.ContinuousOutlinedBookletDialog.prototype.getActionProcess = function ( act
 			this.close( { action: action } );
 		}, this );
 	}
-	return Demo.ContinuousOutlinedBookletDialog.parent.prototype.getActionProcess.call( this, action );
+	return Demo.ContinuousOutlinedBookletDialog
+		.parent.prototype.getActionProcess.call( this, action );
 };
 Demo.ContinuousOutlinedBookletDialog.prototype.getSetupProcess = function ( data ) {
-	return Demo.ContinuousOutlinedBookletDialog.parent.prototype.getSetupProcess.call( this, data )
+	return Demo.ContinuousOutlinedBookletDialog
+		.parent.prototype.getSetupProcess.call( this, data )
 		.next( function () {
 			this.bookletLayout.setPage( 'page1' );
 		}, this );
 };
 Demo.ContinuousOutlinedBookletDialog.prototype.getTeardownProcess = function ( data ) {
-	return Demo.ContinuousOutlinedBookletDialog.parent.prototype.getTeardownProcess.call( this, data )
+	return Demo.ContinuousOutlinedBookletDialog
+		.parent.prototype.getTeardownProcess.call( this, data )
 		.next( function () {
 			this.bookletLayout.resetScroll();
 		}, this );

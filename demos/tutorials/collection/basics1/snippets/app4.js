@@ -39,7 +39,8 @@
 		input.setValue( '' );
 	} );
 
-	$( '.embed-app4' ).append(
+	// eslint-disable-next-line no-jquery/no-global-selector
+	$( '.tutorials-embed-app4' ).append(
 		new OO.ui.FieldsetLayout( {
 			id: 'tutorials-basics1-app4',
 			label: 'Demo #4',

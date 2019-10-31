@@ -22,8 +22,7 @@ class Widget extends Element {
 
 	/**
 	 * @param array $config Configuration options
-	 * @param bool $config['disabled'] Disable (default: false)
-	 * @param-taint $config escapes_html
+	 *      - bool $config['disabled'] Disable (default: false)
 	 */
 	public function __construct( array $config = [] ) {
 		// Initialize config
@@ -55,7 +54,7 @@ class Widget extends Element {
 	 * @return $this
 	 */
 	public function setDisabled( $disabled ) {
-		$this->disabled = !!$disabled;
+		$this->disabled = (bool)$disabled;
 		$this->toggleClasses( [ 'oo-ui-widget-disabled' ], $this->disabled );
 		$this->toggleClasses( [ 'oo-ui-widget-enabled' ], !$this->disabled );
 		$this->setAttributes( [ 'aria-disabled' => $this->disabled ? 'true' : 'false' ] );

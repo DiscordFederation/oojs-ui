@@ -1,7 +1,8 @@
 /**
  * InputWidget is the base class for all input widgets, which
- * include {@link OO.ui.TextInputWidget text inputs}, {@link OO.ui.CheckboxInputWidget checkbox inputs},
- * {@link OO.ui.RadioInputWidget radio inputs}, and {@link OO.ui.ButtonInputWidget button inputs}.
+ * include {@link OO.ui.TextInputWidget text inputs}, {@link OO.ui.CheckboxInputWidget checkbox
+ * inputs}, {@link OO.ui.RadioInputWidget radio inputs}, and
+ * {@link OO.ui.ButtonInputWidget button inputs}.
  * See the [OOUI documentation on MediaWiki] [1] for more information and examples.
  *
  * [1]: https://www.mediawiki.org/wiki/OOUI/Widgets/Inputs
@@ -9,7 +10,6 @@
  * @abstract
  * @class
  * @extends OO.ui.Widget
- * @mixins OO.ui.mixin.FlaggedElement
  * @mixins OO.ui.mixin.TabIndexedElement
  * @mixins OO.ui.mixin.TitledElement
  * @mixins OO.ui.mixin.AccessKeyedElement
@@ -20,8 +20,8 @@
  * @cfg {string} [value=''] The value of the input.
  * @cfg {string} [dir] The directionality of the input (ltr/rtl).
  * @cfg {string} [inputId] The value of the input’s HTML `id` attribute.
- * @cfg {Function} [inputFilter] The name of an input filter function. Input filters modify the value of an input
- *  before it is accepted.
+ * @cfg {Function} [inputFilter] The name of an input filter function. Input filters modify the
+ *  value of an input before it is accepted.
  */
 OO.ui.InputWidget = function OoUiInputWidget( config ) {
 	// Configuration initialization
@@ -37,10 +37,15 @@ OO.ui.InputWidget = function OoUiInputWidget( config ) {
 	this.inputFilter = config.inputFilter;
 
 	// Mixin constructors
-	OO.ui.mixin.FlaggedElement.call( this, config );
-	OO.ui.mixin.TabIndexedElement.call( this, $.extend( {}, config, { $tabIndexed: this.$input } ) );
-	OO.ui.mixin.TitledElement.call( this, $.extend( {}, config, { $titled: this.$input } ) );
-	OO.ui.mixin.AccessKeyedElement.call( this, $.extend( {}, config, { $accessKeyed: this.$input } ) );
+	OO.ui.mixin.TabIndexedElement.call( this, $.extend( {
+		$tabIndexed: this.$input
+	}, config ) );
+	OO.ui.mixin.TitledElement.call( this, $.extend( {
+		$titled: this.$input
+	}, config ) );
+	OO.ui.mixin.AccessKeyedElement.call( this, $.extend( {
+		$accessKeyed: this.$input
+	}, config ) );
 
 	// Events
 	this.$input.on( 'keydown mouseup cut paste change input select', this.onEdit.bind( this ) );
@@ -65,7 +70,6 @@ OO.ui.InputWidget = function OoUiInputWidget( config ) {
 /* Setup */
 
 OO.inheritClass( OO.ui.InputWidget, OO.ui.Widget );
-OO.mixinClass( OO.ui.InputWidget, OO.ui.mixin.FlaggedElement );
 OO.mixinClass( OO.ui.InputWidget, OO.ui.mixin.TabIndexedElement );
 OO.mixinClass( OO.ui.InputWidget, OO.ui.mixin.TitledElement );
 OO.mixinClass( OO.ui.InputWidget, OO.ui.mixin.AccessKeyedElement );
@@ -89,7 +93,8 @@ OO.ui.InputWidget.static.gatherPreInfuseState = function ( node, config ) {
 	var state = OO.ui.InputWidget.parent.static.gatherPreInfuseState( node, config );
 	if ( config.$input && config.$input.length ) {
 		state.value = config.$input.val();
-		// Might be better in TabIndexedElement, but it's awkward to do there because mixins are awkward
+		// Might be better in TabIndexedElement, but it's awkward to do there because
+		// mixins are awkward
 		state.focus = config.$input.is( ':focus' );
 	}
 	return state;

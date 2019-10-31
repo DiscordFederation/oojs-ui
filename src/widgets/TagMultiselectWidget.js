@@ -1,19 +1,20 @@
 /**
- * A basic tag multiselect widget, similar in concept to {@link OO.ui.ComboBoxInputWidget combo box widget}
- * that allows the user to add multiple values that are displayed in a tag area.
+ * A basic tag multiselect widget, similar in concept to
+ * {@link OO.ui.ComboBoxInputWidget combo box widget} that allows the user to add multiple values
+ * that are displayed in a tag area.
  *
- * This widget is a base widget; see {@link OO.ui.MenuTagMultiselectWidget MenuTagMultiselectWidget} and
- * {@link OO.ui.PopupTagMultiselectWidget PopupTagMultiselectWidget} for the implementations that use
- * a menu and a popup respectively.
+ * This widget is a base widget; see {@link OO.ui.MenuTagMultiselectWidget MenuTagMultiselectWidget}
+ * and {@link OO.ui.PopupTagMultiselectWidget PopupTagMultiselectWidget} for the implementations
+ * that use a menu and a popup respectively.
  *
  *     @example
- *     // Example: A basic TagMultiselectWidget.
+ *     // A TagMultiselectWidget.
  *     var widget = new OO.ui.TagMultiselectWidget( {
  *         inputPosition: 'outline',
  *         allowedValues: [ 'Option 1', 'Option 2', 'Option 3' ],
  *         selected: [ 'Option 1' ]
  *     } );
- *     $( 'body' ).append( widget.$element );
+ *     $( document.body ).append( widget.$element );
  *
  * @class
  * @extends OO.ui.Widget
@@ -23,6 +24,7 @@
  * @mixins OO.ui.mixin.IconElement
  * @mixins OO.ui.mixin.TabIndexedElement
  * @mixins OO.ui.mixin.FlaggedElement
+ * @mixins OO.ui.mixin.TitledElement
  *
  * @constructor
  * @param {Object} config Configuration object
@@ -58,8 +60,7 @@ OO.ui.TagMultiselectWidget = function OoUiTagMultiselectWidget( config ) {
 	var inputEvents,
 		rAF = window.requestAnimationFrame || setTimeout,
 		widget = this,
-		$tabFocus = $( '<span>' )
-			.addClass( 'oo-ui-tagMultiselectWidget-focusTrap' );
+		$tabFocus = $( '<span>' ).addClass( 'oo-ui-tagMultiselectWidget-focusTrap' );
 
 	config = config || {};
 
@@ -73,6 +74,7 @@ OO.ui.TagMultiselectWidget = function OoUiTagMultiselectWidget( config ) {
 	OO.ui.mixin.TabIndexedElement.call( this, config );
 	OO.ui.mixin.FlaggedElement.call( this, config );
 	OO.ui.mixin.DraggableGroupElement.call( this, config );
+	OO.ui.mixin.TitledElement.call( this, config );
 
 	this.toggleDraggable(
 		config.allowReordering === undefined ?
@@ -92,8 +94,7 @@ OO.ui.TagMultiselectWidget = function OoUiTagMultiselectWidget( config ) {
 	this.height = null;
 	this.valid = true;
 
-	this.$content = $( '<div>' )
-		.addClass( 'oo-ui-tagMultiselectWidget-content' );
+	this.$content = $( '<div>' ).addClass( 'oo-ui-tagMultiselectWidget-content' );
 	this.$handle = $( '<div>' )
 		.addClass( 'oo-ui-tagMultiselectWidget-handle' )
 		.append(
@@ -101,8 +102,7 @@ OO.ui.TagMultiselectWidget = function OoUiTagMultiselectWidget( config ) {
 			this.$icon,
 			this.$content
 				.append(
-					this.$group
-						.addClass( 'oo-ui-tagMultiselectWidget-group' )
+					this.$group.addClass( 'oo-ui-tagMultiselectWidget-group' )
 				)
 		);
 
@@ -205,6 +205,7 @@ OO.mixinClass( OO.ui.TagMultiselectWidget, OO.ui.mixin.IndicatorElement );
 OO.mixinClass( OO.ui.TagMultiselectWidget, OO.ui.mixin.IconElement );
 OO.mixinClass( OO.ui.TagMultiselectWidget, OO.ui.mixin.TabIndexedElement );
 OO.mixinClass( OO.ui.TagMultiselectWidget, OO.ui.mixin.FlaggedElement );
+OO.mixinClass( OO.ui.TagMultiselectWidget, OO.ui.mixin.TitledElement );
 
 /* Static properties */
 
@@ -287,7 +288,7 @@ OO.ui.TagMultiselectWidget.prototype.onInputKeyDown = function ( e ) {
 		};
 
 	if ( !this.isDisabled() ) {
-		// 'keypress' event is not triggered for Backspace
+		// 'keypress' event is not triggered for Backspace key
 		if ( e.keyCode === OO.ui.Keys.BACKSPACE ) {
 			return this.doInputBackspace( e, withMetaKey );
 		} else if ( e.keyCode === OO.ui.Keys.ESCAPE ) {
@@ -338,11 +339,11 @@ OO.ui.TagMultiselectWidget.prototype.onInputBlur = function () {
 };
 
 /**
- * Perform an action after the enter key on the input
+ * Perform an action after the Enter key on the input
  *
  * @param {jQuery.Event} e Event data
  * @param {boolean} [withMetaKey] Whether this key was pressed with
- * a meta key like 'ctrl'
+ * a meta key like Control
  * @return {boolean} Whether to prevent defaults
  */
 OO.ui.TagMultiselectWidget.prototype.doInputEnter = function () {
@@ -351,11 +352,11 @@ OO.ui.TagMultiselectWidget.prototype.doInputEnter = function () {
 };
 
 /**
- * Perform an action responding to the enter key on the input
+ * Perform an action responding to the Backspace key on the input
  *
  * @param {jQuery.Event} e Event data
  * @param {boolean} [withMetaKey] Whether this key was pressed with
- * a meta key like 'ctrl'
+ * a meta key like Control
  * @return {boolean} Whether to prevent defaults
  */
 OO.ui.TagMultiselectWidget.prototype.doInputBackspace = function ( e, withMetaKey ) {
@@ -375,7 +376,7 @@ OO.ui.TagMultiselectWidget.prototype.doInputBackspace = function ( e, withMetaKe
 			// If Ctrl/Cmd was pressed, delete item entirely.
 			// Otherwise put it into the text field for editing.
 			if ( !withMetaKey ) {
-				this.input.setValue( item.getData() );
+				this.input.setValue( item.getLabel() );
 			}
 		}
 
@@ -384,7 +385,7 @@ OO.ui.TagMultiselectWidget.prototype.doInputBackspace = function ( e, withMetaKe
 };
 
 /**
- * Perform an action after the escape key on the input
+ * Perform an action after the Escape key on the input
  *
  * @param {jQuery.Event} e Event data
  */
@@ -393,14 +394,14 @@ OO.ui.TagMultiselectWidget.prototype.doInputEscape = function () {
 };
 
 /**
- * Perform an action after the arrow key on the input, select the previous
+ * Perform an action after the Left/Right arrow key on the input, select the previous
  * item from the input.
  * See #getPreviousItem
  *
  * @param {jQuery.Event} e Event data
  * @param {string} direction Direction of the movement; forwards or backwards
  * @param {boolean} [withMetaKey] Whether this key was pressed with
- *  a meta key like 'ctrl'
+ *  a meta key like Control
  */
 OO.ui.TagMultiselectWidget.prototype.doInputArrow = function ( e, direction ) {
 	if (
@@ -424,7 +425,7 @@ OO.ui.TagMultiselectWidget.prototype.onTagSelect = function ( item ) {
 			this.addTagFromInput();
 		}
 		// 1. Get the label of the tag into the input
-		this.input.setValue( item.getData() );
+		this.input.setValue( item.getLabel() );
 		// 2. Remove the tag
 		this.removeItems( [ item ] );
 		// 3. Focus the input
@@ -828,8 +829,8 @@ OO.ui.TagMultiselectWidget.prototype.updateInputSize = function () {
 				$lastItem.position().left;
 		}
 
-		// Some safety margin for sanity, because I *really* don't feel like finding out where the few
-		// pixels this is off by are coming from.
+		// Some safety margin for sanity, because I *really* don't feel like finding out where the
+		// few pixels this is off by are coming from.
 		bestWidth -= 13;
 		if ( contentWidth > bestWidth ) {
 			// This will result in the input getting shifted to the next line

@@ -1,7 +1,8 @@
 /**
  * ToggleButtons are buttons that have a state (‘on’ or ‘off’) that is represented by a
  * Boolean value. Like other {@link OO.ui.ButtonWidget buttons}, toggle buttons can be
- * configured with {@link OO.ui.mixin.IconElement icons}, {@link OO.ui.mixin.IndicatorElement indicators},
+ * configured with {@link OO.ui.mixin.IconElement icons},
+ * {@link OO.ui.mixin.IndicatorElement indicators},
  * {@link OO.ui.mixin.TitledElement titles}, {@link OO.ui.mixin.FlaggedElement styling flags},
  * and {@link OO.ui.mixin.LabelElement labels}. Please see
  * the [OOUI documentation][1] on MediaWiki for more information.
@@ -9,14 +10,14 @@
  *     @example
  *     // Toggle buttons in the 'off' and 'on' state.
  *     var toggleButton1 = new OO.ui.ToggleButtonWidget( {
- *         label: 'Toggle Button off'
- *     } );
- *     var toggleButton2 = new OO.ui.ToggleButtonWidget( {
- *         label: 'Toggle Button on',
- *         value: true
- *     } );
+ *             label: 'Toggle Button off'
+ *         } ),
+ *         toggleButton2 = new OO.ui.ToggleButtonWidget( {
+ *             label: 'Toggle Button on',
+ *             value: true
+ *         } );
  *     // Append the buttons to the DOM.
- *     $( 'body' ).append( toggleButton1.$element, toggleButton2.$element );
+ *     $( document.body ).append( toggleButton1.$element, toggleButton2.$element );
  *
  * [1]: https://www.mediawiki.org/wiki/OOUI/Widgets/Buttons_and_Switches#Toggle_buttons
  *
@@ -26,7 +27,6 @@
  * @mixins OO.ui.mixin.IconElement
  * @mixins OO.ui.mixin.IndicatorElement
  * @mixins OO.ui.mixin.LabelElement
- * @mixins OO.ui.mixin.TitledElement
  * @mixins OO.ui.mixin.FlaggedElement
  * @mixins OO.ui.mixin.TabIndexedElement
  *
@@ -43,22 +43,28 @@ OO.ui.ToggleButtonWidget = function OoUiToggleButtonWidget( config ) {
 	OO.ui.ToggleButtonWidget.parent.call( this, config );
 
 	// Mixin constructors
-	OO.ui.mixin.ButtonElement.call( this, $.extend( {}, config, { active: this.active } ) );
+	OO.ui.mixin.ButtonElement.call( this, $.extend( {
+		active: this.active
+	}, config ) );
 	OO.ui.mixin.IconElement.call( this, config );
 	OO.ui.mixin.IndicatorElement.call( this, config );
 	OO.ui.mixin.LabelElement.call( this, config );
-	OO.ui.mixin.TitledElement.call( this, $.extend( {}, config, { $titled: this.$button } ) );
 	OO.ui.mixin.FlaggedElement.call( this, config );
-	OO.ui.mixin.TabIndexedElement.call( this, $.extend( {}, config, { $tabIndexed: this.$button } ) );
+	OO.ui.mixin.TabIndexedElement.call( this, $.extend( {
+		$tabIndexed: this.$button
+	}, config ) );
 
 	// Events
-	this.connect( this, { click: 'onAction' } );
+	this.connect( this, {
+		click: 'onAction'
+	} );
 
 	// Initialization
 	this.$button.append( this.$icon, this.$label, this.$indicator );
 	this.$element
 		.addClass( 'oo-ui-toggleButtonWidget' )
 		.append( this.$button );
+	this.setTitledElement( this.$button );
 };
 
 /* Setup */
@@ -68,7 +74,6 @@ OO.mixinClass( OO.ui.ToggleButtonWidget, OO.ui.mixin.ButtonElement );
 OO.mixinClass( OO.ui.ToggleButtonWidget, OO.ui.mixin.IconElement );
 OO.mixinClass( OO.ui.ToggleButtonWidget, OO.ui.mixin.IndicatorElement );
 OO.mixinClass( OO.ui.ToggleButtonWidget, OO.ui.mixin.LabelElement );
-OO.mixinClass( OO.ui.ToggleButtonWidget, OO.ui.mixin.TitledElement );
 OO.mixinClass( OO.ui.ToggleButtonWidget, OO.ui.mixin.FlaggedElement );
 OO.mixinClass( OO.ui.ToggleButtonWidget, OO.ui.mixin.TabIndexedElement );
 

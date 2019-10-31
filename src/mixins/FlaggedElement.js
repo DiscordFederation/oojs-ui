@@ -7,24 +7,27 @@
  *
  * The library currently contains the following styling flags for general use:
  *
- * - **progressive**:  Progressive styling is applied to convey that the widget will move the user forward in a process.
- * - **destructive**: Destructive styling is applied to convey that the widget will remove something.
+ * - **progressive**: Progressive styling is applied to convey that the widget will move the user
+ *   forward in a process.
+ * - **destructive**: Destructive styling is applied to convey that the widget will remove
+ *   something.
  *
  * The flags affect the appearance of the buttons:
  *
  *     @example
  *     // FlaggedElement is mixed into ButtonWidget to provide styling flags
  *     var button1 = new OO.ui.ButtonWidget( {
- *         label: 'Progressive',
- *         flags: 'progressive'
- *     } );
- *     var button2 = new OO.ui.ButtonWidget( {
- *         label: 'Destructive',
- *         flags: 'destructive'
- *     } );
- *     $( 'body' ).append( button1.$element, button2.$element );
+ *             label: 'Progressive',
+ *             flags: 'progressive'
+ *         } ),
+ *         button2 = new OO.ui.ButtonWidget( {
+ *             label: 'Destructive',
+ *             flags: 'destructive'
+ *         } );
+ *     $( document.body ).append( button1.$element, button2.$element );
  *
- * {@link OO.ui.ActionWidget ActionWidgets}, which are a special kind of button that execute an action, use these flags: **primary** and **safe**.
+ * {@link OO.ui.ActionWidget ActionWidgets}, which are a special kind of button that execute an
+ * action, use these flags: **primary** and **safe**.
  * Please see the [OOUI documentation on MediaWiki] [1] for more information.
  *
  * [1]: https://www.mediawiki.org/wiki/OOUI/Elements/Flagged
@@ -34,7 +37,8 @@
  *
  * @constructor
  * @param {Object} [config] Configuration options
- * @cfg {string|string[]} [flags] The name or names of the flags (e.g., 'progressive' or 'primary') to apply.
+ * @cfg {string|string[]} [flags] The name or names of the flags (e.g., 'progressive' or 'primary')
+ *  to apply.
  *  Please see the [OOUI documentation on MediaWiki] [2] for more information about available flags.
  *  [2]: https://www.mediawiki.org/wiki/OOUI/Elements/Flagged
  * @cfg {jQuery} [$flagged] The flagged element. By default,
@@ -50,9 +54,13 @@ OO.ui.mixin.FlaggedElement = function OoUiMixinFlaggedElement( config ) {
 	this.$flagged = null;
 
 	// Initialization
-	this.setFlags( config.flags );
+	this.setFlags( config.flags || this.constructor.static.flags );
 	this.setFlaggedElement( config.$flagged || this.$element );
 };
+
+/* Setup */
+
+OO.initClass( OO.ui.mixin.FlaggedElement );
 
 /* Events */
 
@@ -66,12 +74,24 @@ OO.ui.mixin.FlaggedElement = function OoUiMixinFlaggedElement( config ) {
  * that the flag was added, `false` that the flag was removed.
  */
 
+/* Static Properties */
+
+/**
+ * Initial value to pass to setFlags if no value is provided in config.
+ *
+ * @static
+ * @inheritable
+ * @property {string|string[]|Object.<string, boolean>}
+ */
+OO.ui.mixin.FlaggedElement.static.flags = null;
+
 /* Methods */
 
 /**
  * Set the flagged element.
  *
- * This method is used to retarget a flagged mixin so that its functionality applies to the specified element.
+ * This method is used to retarget a flagged mixin so that its functionality applies to the
+ * specified element.
  * If an element is already set, the method will remove the mixin’s effect on that element.
  *
  * @param {jQuery} $flagged Element that should be flagged

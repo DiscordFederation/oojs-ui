@@ -1,11 +1,20 @@
 /**
- * MenuLayouts combine a menu and a content {@link OO.ui.PanelLayout panel}. The menu is positioned relative to the content (after, before, top, or bottom)
- * and its size is customized with the #menuSize config. The content area will fill all remaining space.
+ * MenuLayouts combine a menu and a content {@link OO.ui.PanelLayout panel}. The menu is positioned
+ * relative to the content (after, before, top, or bottom) and its size is customized with the
+ * #menuSize config. The content area will fill all remaining space.
  *
  *     @example
  *     var menuLayout,
- *         menuPanel = new OO.ui.PanelLayout( { padded: true, expanded: true, scrollable: true } ),
- *         contentPanel = new OO.ui.PanelLayout( { padded: true, expanded: true, scrollable: true } ),
+ *         menuPanel = new OO.ui.PanelLayout( {
+ *             padded: true,
+ *             expanded: true,
+ *             scrollable: true
+ *         } ),
+ *         contentPanel = new OO.ui.PanelLayout( {
+ *             padded: true,
+ *             expanded: true,
+ *             scrollable: true
+ *         } ),
  *         select = new OO.ui.SelectWidget( {
  *             items: [
  *                 new OO.ui.OptionWidget( {
@@ -33,14 +42,18 @@
  *         position: 'top',
  *         menuPanel: menuPanel,
  *         contentPanel: contentPanel
- *     } )
+ *     } );
  *     menuLayout.$menu.append(
  *         menuPanel.$element.append( '<b>Menu panel</b>', select.$element )
  *     );
  *     menuLayout.$content.append(
- *         contentPanel.$element.append( '<b>Content panel</b>', '<p>Note that the menu is positioned relative to the content panel: top, bottom, after, before.</p>')
+ *         contentPanel.$element.append(
+ *             '<b>Content panel</b>',
+ *             '<p>Note that the menu is positioned relative to the content panel: ' +
+ *             'top, bottom, after, before.</p>'
+ *          )
  *     );
- *     $( 'body' ).append( menuLayout.$element );
+ *     $( document.body ).append( menuLayout.$element );
  *
  * If menu size needs to be overridden, it can be accomplished using CSS similar to the snippet
  * below. MenuLayout's CSS will override the appropriate values with 'auto' or '0' to display the
@@ -98,11 +111,9 @@ OO.ui.MenuLayout = function OoUiMenuLayout( config ) {
 	this.$content = $( '<div>' );
 
 	// Initialization
-	this.$menu
-		.addClass( 'oo-ui-menuLayout-menu' );
+	this.$menu.addClass( 'oo-ui-menuLayout-menu' );
 	this.$content.addClass( 'oo-ui-menuLayout-content' );
-	this.$element
-		.addClass( 'oo-ui-menuLayout' );
+	this.$element.addClass( 'oo-ui-menuLayout' );
 	if ( config.expanded ) {
 		this.$element.addClass( 'oo-ui-menuLayout-expanded' );
 	} else {
@@ -158,11 +169,14 @@ OO.ui.MenuLayout.prototype.isMenuVisible = function () {
  * Set menu position.
  *
  * @param {string} position Position of menu, either `top`, `after`, `bottom` or `before`
- * @throws {Error} If position value is not supported
  * @chainable
  * @return {OO.ui.MenuLayout} The layout, for chaining
  */
 OO.ui.MenuLayout.prototype.setMenuPosition = function ( position ) {
+	if ( [ 'top', 'bottom', 'before', 'after' ].indexOf( position ) === -1 ) {
+		position = 'before';
+	}
+
 	this.$element.removeClass( 'oo-ui-menuLayout-' + this.menuPosition );
 	this.menuPosition = position;
 	if ( this.menuPosition === 'top' || this.menuPosition === 'before' ) {

@@ -18,11 +18,15 @@ Demo.static.pages.icons = function ( demo ) {
 			content: [
 				'article',
 				'articles',
+				'articleAdd',
 				'articleCheck',
+				'articleDisambiguation',
+				'articleNotFound',
 				'articleSearch',
 				'articleRedirect',
 				'history',
 				'info',
+				'infoFilled',
 				'folderPlaceholder',
 				'die',
 				'download',
@@ -34,6 +38,8 @@ Demo.static.pages.icons = function ( demo ) {
 			alerts: [
 				'alert',
 				'bell',
+				'bellOutline',
+				'error',
 				'message',
 				'notice',
 				'speechBubble',
@@ -81,7 +87,7 @@ Demo.static.pages.icons = function ( demo ) {
 				'halfStar',
 				'unStar',
 				'trash',
-				'unTrash',
+				'restore',
 				'pushPin',
 				'ongoingConversation'
 			],
@@ -90,6 +96,7 @@ Demo.static.pages.icons = function ( demo ) {
 				'editLock',
 				'editUndo',
 				'link',
+				'unLink',
 				'linkExternal',
 				'linkSecure',
 				'redo',
@@ -120,10 +127,14 @@ Demo.static.pages.icons = function ( demo ) {
 				'alignLeft',
 				'alignRight',
 				'attachment',
-				'beaker',
 				'calendar',
 				'code',
 				'hieroglyph',
+				'imageLayoutBasic',
+				'imageLayoutFrame',
+				'imageLayoutFrameless',
+				'imageLayoutThumbnail',
+				'labFlask',
 				'language',
 				'layout',
 				'mathematics',
@@ -159,7 +170,6 @@ Demo.static.pages.icons = function ( demo ) {
 				'book',
 				'journal',
 				'newspaper',
-				'web',
 				'reference',
 				'referenceExisting',
 				'references'
@@ -191,6 +201,8 @@ Demo.static.pages.icons = function ( demo ) {
 			user: [
 				'userAnonymous',
 				'userAvatar',
+				'userAvatarOutline',
+				'userGroup',
 				'userTalk'
 			],
 			layout: [
@@ -214,6 +226,8 @@ Demo.static.pages.icons = function ( demo ) {
 			],
 			wikimedia: [
 				'logoCC',
+				'logoWikidata',
+				'logoWikimedia',
 				'logoWikimediaCommons',
 				'logoWikimediaDiscovery',
 				'logoWikipedia'
@@ -227,7 +241,10 @@ Demo.static.pages.icons = function ( demo ) {
 		],
 		iconsFieldsets = [],
 		iconsWidgets = [],
-		indicatorsFieldset = new OO.ui.FieldsetLayout( { label: 'Indicators' } );
+		indicatorsFieldset = new Demo.LinkedFieldsetLayout( {
+			label: 'Indicators',
+			id: 'demo-section-indicators'
+		} );
 
 	for ( i = 0, len = indicators.length; i < len; i++ ) {
 		indicatorsFieldset.addItems( [
@@ -244,7 +261,10 @@ Demo.static.pages.icons = function ( demo ) {
 		] );
 	}
 	for ( iconSet in icons ) {
-		iconsFieldset = new OO.ui.FieldsetLayout( { label: 'Icons – ' + iconSet } );
+		iconsFieldset = new Demo.LinkedFieldsetLayout( {
+			label: 'Icons – ' + iconSet,
+			id: 'demo-section-' + iconSet
+		} );
 		iconsFieldsets.push( iconsFieldset );
 
 		for ( i = 0, len = icons[ iconSet ].length; i < len; i++ ) {

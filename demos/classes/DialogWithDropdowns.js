@@ -5,7 +5,7 @@ OO.inheritClass( Demo.DialogWithDropdowns, OO.ui.ProcessDialog );
 Demo.DialogWithDropdowns.static.title = 'Dialog with dropdowns ($overlay test)';
 Demo.DialogWithDropdowns.static.actions = [
 	{ action: 'save', label: 'Done', flags: [ 'primary', 'progressive' ] },
-	{ action: 'cancel', label: 'Cancel', flags: [ 'safe', 'back' ] }
+	{ action: 'cancel', label: 'Cancel', flags: [ 'safe', 'close' ] }
 ];
 Demo.DialogWithDropdowns.prototype.getBodyHeight = function () {
 	return 300;
@@ -185,7 +185,11 @@ Demo.DialogWithDropdowns.prototype.initialize = function () {
 		new Demo.SamplePage( 'tagpopup2', {
 			label: 'TagMultiselectWidget (popup)',
 			icon: 'alert',
-			content: [ $spacer.clone(), new Demo.TagNumberPopupMultiselectWidget(), $spacer.clone() ]
+			content: [
+				$spacer.clone(),
+				new Demo.TagNumberPopupMultiselectWidget(),
+				$spacer.clone()
+			]
 		} )
 	];
 	this.bookletLayout.on( 'set', function ( page ) {

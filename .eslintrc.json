@@ -1,9 +1,14 @@
 {
-    "root": true,
-    "extends": [
-        "wikimedia"
-    ],
-    "globals": {
-        "OO": false
-    }
+	"root": true,
+	"extends": [
+		"wikimedia"
+	],
+	"globals": {
+		"OO": "readonly"
+	},
+	"plugins": [ "html" ],
+	"settings": {
+		"html/indent": "+tab",
+		"html/report-bad-indent": "error"
+	}
 }

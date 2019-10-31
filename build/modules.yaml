@@ -8,6 +8,7 @@
 			# Core of the core. The basic building block of Element, facilities to connect PHP and JS
 			# widgets (infuse), some abstract classes, a bunch of convenience methods.
 			"src/core.js",
+			"dist/tmp/src/core-messages.js",
 			"src/mixin.js",
 			"src/Element.js",
 			"src/HtmlSnippet.js",
@@ -33,6 +34,7 @@
 			"src/widgets/IconWidget.js",
 			"src/widgets/IndicatorWidget.js",
 			"src/widgets/LabelWidget.js",
+			"src/widgets/MessageWidget.js",
 
 			# The JavaScript-specific dependencies of the basic widgets. It's sad how many there are :(
 			# TextInputWidget
@@ -85,7 +87,8 @@
 			"src/layouts/FormLayout.js",
 			"src/layouts/PanelLayout.js",
 			"src/layouts/HorizontalLayout.js",
-			"src/widgets/NumberInputWidget.js"
+			"src/widgets/NumberInputWidget.js",
+			"src/widgets/SelectFileInputWidget.js"
 		]
 	},
 	# Additional widgets and layouts module. These have no equivalent in OOUI PHP.
@@ -200,6 +203,7 @@
 			"src/styles/widgets/RadioSelectWidget.less",
 			"src/styles/widgets/RadioOptionWidget.less",
 			"src/styles/widgets/LabelWidget.less",
+			"src/styles/widgets/MessageWidget.less",
 			"src/styles/widgets/IconWidget.less",
 			"src/styles/widgets/IndicatorWidget.less",
 			"src/styles/widgets/ButtonWidget.less",
@@ -225,6 +229,7 @@
 			"src/styles/widgets/CheckboxMultioptionWidget.less",
 			"src/styles/widgets/ProgressBarWidget.less",
 			"src/styles/widgets/NumberInputWidget.less",
+			"src/styles/widgets/SelectFileInputWidget.less",
 
 			"src/styles/core.less"
 		]
@@ -290,6 +295,8 @@
 			"src/styles/WindowManager.less"
 		]
 	},
+
+	# Image content. Generates oojs-ui-images-{theme}.css and so oojs-ui-{theme}.css files
 	"oojs-ui-images-{theme}": {
 		"styles": [
 			"src/themes/{theme}/icons-movement.json",
@@ -308,12 +315,11 @@
 			"src/themes/{theme}/icons-layout.json",
 			"src/themes/{theme}/icons-accessibility.json",
 			"src/themes/{theme}/icons-wikimedia.json",
-			"src/themes/{theme}/indicators.json",
-			"src/themes/{theme}/textures.json"
+			"src/themes/{theme}/indicators.json"
 		]
 	},
 
-	# Additional icon packs. Some exist for all themes, some are WikimediaUI-theme-specific.
+	# Icon packs. Generates oojs-ui-{theme}-icons-{pack}.css files
 	"oojs-ui-{theme}-icons-accessibility": {
 		"styles": [
 			"src/themes/{theme}/icons-accessibility.json"

@@ -1,7 +1,7 @@
 {
 	"selectorWithoutVariant": ".oo-ui-icon-{name}",
 	"selectorWithVariant": ".oo-ui-image-{variant}.oo-ui-icon-{name}",
-	"intro": "@import '../../../../src/styles/common';",
+	"intro": "@import '../../../../src/styles/common.less';",
 	"variants": {
 		"invert": {
 			"color": "#fff",
@@ -14,8 +14,14 @@
 		"destructive": {
 			"color": "#d33"
 		},
+		"error": {
+			"color": "#d33"
+		},
 		"warning": {
-			"color": "#ff5d00"
+			"color": "#fc3"
+		},
+		"success": {
+			"color": "#14866d"
 		}
 	},
 	"images": {
@@ -32,7 +38,8 @@
 			"file": "images/icons/attachment.svg"
 		},
 		"beaker": {
-			"file": "images/icons/beaker.svg"
+			"file": "images/icons/labFlask.svg",
+			"deprecated": "Renamed since v0.34.1, use 'labFlask' instead."
 		},
 		"calendar": {
 			"file": "images/icons/calendar.svg"
@@ -42,6 +49,21 @@
 		},
 		"hieroglyph": {
 			"file": "images/icons/hieroglyph.svg"
+		},
+		"imageLayoutBasic": {
+			"file": "images/icons/imageLayoutBasic.svg"
+		},
+		"imageLayoutFrame": {
+			"file": "images/icons/imageLayoutFrame.svg"
+		},
+		"imageLayoutFrameless": {
+			"file": "images/icons/imageLayoutFrameless.svg"
+		},
+		"imageLayoutThumbnail": {
+			"file": "images/icons/imageLayoutThumbnail.svg"
+		},
+		"labFlask": {
+			"file": "images/icons/labFlask.svg"
 		},
 		"language": {
 			"file": "images/icons/language.svg"

@@ -1,3 +1,4 @@
+/* eslint-disable no-jquery/no-global-selector, no-jquery/no-parse-html-literal */
 QUnit.module( 'Element', {
 	beforeEach: function () {
 		this.fixture = document.createElement( 'div' );
@@ -26,68 +27,44 @@ QUnit.test( 'static.infuse', function ( assert ) {
 } );
 
 QUnit.test( 'static.infuse (infusing already infused nodes)', function ( assert ) {
-	var a, b, $node, fixture = this.fixture;
+	var a, b, fixture = this.fixture;
 
 	function reset() {
-		// ( new OOUI\FieldLayout( new OOUI\ButtonWidget( [ 'id' => 'button' ] ), [ 'id' => 'field' ] ) )->setInfusable( true )
+		// ( new OOUI\FieldLayout(
+		//     new OOUI\ButtonWidget( [ 'id' => 'button' ] ),
+		//     [ 'id' => 'field' ]
+		// ) )->setInfusable( true )
 		var html = '<div id=\'field\' class=\'oo-ui-layout oo-ui-fieldLayout oo-ui-fieldLayout-align-left\' data-ooui=\'{"_":"OO.ui.FieldLayout","fieldWidget":{"tag":"button"},"align":"left","errors":[],"notices":[],"$overlay":true}\'><div class=\'oo-ui-fieldLayout-body\'><span class=\'oo-ui-fieldLayout-header\'><label class=\'oo-ui-labelElement-label\'></label></span><span class=\'oo-ui-fieldLayout-field\'><span id=\'button\' aria-disabled=\'false\' class=\'oo-ui-widget oo-ui-widget-enabled oo-ui-buttonElement oo-ui-buttonElement-framed oo-ui-buttonWidget\' data-ooui=\'{"_":"OO.ui.ButtonWidget"}\'><a role=\'button\' tabindex=\'0\' aria-disabled=\'false\' rel=\'nofollow\' class=\'oo-ui-buttonElement-button\'><span class=\'oo-ui-iconElement-icon\'></span><span class=\'oo-ui-labelElement-label\'></span><span class=\'oo-ui-indicatorElement-indicator\'></span></a></span></span></div></div>';
 		$( fixture ).empty().append( html );
 	}
 
-	// Infuse a widget, then the same widget (by id)
+	// Infuse a widget, then the same widget with jQuery
 	reset();
-	a = OO.ui.infuse( 'button' );
-	b = OO.ui.infuse( 'button' );
+	a = OO.ui.infuse( document.getElementById( 'button' ) );
+	b = OO.ui.infuse( $( '#button' ) );
 	assert.ok( a instanceof OO.ui.ButtonWidget, 'infuse() returned a ButtonWidget' );
 	assert.ok( b instanceof OO.ui.ButtonWidget, 'infuse() returned a ButtonWidget' );
 	assert.strictEqual( a, b, 'Both infuse() calls returned the same widget instance' );
 
-	// Infuse a widget, then the same widget (by node)
+	// Infuse a field, then its widget
 	reset();
-	$node = $( '#button' );
-	a = OO.ui.infuse( 'button' );
-	b = OO.ui.infuse( $node );
-	assert.ok( a instanceof OO.ui.ButtonWidget, 'infuse() returned a ButtonWidget' );
-	assert.ok( b instanceof OO.ui.ButtonWidget, 'infuse() returned a ButtonWidget' );
-	assert.strictEqual( a, b, 'Both infuse() calls returned the same widget instance' );
-
-	// Infuse a field, then its widget (by id)
-	reset();
-	a = OO.ui.infuse( 'field' );
-	b = OO.ui.infuse( 'button' );
+	a = OO.ui.infuse( document.getElementById( 'field' ) );
+	b = OO.ui.infuse( document.getElementById( 'button' ) );
 	assert.ok( a instanceof OO.ui.FieldLayout, 'infuse() returned a FieldLayout' );
 	assert.ok( b instanceof OO.ui.ButtonWidget, 'infuse() returned a ButtonWidget' );
 	assert.strictEqual( a.fieldWidget, b, 'Both infuse() calls returned the same widget instance' );
 
-	// Infuse a field, then its widget (by node)
+	// Infuse a widget, then its field
 	reset();
-	$node = $( '#button' );
-	a = OO.ui.infuse( 'field' );
-	b = OO.ui.infuse( $node );
-	assert.ok( a instanceof OO.ui.FieldLayout, 'infuse() returned a FieldLayout' );
-	assert.ok( b instanceof OO.ui.ButtonWidget, 'infuse() returned a ButtonWidget' );
-	assert.strictEqual( a.fieldWidget, b, 'Both infuse() calls returned the same widget instance' );
-
-	// Infuse a widget, then its field (by id)
-	reset();
-	a = OO.ui.infuse( 'button' );
-	b = OO.ui.infuse( 'field' );
-	assert.ok( a instanceof OO.ui.ButtonWidget, 'infuse() returned a ButtonWidget' );
-	assert.ok( b instanceof OO.ui.FieldLayout, 'infuse() returned a FieldLayout' );
-	assert.strictEqual( b.fieldWidget, a, 'Both infuse() calls returned the same widget instance' );
-
-	// Infuse a widget, then its field (by node)
-	reset();
-	$node = $( '#field' );
-	a = OO.ui.infuse( 'button' );
-	b = OO.ui.infuse( $node );
+	a = OO.ui.infuse( document.getElementById( 'button' ) );
+	b = OO.ui.infuse( document.getElementById( 'field' ) );
 	assert.ok( a instanceof OO.ui.ButtonWidget, 'infuse() returned a ButtonWidget' );
 	assert.ok( b instanceof OO.ui.FieldLayout, 'infuse() returned a FieldLayout' );
 	assert.strictEqual( b.fieldWidget, a, 'Both infuse() calls returned the same widget instance' );
 
 	// Infuse a widget with extra config
 	reset();
-	a = OO.ui.infuse( $( '#button' ), { flags: [ 'extra' ] } );
+	a = OO.ui.infuse( document.getElementById( 'button' ), { flags: [ 'extra' ] } );
 	assert.deepEqual( a.getFlags(), [ 'extra' ], 'infuse with extra config' );
 } );
 

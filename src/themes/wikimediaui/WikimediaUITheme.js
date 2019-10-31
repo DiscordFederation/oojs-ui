@@ -22,16 +22,19 @@ OO.ui.WikimediaUITheme.prototype.getElementClasses = function ( element ) {
 	// Parent method
 	var variant, isFramed, isActive, isToolOrGroup,
 		variants = {
-			warning: false,
 			invert: false,
 			progressive: false,
-			destructive: false
+			destructive: false,
+			error: false,
+			warning: false,
+			success: false
 		},
 		// Parent method
 		classes = OO.ui.WikimediaUITheme.parent.prototype.getElementClasses.call( this, element );
 
 	if (
 		element instanceof OO.ui.IconWidget &&
+		// eslint-disable-next-line no-jquery/no-class-state
 		element.$element.hasClass( 'oo-ui-checkboxInputWidget-checkIcon' )
 	) {
 		// Icon on CheckboxInputWidget
@@ -40,22 +43,24 @@ OO.ui.WikimediaUITheme.prototype.getElementClasses = function ( element ) {
 		isFramed = element.supports( [ 'isFramed' ] ) && element.isFramed();
 		isActive = element.supports( [ 'isActive' ] ) && element.isActive();
 		isToolOrGroup =
-			// Check if the class exists, as classes that are not in the 'core' module may not be loaded
+			// Check if the class exists, as classes that are not in the 'core' module may
+			// not be loaded.
 			( OO.ui.Tool && element instanceof OO.ui.Tool ) ||
 			( OO.ui.ToolGroup && element instanceof OO.ui.ToolGroup );
 		if (
-			// Button with a dark background
+			// Button with a dark background.
 			isFramed && ( isActive || element.isDisabled() || element.hasFlag( 'primary' ) ) ||
-			// Toolbar with a dark background
+			// Toolbar with a dark background.
 			isToolOrGroup && element.hasFlag( 'primary' )
 		) {
 			// … use white icon / indicator, regardless of other flags
 			variants.invert = true;
-		} else if ( !isFramed && element.isDisabled() ) {
-			// Frameless disabled button, always use black icon / indicator regardless of other flags
+		} else if ( !isFramed && element.isDisabled() && !element.hasFlag( 'invert' ) ) {
+			// Frameless disabled button, always use black icon / indicator regardless of
+			// other flags.
 			variants.invert = false;
 		} else if ( !element.isDisabled() ) {
-			// Any other kind of button, use the right colored icon / indicator if available
+			// Any other kind of button, use the right colored icon / indicator if available.
 			variants.progressive = element.hasFlag( 'progressive' ) ||
 				// Active tools/toolgroups
 				( isToolOrGroup && isActive ) ||
@@ -63,14 +68,21 @@ OO.ui.WikimediaUITheme.prototype.getElementClasses = function ( element ) {
 				(
 					(
 						element instanceof OO.ui.MenuOptionWidget ||
-						// Check if the class exists, as classes that are not in the 'core' module may not be loaded
-						( OO.ui.OutlineOptionWidget && element instanceof OO.ui.OutlineOptionWidget )
+						// Check if the class exists, as classes that are not in the 'core' module
+						// may not be loaded.
+						(
+							OO.ui.OutlineOptionWidget &&
+							element instanceof OO.ui.OutlineOptionWidget
+						)
 					) &&
 					( element.isPressed() || element.isSelected() )
 				);
 
 			variants.destructive = element.hasFlag( 'destructive' );
+			variants.invert = element.hasFlag( 'invert' );
+			variants.error = element.hasFlag( 'error' );
 			variants.warning = element.hasFlag( 'warning' );
+			variants.success = element.hasFlag( 'success' );
 		}
 	}
 

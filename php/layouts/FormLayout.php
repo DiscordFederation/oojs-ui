@@ -14,18 +14,17 @@ class FormLayout extends Layout {
 
 	/**
 	 * @param array $config Configuration options
-	 * @param string $config['method'] HTML form `method` attribute
-	 * @param string $config['action'] HTML form `action` attribute
-	 * @param string $config['enctype'] HTML form `enctype` attribute
-	 * @param FieldsetLayout[] $config['items'] Items to add
-	 * @param-taint $config escapes_htmlnoent
+	 *      - string $config['method'] HTML form `method` attribute
+	 *      - string $config['action'] HTML form `action` attribute
+	 *      - string $config['enctype'] HTML form `enctype` attribute
+	 *      - FieldsetLayout[] $config['items'] Items to add
 	 */
 	public function __construct( array $config = [] ) {
 		// Parent constructor
 		parent::__construct( $config );
 
 		// Traits
-		$this->initializeGroupElement( array_merge( $config, [ 'group' => $this ] ) );
+		$this->initializeGroupElement( array_merge( [ 'group' => $this ], $config ) );
 
 		// Initialization
 		$attributeWhitelist = [ 'method', 'action', 'enctype' ];

@@ -6,14 +6,14 @@
  * Note that inline elements, such as OO.ui.ButtonWidgets, do not need this wrapper.
  *
  *     @example
- *     // HorizontalLayout with a text input and a label
+ *     // HorizontalLayout with a text input and a label.
  *     var layout = new OO.ui.HorizontalLayout( {
  *       items: [
  *         new OO.ui.LabelWidget( { label: 'Label' } ),
  *         new OO.ui.TextInputWidget( { value: 'Text' } )
  *       ]
  *     } );
- *     $( 'body' ).append( layout.$element );
+ *     $( document.body ).append( layout.$element );
  *
  * @class
  * @extends OO.ui.Layout
@@ -31,7 +31,7 @@ OO.ui.HorizontalLayout = function OoUiHorizontalLayout( config ) {
 	OO.ui.HorizontalLayout.parent.call( this, config );
 
 	// Mixin constructors
-	OO.ui.mixin.GroupElement.call( this, $.extend( {}, config, { $group: this.$element } ) );
+	OO.ui.mixin.GroupElement.call( this, $.extend( { $group: this.$element }, config ) );
 
 	// Initialization
 	this.$element.addClass( 'oo-ui-horizontalLayout' );

@@ -12,7 +12,7 @@
  *         icon: 'check',
  *         value: 'check'
  *     } );
- *     $( 'body' ).append( button.$element );
+ *     $( document.body ).append( button.$element );
  *
  * [1]: https://www.mediawiki.org/wiki/OOUI/Widgets/Inputs#Button_inputs
  *
@@ -22,15 +22,17 @@
  * @mixins OO.ui.mixin.IconElement
  * @mixins OO.ui.mixin.IndicatorElement
  * @mixins OO.ui.mixin.LabelElement
- * @mixins OO.ui.mixin.TitledElement
+ * @mixins OO.ui.mixin.FlaggedElement
  *
  * @constructor
  * @param {Object} [config] Configuration options
- * @cfg {string} [type='button'] The value of the HTML `'type'` attribute: 'button', 'submit' or 'reset'.
+ * @cfg {string} [type='button'] The value of the HTML `'type'` attribute:
+ *  'button', 'submit' or 'reset'.
  * @cfg {boolean} [useInputTag=false] Use an `<input>` tag instead of a `<button>` tag, the default.
- *  Widgets configured to be an `<input>` do not support {@link #icon icons} and {@link #indicator indicators},
- *  non-plaintext {@link #label labels}, or {@link #value values}. In general, useInputTag should only
- *  be set to `true` when there’s need to support IE 6 in a form with multiple buttons.
+ *  Widgets configured to be an `<input>` do not support {@link #icon icons} and
+ *  {@link #indicator indicators},
+ *  non-plaintext {@link #label labels}, or {@link #value values}. In general, useInputTag should
+ *  only be set to `true` when there’s need to support IE 6 in a form with multiple buttons.
  */
 OO.ui.ButtonInputWidget = function OoUiButtonInputWidget( config ) {
 	// Configuration initialization
@@ -48,11 +50,13 @@ OO.ui.ButtonInputWidget = function OoUiButtonInputWidget( config ) {
 	OO.ui.ButtonInputWidget.parent.call( this, config );
 
 	// Mixin constructors
-	OO.ui.mixin.ButtonElement.call( this, $.extend( {}, config, { $button: this.$input } ) );
+	OO.ui.mixin.ButtonElement.call( this, $.extend( {
+		$button: this.$input
+	}, config ) );
 	OO.ui.mixin.IconElement.call( this, config );
 	OO.ui.mixin.IndicatorElement.call( this, config );
 	OO.ui.mixin.LabelElement.call( this, config );
-	OO.ui.mixin.TitledElement.call( this, $.extend( {}, config, { $titled: this.$input } ) );
+	OO.ui.mixin.FlaggedElement.call( this, config );
 
 	// Initialization
 	if ( !config.useInputTag ) {
@@ -68,7 +72,7 @@ OO.mixinClass( OO.ui.ButtonInputWidget, OO.ui.mixin.ButtonElement );
 OO.mixinClass( OO.ui.ButtonInputWidget, OO.ui.mixin.IconElement );
 OO.mixinClass( OO.ui.ButtonInputWidget, OO.ui.mixin.IndicatorElement );
 OO.mixinClass( OO.ui.ButtonInputWidget, OO.ui.mixin.LabelElement );
-OO.mixinClass( OO.ui.ButtonInputWidget, OO.ui.mixin.TitledElement );
+OO.mixinClass( OO.ui.ButtonInputWidget, OO.ui.mixin.FlaggedElement );
 
 /* Static Properties */
 
@@ -138,7 +142,8 @@ OO.ui.ButtonInputWidget.prototype.setValue = function ( value ) {
  * @inheritdoc
  */
 OO.ui.ButtonInputWidget.prototype.getInputId = function () {
-	// Disable generating `<label>` elements for buttons. One would very rarely need additional label
-	// for a button, and it's already a big clickable target, and it causes unexpected rendering.
+	// Disable generating `<label>` elements for buttons. One would very rarely need additional
+	// label for a button, and it's already a big clickable target, and it causes
+	// unexpected rendering.
 	return null;
 };

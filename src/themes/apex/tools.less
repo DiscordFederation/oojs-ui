@@ -1,4 +1,4 @@
-@import 'common';
+@import 'common.less';
 
 .theme-oo-ui-toolbar() {
 	&-bar {
@@ -18,59 +18,6 @@
 			border: 0;
 			background: none;
 			box-shadow: none;
-		}
-	}
-
-	&-actions {
-		> .oo-ui-buttonElement-framed,
-		> .oo-ui-buttonElement-framed:last-child {
-			margin-top: 0.4em;
-			margin-bottom: 0.4em;
-			margin-right: 0.5em;
-		}
-
-		> .oo-ui-buttonElement-frameless,
-		> .oo-ui-buttonElement-frameless:last-child {
-			&.oo-ui-labelElement {
-				margin: 0;
-
-				> .oo-ui-buttonElement-button {
-					margin: 0;
-					padding: 0 0.3125em;
-
-					> .oo-ui-labelElement-label {
-						margin: 0 1em;
-						line-height: 3.40625em;
-					}
-				}
-			}
-		}
-
-		> .oo-ui-buttonGroupWidget {
-			> .oo-ui-buttonElement > .oo-ui-buttonElement-button {
-			}
-
-			> .oo-ui-popupToolGroup,
-			> .oo-ui-popupToolGroup > .oo-ui-popupToolGroup-handle {
-				height: 2.34375em;
-			}
-
-			> .oo-ui-popupToolGroup.oo-ui-widget-enabled.oo-ui-flaggedElement-primary.oo-ui-flaggedElement-progressive {
-				border: 0;
-
-				> .oo-ui-popupToolGroup-handle {
-					.oo-ui-vertical-gradient( @background-color-progressive-gradient-light, @background-color-progressive-gradient-dark );
-					border: 1px solid @border-color-progressive;
-
-					&:hover {
-						border-color: @border-color-progressive--hover;
-					}
-				}
-
-				&.oo-ui-popupToolGroup-active > .oo-ui-popupToolGroup-handle {
-					.oo-ui-vertical-gradient( @background-color-progressive-gradient-dark, @background-color-progressive-gradient-light );
-				}
-			}
 		}
 	}
 }
@@ -134,12 +81,6 @@
 			border-color: rgba( 0, 0, 0, 0.1 );
 		}
 	}
-
-	&-tools.oo-ui-toolGroup-enabled-tools {
-		.oo-ui-tool-link .oo-ui-tool-title {
-			color: #000;
-		}
-	}
 }
 
 .theme-oo-ui-barToolGroup() {
@@ -159,6 +100,7 @@
 		}
 
 		> .oo-ui-tool-link {
+			color: inherit;
 			height: 1.875em;
 			padding: 0.3125em;
 
@@ -174,6 +116,10 @@
 			.oo-ui-tool-title {
 				line-height: 2.1em; // 0.5em less
 			}
+		}
+
+		&:not( .oo-ui-tool-with-icon ) > .oo-ui-tool-link .oo-ui-iconElement-noIcon {
+			display: none;
 		}
 	}
 
@@ -211,6 +157,39 @@
 		&.oo-ui-widget-enabled {
 			&:hover > .oo-ui-tool-link .oo-ui-iconElement-icon {
 				opacity: 1;
+			}
+		}
+
+		&.oo-ui-flaggedElement {
+			&-progressive {
+				.oo-ui-vertical-gradient( @background-color-progressive-gradient-light, @background-color-progressive-gradient-dark );
+				border: 1px solid @border-color-progressive;
+
+				&:hover {
+					border-color: @border-color-progressive--hover;
+				}
+
+				&.oo-ui-tool-active.oo-ui-widget-enabled {
+					.oo-ui-vertical-gradient( @background-color-progressive-gradient-dark, @background-color-progressive-gradient-light );
+					border: 1px solid @border-color-progressive;
+				}
+
+				> .oo-ui-tool-link {
+					padding: 0.3125em 0.6255em;
+				}
+			}
+
+			&-destructive {
+				.oo-ui-vertical-gradient( @background-color-framed-start, @background-color-framed-stop );
+				border: @border-base;
+
+				&.oo-ui-widget-enabled > .oo-ui-tool-link {
+					color: @color-destructive;
+				}
+
+				> .oo-ui-tool-link {
+					padding: 0.3125em 0.6255em;
+				}
 			}
 		}
 	}
@@ -422,31 +401,6 @@
 		}
 	}
 
-	.oo-ui-buttonGroupWidget & {
-		margin-left: 0;
-
-		> .oo-ui-popupToolGroup-handle {
-			height: 2.4em;
-			border-radius: 0;
-			margin-left: -2px;
-		}
-
-		&:first-child > .oo-ui-popupToolGroup-handle {
-			border-bottom-left-radius: @border-radius-base;
-			border-top-left-radius: @border-radius-base;
-			margin-left: 0;
-		}
-
-		&:last-child {
-			margin-right: 0.5em;
-
-			& > .oo-ui-popupToolGroup-handle {
-				border-bottom-right-radius: @border-radius-base;
-				border-top-right-radius: @border-radius-base;
-			}
-		}
-	}
-
 	&-handle {
 		height: 2.5em;
 
@@ -488,6 +442,31 @@
 		border-bottom-left-radius: 0;
 		border-bottom-right-radius: 0;
 		box-shadow: inset 0 0.0875em 0.0875em 0 rgba( 0, 0, 0, 0.07 );
+	}
+
+	&.oo-ui-flaggedElement {
+		&-progressive {
+			.oo-ui-vertical-gradient( @background-color-progressive-gradient-light, @background-color-progressive-gradient-dark );
+			border: 1px solid @border-color-progressive;
+
+			&:hover {
+				border-color: @border-color-progressive--hover;
+			}
+
+			&.oo-ui-popupToolGroup-active.oo-ui-widget-enabled {
+				.oo-ui-vertical-gradient( @background-color-progressive-gradient-dark, @background-color-progressive-gradient-light );
+				border: 1px solid @border-color-progressive;
+			}
+		}
+
+		&-destructive {
+			.oo-ui-vertical-gradient( @background-color-framed-start, @background-color-framed-stop );
+			border: @border-base;
+
+			&.oo-ui-widget-enabled > .oo-ui-popupToolGroup-handle {
+				color: @color-destructive;
+			}
+		}
 	}
 
 	&-tools {

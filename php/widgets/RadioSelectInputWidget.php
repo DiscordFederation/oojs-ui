@@ -23,9 +23,8 @@ class RadioSelectInputWidget extends InputWidget {
 
 	/**
 	 * @param array $config Configuration options
-	 * @param array[] $config['options'] Array of menu options in the format
-	 *   `[ 'data' => …, 'label' => … ]`
-	 * @param-taint $config escapes_html
+	 *      - array[] $config['options'] Array of menu options in the format
+	 *          `[ 'data' => …, 'label' => … ]`
 	 */
 	public function __construct( array $config = [] ) {
 		// Parent constructor

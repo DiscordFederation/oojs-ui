@@ -1,6 +1,6 @@
 /**
  * ButtonElement is often mixed into other classes to generate a button, which is a clickable
- * interface element that can be configured with access keys for accessibility.
+ * interface element that can be configured with access keys for keyboard interaction.
  * See the [OOUI documentation on MediaWiki] [1] for examples.
  *
  * [1]: https://www.mediawiki.org/wiki/OOUI/Widgets/Buttons_and_Switches#Buttons
@@ -44,10 +44,11 @@ OO.initClass( OO.ui.mixin.ButtonElement );
 /**
  * Cancel mouse down events.
  *
- * This property is usually set to `true` to prevent the focus from changing when the button is clicked.
- * Classes such as {@link OO.ui.mixin.DraggableElement DraggableElement} and {@link OO.ui.ButtonOptionWidget ButtonOptionWidget}
- * use a value of `false` so that dragging behavior is possible and mousedown events can be handled by a
- * parent widget.
+ * This property is usually set to `true` to prevent the focus from changing when the button is
+ * clicked.
+ * Classes such as {@link OO.ui.mixin.DraggableElement DraggableElement} and
+ * {@link OO.ui.ButtonOptionWidget ButtonOptionWidget} use a value of `false` so that dragging
+ * behavior is possible and mousedown events can be handled by a parent widget.
  *
  * @static
  * @inheritable
@@ -108,7 +109,7 @@ OO.ui.mixin.ButtonElement.prototype.setButtonElement = function ( $button ) {
  *
  * @protected
  * @param {jQuery.Event} e Mouse down event
- * @return {undefined/boolean} False to prevent default if event is handled
+ * @return {undefined|boolean} False to prevent default if event is handled
  */
 OO.ui.mixin.ButtonElement.prototype.onMouseDown = function ( e ) {
 	if ( this.isDisabled() || e.which !== OO.ui.MouseButtons.LEFT ) {
@@ -139,19 +140,13 @@ OO.ui.mixin.ButtonElement.prototype.onDocumentMouseUp = function ( e ) {
 	this.getElementDocument().removeEventListener( 'mouseup', this.onDocumentMouseUpHandler, true );
 };
 
-// Deprecated alias since 0.28.3
-OO.ui.mixin.ButtonElement.prototype.onMouseUp = function () {
-	OO.ui.warnDeprecation( 'onMouseUp is deprecated, use onDocumentMouseUp instead' );
-	this.onDocumentMouseUp.apply( this, arguments );
-};
-
 /**
  * Handles mouse click events.
  *
  * @protected
  * @param {jQuery.Event} e Mouse click event
  * @fires click
- * @return {undefined/boolean} False to prevent default if event is handled
+ * @return {undefined|boolean} False to prevent default if event is handled
  */
 OO.ui.mixin.ButtonElement.prototype.onClick = function ( e ) {
 	if ( !this.isDisabled() && e.which === OO.ui.MouseButtons.LEFT ) {
@@ -192,19 +187,13 @@ OO.ui.mixin.ButtonElement.prototype.onDocumentKeyUp = function ( e ) {
 	this.getElementDocument().removeEventListener( 'keyup', this.onDocumentKeyUpHandler, true );
 };
 
-// Deprecated alias since 0.28.3
-OO.ui.mixin.ButtonElement.prototype.onKeyUp = function () {
-	OO.ui.warnDeprecation( 'onKeyUp is deprecated, use onDocumentKeyUp instead' );
-	this.onDocumentKeyUp.apply( this, arguments );
-};
-
 /**
  * Handles key press events.
  *
  * @protected
  * @param {jQuery.Event} e Key press event
  * @fires click
- * @return {undefined/boolean} False to prevent default if event is handled
+ * @return {undefined|boolean} False to prevent default if event is handled
  */
 OO.ui.mixin.ButtonElement.prototype.onKeyPress = function ( e ) {
 	if ( !this.isDisabled() && ( e.which === OO.ui.Keys.SPACE || e.which === OO.ui.Keys.ENTER ) ) {
@@ -224,7 +213,8 @@ OO.ui.mixin.ButtonElement.prototype.isFramed = function () {
 };
 
 /**
- * Render the button with or without a frame. Omit the `framed` parameter to toggle the button frame on and off.
+ * Render the button with or without a frame. Omit the `framed` parameter to toggle the button frame
+ * on and off.
  *
  * @param {boolean} [framed] Make button framed, omit to toggle
  * @chainable

@@ -1,19 +1,19 @@
 /**
  * TextInputWidgets, like HTML text inputs, can be configured with options that customize the
  * size of the field as well as its presentation. In addition, these widgets can be configured
- * with {@link OO.ui.mixin.IconElement icons}, {@link OO.ui.mixin.IndicatorElement indicators}, an optional
- * validation-pattern (used to determine if an input value is valid or not) and an input filter,
- * which modifies incoming values rather than validating them.
+ * with {@link OO.ui.mixin.IconElement icons}, {@link OO.ui.mixin.IndicatorElement indicators}, an
+ * optional validation-pattern (used to determine if an input value is valid or not) and an input
+ * filter, which modifies incoming values rather than validating them.
  * Please see the [OOUI documentation on MediaWiki] [1] for more information and examples.
  *
  * This widget can be used inside an HTML form, such as a OO.ui.FormLayout.
  *
  *     @example
- *     // Example of a text input widget
+ *     // A TextInputWidget.
  *     var textInput = new OO.ui.TextInputWidget( {
  *         value: 'Text input'
- *     } )
- *     $( 'body' ).append( textInput.$element );
+ *     } );
+ *     $( document.body ).append( textInput.$element );
  *
  * [1]: https://www.mediawiki.org/wiki/OOUI/Widgets/Inputs
  *
@@ -23,6 +23,7 @@
  * @mixins OO.ui.mixin.IndicatorElement
  * @mixins OO.ui.mixin.PendingElement
  * @mixins OO.ui.mixin.LabelElement
+ * @mixins OO.ui.mixin.FlaggedElement
  *
  * @constructor
  * @param {Object} [config] Configuration options
@@ -39,11 +40,12 @@
  *  many emojis) count as 2 characters each.
  * @cfg {string} [labelPosition='after'] The position of the inline label relative to that of
  *  the value or placeholder text: `'before'` or `'after'`
- * @cfg {boolean} [required=false] Mark the field as required with `true`. Implies `indicator: 'required'`.
- *  Note that `false` & setting `indicator: 'required' will result in no indicator shown.
+ * @cfg {boolean} [required=false] Mark the field as required with `true`. Implies `indicator:
+ *  'required'`. Note that `false` & setting `indicator: 'required' will result in no indicator
+ *  shown.
  * @cfg {boolean} [autocomplete=true] Should the browser support autocomplete for this field
- * @cfg {boolean} [spellcheck] Should the browser support spellcheck for this field (`undefined` means
- *  leaving it up to the browser).
+ * @cfg {boolean} [spellcheck] Should the browser support spellcheck for this field (`undefined`
+ *  means leaving it up to the browser).
  * @cfg {RegExp|Function|string} [validate] Validation pattern: when string, a symbolic name of a
  *  pattern defined by the class: 'non-empty' (the value cannot be an empty string) or 'integer'
  *  (the value must contain only numbers); when RegExp, a regular expression that must match the
@@ -63,15 +65,15 @@ OO.ui.TextInputWidget = function OoUiTextInputWidget( config ) {
 	// Mixin constructors
 	OO.ui.mixin.IconElement.call( this, config );
 	OO.ui.mixin.IndicatorElement.call( this, config );
-	OO.ui.mixin.PendingElement.call( this, $.extend( {}, config, { $pending: this.$input } ) );
+	OO.ui.mixin.PendingElement.call( this, $.extend( { $pending: this.$input }, config ) );
 	OO.ui.mixin.LabelElement.call( this, config );
+	OO.ui.mixin.FlaggedElement.call( this, config );
 
 	// Properties
 	this.type = this.getSaneType( config );
 	this.readOnly = false;
 	this.required = false;
 	this.validate = null;
-	this.styleHeight = null;
 	this.scrollWidth = null;
 
 	this.setValidation( config.validate );
@@ -106,14 +108,15 @@ OO.ui.TextInputWidget = function OoUiTextInputWidget( config ) {
 	if ( config.autocomplete === false ) {
 		this.$input.attr( 'autocomplete', 'off' );
 		// Turning off autocompletion also disables "form caching" when the user navigates to a
-		// different page and then clicks "Back". Re-enable it when leaving. Borrowed from jQuery UI.
+		// different page and then clicks "Back". Re-enable it when leaving.
+		// Borrowed from jQuery UI.
 		$( window ).on( {
 			beforeunload: function () {
 				this.$input.removeAttr( 'autocomplete' );
 			}.bind( this ),
 			pageshow: function () {
-				// Browsers don't seem to actually fire this event on "Back", they instead just reload the
-				// whole page... it shouldn't hurt, though.
+				// Browsers don't seem to actually fire this event on "Back", they instead just
+				// reload the whole page... it shouldn't hurt, though.
 				this.$input.attr( 'autocomplete', 'off' );
 			}.bind( this )
 		} );
@@ -134,6 +137,7 @@ OO.mixinClass( OO.ui.TextInputWidget, OO.ui.mixin.IconElement );
 OO.mixinClass( OO.ui.TextInputWidget, OO.ui.mixin.IndicatorElement );
 OO.mixinClass( OO.ui.TextInputWidget, OO.ui.mixin.PendingElement );
 OO.mixinClass( OO.ui.TextInputWidget, OO.ui.mixin.LabelElement );
+OO.mixinClass( OO.ui.TextInputWidget, OO.ui.mixin.FlaggedElement );
 
 /* Static Properties */
 
@@ -145,7 +149,7 @@ OO.ui.TextInputWidget.static.validationPatterns = {
 /* Events */
 
 /**
- * An `enter` event is emitted when the user presses 'enter' inside the text box.
+ * An `enter` event is emitted when the user presses Enter key inside the text box.
  *
  * @event enter
  */
@@ -157,7 +161,7 @@ OO.ui.TextInputWidget.static.validationPatterns = {
  *
  * @private
  * @param {jQuery.Event} e Mouse down event
- * @return {undefined/boolean} False to prevent default if event is handled
+ * @return {undefined|boolean} False to prevent default if event is handled
  */
 OO.ui.TextInputWidget.prototype.onIconMouseDown = function ( e ) {
 	if ( e.which === OO.ui.MouseButtons.LEFT ) {
@@ -171,7 +175,7 @@ OO.ui.TextInputWidget.prototype.onIconMouseDown = function ( e ) {
  *
  * @private
  * @param {jQuery.Event} e Mouse down event
- * @return {undefined/boolean} False to prevent default if event is handled
+ * @return {undefined|boolean} False to prevent default if event is handled
  */
 OO.ui.TextInputWidget.prototype.onIndicatorMouseDown = function ( e ) {
 	if ( e.which === OO.ui.MouseButtons.LEFT ) {
@@ -185,7 +189,7 @@ OO.ui.TextInputWidget.prototype.onIndicatorMouseDown = function ( e ) {
  *
  * @private
  * @param {jQuery.Event} e Key press event
- * @fires enter If enter key is pressed
+ * @fires enter If Enter key is pressed
  */
 OO.ui.TextInputWidget.prototype.onKeyPress = function ( e ) {
 	if ( e.which === OO.ui.Keys.ENTER ) {
@@ -310,17 +314,19 @@ OO.ui.TextInputWidget.prototype.setRequired = function ( state ) {
  */
 OO.ui.TextInputWidget.prototype.installParentChangeDetector = function () {
 	var mutationObserver, onRemove, topmostNode, fakeParentNode,
-		MutationObserver = window.MutationObserver || window.WebKitMutationObserver || window.MozMutationObserver,
+		MutationObserver = window.MutationObserver ||
+			window.WebKitMutationObserver ||
+			window.MozMutationObserver,
 		widget = this;
 
 	if ( MutationObserver ) {
 		// The new way. If only it wasn't so ugly.
 
 		if ( this.isElementAttached() ) {
-			// Widget is attached already, do nothing. This breaks the functionality of this function when
-			// the widget is detached and reattached. Alas, doing this correctly with MutationObserver
-			// would require observation of the whole document, which would hurt performance of other,
-			// more important code.
+			// Widget is attached already, do nothing. This breaks the functionality of this
+			// function when the widget is detached and reattached. Alas, doing this correctly with
+			// MutationObserver would require observation of the whole document, which would hurt
+			// performance of other, more important code.
 			return;
 		}
 
@@ -330,12 +336,11 @@ OO.ui.TextInputWidget.prototype.installParentChangeDetector = function () {
 			topmostNode = topmostNode.parentNode;
 		}
 
-		// We have no way to detect the $element being attached somewhere without observing the entire
-		// DOM with subtree modifications, which would hurt performance. So we cheat: we hook to the
-		// parent node of $element, and instead detect when $element is removed from it (and thus
-		// probably attached somewhere else). If there is no parent, we create a "fake" one. If it
-		// doesn't get attached, we end up back here and create the parent.
-
+		// We have no way to detect the $element being attached somewhere without observing the
+		// entire DOM with subtree modifications, which would hurt performance. So we cheat: we hook
+		// to the parent node of $element, and instead detect when $element is removed from it (and
+		// thus probably attached somewhere else). If there is no parent, we create a "fake" one. If
+		// it doesn't get attached, we end up back here and create the parent.
 		mutationObserver = new MutationObserver( function ( mutations ) {
 			var i, j, removedNodes;
 			for ( i = 0; i < mutations.length; i++ ) {

@@ -1,9 +1,12 @@
 /**
- * Layouts are containers for elements and are used to arrange other widgets of arbitrary type in a way
- * that is centrally controlled and can be updated dynamically. Layouts can be, and usually are, combined.
- * See {@link OO.ui.FieldsetLayout FieldsetLayout}, {@link OO.ui.FieldLayout FieldLayout}, {@link OO.ui.FormLayout FormLayout},
- * {@link OO.ui.PanelLayout PanelLayout}, {@link OO.ui.StackLayout StackLayout}, {@link OO.ui.PageLayout PageLayout},
- * {@link OO.ui.HorizontalLayout HorizontalLayout}, and {@link OO.ui.BookletLayout BookletLayout} for more information and examples.
+ * Layouts are containers for elements and are used to arrange other widgets of arbitrary type in
+ * a way that is centrally controlled and can be updated dynamically. Layouts can be, and usually
+ * are, combined.
+ * See {@link OO.ui.FieldsetLayout FieldsetLayout}, {@link OO.ui.FieldLayout FieldLayout},
+ * {@link OO.ui.FormLayout FormLayout}, {@link OO.ui.PanelLayout PanelLayout},
+ * {@link OO.ui.StackLayout StackLayout}, {@link OO.ui.PageLayout PageLayout},
+ * {@link OO.ui.HorizontalLayout HorizontalLayout}, and {@link OO.ui.BookletLayout BookletLayout}
+ * for more information and examples.
  *
  * @abstract
  * @class
@@ -42,7 +45,7 @@ OO.mixinClass( OO.ui.Layout, OO.EventEmitter );
  */
 OO.ui.Layout.prototype.resetScroll = function () {
 	this.$element[ 0 ].scrollTop = 0;
-	// TODO: Reset scrollLeft in an RTL-aware manner, see OO.ui.Element.static.getScrollLeft.
+	OO.ui.Element.static.setScrollLeft( this.$element[ 0 ], 0 );
 
 	return this;
 };

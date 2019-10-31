@@ -1,13 +1,13 @@
 /**
- * RadioSelectInputWidget is a {@link OO.ui.RadioSelectWidget RadioSelectWidget} intended to be used
- * within an HTML form, such as a OO.ui.FormLayout. The selected value is synchronized with the value
- * of a hidden HTML `input` tag. Please see the [OOUI documentation on MediaWiki][1] for
+ * RadioSelectInputWidget is a {@link OO.ui.RadioSelectWidget RadioSelectWidget} intended to be
+ * used within an HTML form, such as a OO.ui.FormLayout. The selected value is synchronized with
+ * the value of a hidden HTML `input` tag. Please see the [OOUI documentation on MediaWiki][1] for
  * more information about input widgets.
  *
- * This and OO.ui.DropdownInputWidget support the same configuration options.
+ * This and OO.ui.DropdownInputWidget support similar configuration options.
  *
  *     @example
- *     // Example: A RadioSelectInputWidget with three options
+ *     // A RadioSelectInputWidget with three options
  *     var radioSelectInput = new OO.ui.RadioSelectInputWidget( {
  *         options: [
  *             { data: 'a', label: 'First' },
@@ -15,7 +15,7 @@
  *             { data: 'c', label: 'Third' }
  *         ]
  *     } );
- *     $( 'body' ).append( radioSelectInput.$element );
+ *     $( document.body ).append( radioSelectInput.$element );
  *
  * [1]: https://www.mediawiki.org/wiki/OOUI/Widgets/Inputs
  *
@@ -40,7 +40,9 @@ OO.ui.RadioSelectInputWidget = function OoUiRadioSelectInputWidget( config ) {
 	OO.ui.RadioSelectInputWidget.parent.call( this, config );
 
 	// Events
-	this.radioSelectWidget.connect( this, { select: 'onMenuSelect' } );
+	this.radioSelectWidget.connect( this, {
+		select: 'onMenuSelect'
+	} );
 
 	// Initialization
 	this.$element

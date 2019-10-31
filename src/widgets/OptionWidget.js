@@ -12,6 +12,7 @@
  * @mixins OO.ui.mixin.LabelElement
  * @mixins OO.ui.mixin.FlaggedElement
  * @mixins OO.ui.mixin.AccessKeyedElement
+ * @mixins OO.ui.mixin.TitledElement
  *
  * @constructor
  * @param {Object} [config] Configuration options
@@ -28,19 +29,19 @@ OO.ui.OptionWidget = function OoUiOptionWidget( config ) {
 	OO.ui.mixin.LabelElement.call( this, config );
 	OO.ui.mixin.FlaggedElement.call( this, config );
 	OO.ui.mixin.AccessKeyedElement.call( this, config );
+	OO.ui.mixin.TitledElement.call( this, config );
 
 	// Properties
-	this.selected = false;
 	this.highlighted = false;
 	this.pressed = false;
+	this.setSelected( !!config.selected );
 
 	// Initialization
 	this.$element
 		.data( 'oo-ui-optionWidget', this )
-		// Allow programmatic focussing (and by accesskey), but not tabbing
+		// Allow programmatic focussing (and by access key), but not tabbing
 		.attr( 'tabindex', '-1' )
 		.attr( 'role', 'option' )
-		.attr( 'aria-selected', 'false' )
 		.addClass( 'oo-ui-optionWidget' )
 		.append( this.$label );
 };
@@ -52,6 +53,7 @@ OO.mixinClass( OO.ui.OptionWidget, OO.ui.mixin.ItemWidget );
 OO.mixinClass( OO.ui.OptionWidget, OO.ui.mixin.LabelElement );
 OO.mixinClass( OO.ui.OptionWidget, OO.ui.mixin.FlaggedElement );
 OO.mixinClass( OO.ui.OptionWidget, OO.ui.mixin.AccessKeyedElement );
+OO.mixinClass( OO.ui.OptionWidget, OO.ui.mixin.TitledElement );
 
 /* Static Properties */
 
@@ -104,7 +106,7 @@ OO.ui.OptionWidget.prototype.isSelectable = function () {
 
 /**
  * Check if the option can be highlighted. A highlight indicates that the option
- * may be selected when a user presses enter or clicks. Disabled items cannot
+ * may be selected when a user presses Enter key or clicks. Disabled items cannot
  * be highlighted.
  *
  * @return {boolean} Item is highlightable
@@ -134,7 +136,7 @@ OO.ui.OptionWidget.prototype.isSelected = function () {
 
 /**
  * Check if the option is highlighted. A highlight indicates that the
- * item may be selected when a user presses enter or clicks.
+ * item may be selected when a user presses Enter key or clicks.
  *
  * @return {boolean} Item is highlighted
  */
@@ -155,8 +157,8 @@ OO.ui.OptionWidget.prototype.isPressed = function () {
 
 /**
  * Set the option’s selected state. In general, all modifications to the selection
- * should be handled by the SelectWidget’s {@link OO.ui.SelectWidget#selectItem selectItem( [item] )}
- * method instead of this method.
+ * should be handled by the SelectWidget’s
+ * {@link OO.ui.SelectWidget#selectItem selectItem( [item] )} method instead of this method.
  *
  * @param {boolean} [state=false] Select option
  * @chainable

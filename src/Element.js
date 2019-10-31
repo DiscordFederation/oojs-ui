@@ -1,16 +1,16 @@
 /**
  * Each Element represents a rendering in the DOM—a button or an icon, for example, or anything
- * that is visible to a user. Unlike {@link OO.ui.Widget widgets}, plain elements usually do not have events
- * connected to them and can't be interacted with.
+ * that is visible to a user. Unlike {@link OO.ui.Widget widgets}, plain elements usually do not
+ * have events connected to them and can't be interacted with.
  *
  * @abstract
  * @class
  *
  * @constructor
  * @param {Object} [config] Configuration options
- * @cfg {string[]} [classes] The names of the CSS classes to apply to the element. CSS styles are added
- *  to the top level (e.g., the outermost div) of the element. See the [OOUI documentation on MediaWiki][2]
- *  for an example.
+ * @cfg {string[]} [classes] The names of the CSS classes to apply to the element. CSS styles are
+ *  added to the top level (e.g., the outermost div) of the element. See the
+ *  [OOUI documentation on MediaWiki][2] for an example.
  *  [2]: https://www.mediawiki.org/wiki/OOUI/Widgets/Buttons_and_Switches#cssExample
  * @cfg {string} [id] The HTML id attribute used in the rendered tag.
  * @cfg {string} [text] Text to insert
@@ -19,7 +19,8 @@
  *  Instances of OO.ui.Element will have their $element appended.
  * @cfg {jQuery} [$content] Content elements to append (after #text).
  * @cfg {jQuery} [$element] Wrapper element. Defaults to a new element with #getTagName.
- * @cfg {Mixed} [data] Custom data of any type or combination of types (e.g., string, number, array, object).
+ * @cfg {Mixed} [data] Custom data of any type or combination of types (e.g., string, number,
+ *  array, object).
  *  Data can also be specified with the #setData method.
  */
 OO.ui.Element = function OoUiElement( config ) {
@@ -30,7 +31,6 @@ OO.ui.Element = function OoUiElement( config ) {
 	config = config || {};
 
 	// Properties
-	this.$ = $;
 	this.elementId = null;
 	this.visible = true;
 	this.data = config.data;
@@ -55,7 +55,8 @@ OO.ui.Element = function OoUiElement( config ) {
 		this.$element.append( config.content.map( function ( v ) {
 			if ( typeof v === 'string' ) {
 				// Escape string so it is properly represented in HTML.
-				return document.createTextNode( v );
+				// Don't create empty text nodes for empty strings.
+				return v ? document.createTextNode( v ) : undefined;
 			} else if ( v instanceof OO.ui.HtmlSnippet ) {
 				// Bypass escaping.
 				return v.toString();
@@ -94,8 +95,8 @@ OO.ui.Element.static.tagName = 'div';
  * Reconstitute a JavaScript object corresponding to a widget created
  * by the PHP implementation.
  *
- * @param {string|HTMLElement|jQuery} idOrNode
- *   A DOM id (if a string) or node for the widget to infuse.
+ * @param {HTMLElement|jQuery} node
+ *   A node for the widget to infuse.
  * @param {Object} [config] Configuration options
  * @return {OO.ui.Element}
  *   The `OO.ui.Element` corresponding to this (infusable) document node.
@@ -103,15 +104,9 @@ OO.ui.Element.static.tagName = 'div';
  *   the value returned is a newly-created Element wrapping around the existing
  *   DOM node.
  */
-OO.ui.Element.static.infuse = function ( idOrNode, config ) {
-	var obj = OO.ui.Element.static.unsafeInfuse( idOrNode, config, false );
+OO.ui.Element.static.infuse = function ( node, config ) {
+	var obj = OO.ui.Element.static.unsafeInfuse( node, config, false );
 
-	if ( typeof idOrNode === 'string' ) {
-		// IDs deprecated since 0.29.7
-		OO.ui.warnDeprecation(
-			'Passing a string ID to infuse is deprecated. Use an HTMLElement or jQuery collection instead.'
-		);
-	}
 	// Verify that the type matches up.
 	// FIXME: uncomment after T89721 is fixed, see T90929.
 	/*
@@ -127,35 +122,29 @@ OO.ui.Element.static.infuse = function ( idOrNode, config ) {
  * extra property so that only the top-level invocation touches the DOM.
  *
  * @private
- * @param {string|HTMLElement|jQuery} idOrNode
+ * @param {HTMLElement|jQuery} node
  * @param {Object} [config] Configuration options
  * @param {jQuery.Promise} [domPromise] A promise that will be resolved
  *     when the top-level widget of this infusion is inserted into DOM,
  *     replacing the original node; only used internally.
  * @return {OO.ui.Element}
  */
-OO.ui.Element.static.unsafeInfuse = function ( idOrNode, config, domPromise ) {
+OO.ui.Element.static.unsafeInfuse = function ( node, config, domPromise ) {
 	// look for a cached result of a previous infusion.
-	var id, $elem, error, data, cls, parts, parent, obj, top, state, infusedChildren;
-	if ( typeof idOrNode === 'string' ) {
-		id = idOrNode;
-		$elem = $( document.getElementById( id ) );
-	} else {
-		$elem = $( idOrNode );
+	var error, data, cls, parts, parent, obj, top, state, infusedChildren,
+		$elem = $( node ),
 		id = $elem.attr( 'id' );
-	}
+
 	if ( !$elem.length ) {
-		if ( typeof idOrNode === 'string' ) {
-			error = 'Widget not found: ' + idOrNode;
-		} else if ( idOrNode && idOrNode.selector ) {
-			error = 'Widget not found: ' + idOrNode.selector;
+		if ( node && node.selector ) {
+			error = 'Widget not found: ' + node.selector;
 		} else {
 			error = 'Widget not found';
 		}
 		throw new Error( error );
 	}
-	if ( $elem[ 0 ].oouiInfused ) {
-		$elem = $elem[ 0 ].oouiInfused;
+	if ( $elem[ 0 ].$oouiInfused ) {
+		$elem = $elem[ 0 ].$oouiInfused;
 	}
 	data = $elem.data( 'ooui-infused' );
 	if ( data ) {
@@ -164,9 +153,10 @@ OO.ui.Element.static.unsafeInfuse = function ( idOrNode, config, domPromise ) {
 			throw new Error( 'Circular dependency! ' + id );
 		}
 		if ( domPromise ) {
-			// pick up dynamic state, like focus, value of form inputs, scroll position, etc.
+			// Pick up dynamic state, like focus, value of form inputs, scroll position, etc.
 			state = data.constructor.static.gatherPreInfuseState( $elem, data );
-			// restore dynamic state after the new element is re-inserted into DOM under infused parent
+			// Restore dynamic state after the new element is re-inserted into DOM under
+			// infused parent.
 			domPromise.done( data.restorePreInfuseState.bind( data, state ) );
 			infusedChildren = $elem.data( 'ooui-infused-children' );
 			if ( infusedChildren && infusedChildren.length ) {
@@ -226,11 +216,16 @@ OO.ui.Element.static.unsafeInfuse = function ( idOrNode, config, domPromise ) {
 	data = OO.copy( data, null, function deserialize( value ) {
 		var infused;
 		if ( OO.isPlainObject( value ) ) {
-			if ( value.tag ) {
-				infused = OO.ui.Element.static.unsafeInfuse( value.tag, config, domPromise );
+			if ( value.tag && document.getElementById( value.tag ) ) {
+				infused = OO.ui.Element.static.unsafeInfuse(
+					document.getElementById( value.tag ), config, domPromise
+				);
 				infusedChildren.push( infused );
 				// Flatten the structure
-				infusedChildren.push.apply( infusedChildren, infused.$element.data( 'ooui-infused-children' ) || [] );
+				infusedChildren.push.apply(
+					infusedChildren,
+					infused.$element.data( 'ooui-infused-children' ) || []
+				);
 				infused.$element.removeData( 'ooui-infused-children' );
 				return infused;
 			}
@@ -249,11 +244,11 @@ OO.ui.Element.static.unsafeInfuse = function ( idOrNode, config, domPromise ) {
 	// If anyone is holding a reference to the old DOM element,
 	// let's allow them to OO.ui.infuse() it and do what they expect, see T105828.
 	// Do not use jQuery.data(), as using it on detached nodes leaks memory in 1.x line by design.
-	$elem[ 0 ].oouiInfused = obj.$element;
+	$elem[ 0 ].$oouiInfused = obj.$element;
 	// now replace old DOM with this new DOM.
 	if ( top ) {
-		// An efficient constructor might be able to reuse the entire DOM tree of the original element,
-		// so only mutate the DOM if we need to.
+		// An efficient constructor might be able to reuse the entire DOM tree of the original
+		// element, so only mutate the DOM if we need to.
 		if ( $elem[ 0 ] !== obj.$element[ 0 ] ) {
 			$elem.replaceWith( obj.$element );
 		}
@@ -285,8 +280,8 @@ OO.ui.Element.static.reusePreInfuseDOM = function ( node, config ) {
 };
 
 /**
- * Gather the dynamic state (focus, value of form inputs, scroll position, etc.) of an HTML DOM node
- * (and its children) that represent an Element of the same class and the given configuration,
+ * Gather the dynamic state (focus, value of form inputs, scroll position, etc.) of an HTML DOM
+ * node (and its children) that represent an Element of the same class and the given configuration,
  * generated by the PHP implementation.
  *
  * This method is called just before `node` is detached from the DOM. The return value of this
@@ -300,29 +295,6 @@ OO.ui.Element.static.reusePreInfuseDOM = function ( node, config ) {
  */
 OO.ui.Element.static.gatherPreInfuseState = function () {
 	return {};
-};
-
-/**
- * Get a jQuery function within a specific document.
- *
- * @static
- * @param {jQuery|HTMLElement|HTMLDocument|Window} context Context to bind the function to
- * @param {jQuery} [$iframe] HTML iframe element that contains the document, omit if document is
- *   not in an iframe
- * @return {Function} Bound jQuery function
- */
-OO.ui.Element.static.getJQuery = function ( context, $iframe ) {
-	function wrapper( selector ) {
-		return $( selector, wrapper.context );
-	}
-
-	wrapper.context = this.getDocument( context );
-
-	if ( $iframe ) {
-		wrapper.$iframe = $iframe;
-	}
-
-	return wrapper;
 };
 
 /**
@@ -504,7 +476,7 @@ OO.ui.Element.static.getDimensions = function ( el ) {
 			borders: { top: 0, left: 0, bottom: 0, right: 0 },
 			scroll: {
 				top: $win.scrollTop(),
-				left: $win.scrollLeft()
+				left: OO.ui.Element.static.getScrollLeft( win )
 			},
 			scrollbar: { right: 0, bottom: 0 },
 			rect: {
@@ -520,7 +492,7 @@ OO.ui.Element.static.getDimensions = function ( el ) {
 			borders: this.getBorders( el ),
 			scroll: {
 				top: $el.scrollTop(),
-				left: $el.scrollLeft()
+				left: OO.ui.Element.static.getScrollLeft( el )
 			},
 			scrollbar: {
 				right: $el.innerWidth() - el.clientWidth,
@@ -531,33 +503,16 @@ OO.ui.Element.static.getDimensions = function ( el ) {
 	}
 };
 
-/**
- * Get the number of pixels that an element's content is scrolled to the left.
- *
- * Adapted from <https://github.com/othree/jquery.rtl-scroll-type>.
- * Original code copyright 2012 Wei-Ko Kao, licensed under the MIT License.
- *
- * This function smooths out browser inconsistencies (nicely described in the README at
- * <https://github.com/othree/jquery.rtl-scroll-type>) and produces a result consistent
- * with Firefox's 'scrollLeft', which seems the sanest.
- *
- * @static
- * @method
- * @param {HTMLElement|Window} el Element to measure
- * @return {number} Scroll position from the left.
- *  If the element's direction is LTR, this is a positive number between `0` (initial scroll position)
- *  and `el.scrollWidth - el.clientWidth` (furthest possible scroll position).
- *  If the element's direction is RTL, this is a negative number between `0` (initial scroll position)
- *  and `-el.scrollWidth + el.clientWidth` (furthest possible scroll position).
- */
-OO.ui.Element.static.getScrollLeft = ( function () {
+( function () {
 	var rtlScrollType = null;
 
-	function test() {
+	// Adapted from <https://github.com/othree/jquery.rtl-scroll-type>.
+	// Original code copyright 2012 Wei-Ko Kao, licensed under the MIT License.
+	function rtlScrollTypeTest() {
 		var $definer = $( '<div>' ).attr( {
 				dir: 'rtl',
-				style: 'font-size: 14px; width: 1px; height: 1px; position: absolute; top: -1000px; overflow: scroll;'
-			} ).text( 'A' ),
+				style: 'font-size: 14px; width: 4px; height: 1px; position: absolute; top: -1000px; overflow: scroll;'
+			} ).text( 'ABCD' ),
 			definer = $definer[ 0 ];
 
 		$definer.appendTo( 'body' );
@@ -577,27 +532,114 @@ OO.ui.Element.static.getScrollLeft = ( function () {
 		$definer.remove();
 	}
 
-	return function getScrollLeft( el ) {
-		var isRoot = el.window === el ||
-				el === el.ownerDocument.body ||
-				el === el.ownerDocument.documentElement,
-			scrollLeft = isRoot ? $( window ).scrollLeft() : el.scrollLeft,
-			// All browsers use the correct scroll type ('negative') on the root, so don't
-			// do any fixups when looking at the root element
-			direction = isRoot ? 'ltr' : $( el ).css( 'direction' );
+	function isRoot( el ) {
+		return el.window === el ||
+			el === el.ownerDocument.body ||
+			el === el.ownerDocument.documentElement;
+	}
+
+	/**
+	 * Convert native `scrollLeft` value to a value consistent between browsers. See #getScrollLeft.
+	 * @param {number} nativeOffset Native `scrollLeft` value
+	 * @param {HTMLElement|Window} el Element from which the value was obtained
+	 * @return {number}
+	 */
+	OO.ui.Element.static.computeNormalizedScrollLeft = function ( nativeOffset, el ) {
+		// All browsers use the correct scroll type ('negative') on the root, so don't
+		// do any fixups when looking at the root element
+		var direction = isRoot( el ) ? 'ltr' : $( el ).css( 'direction' );
 
 		if ( direction === 'rtl' ) {
 			if ( rtlScrollType === null ) {
-				test();
+				rtlScrollTypeTest();
 			}
 			if ( rtlScrollType === 'reverse' ) {
-				scrollLeft = -scrollLeft;
+				return -nativeOffset;
 			} else if ( rtlScrollType === 'default' ) {
-				scrollLeft = scrollLeft - el.scrollWidth + el.clientWidth;
+				return nativeOffset - el.scrollWidth + el.clientWidth;
 			}
 		}
 
+		return nativeOffset;
+	};
+
+	/**
+	 * Convert our normalized `scrollLeft` value to a value for current browser. See #getScrollLeft.
+	 * @param {number} normalizedOffset Normalized `scrollLeft` value
+	 * @param {HTMLElement|Window} el Element on which the value will be set
+	 * @return {number}
+	 */
+	OO.ui.Element.static.computeNativeScrollLeft = function ( normalizedOffset, el ) {
+		// All browsers use the correct scroll type ('negative') on the root, so don't
+		// do any fixups when looking at the root element
+		var direction = isRoot( el ) ? 'ltr' : $( el ).css( 'direction' );
+
+		if ( direction === 'rtl' ) {
+			if ( rtlScrollType === null ) {
+				rtlScrollTypeTest();
+			}
+			if ( rtlScrollType === 'reverse' ) {
+				return -normalizedOffset;
+			} else if ( rtlScrollType === 'default' ) {
+				return normalizedOffset + el.scrollWidth - el.clientWidth;
+			}
+		}
+
+		return normalizedOffset;
+	};
+
+	/**
+	 * Get the number of pixels that an element's content is scrolled to the left.
+	 *
+	 * This function smooths out browser inconsistencies (nicely described in the README at
+	 * <https://github.com/othree/jquery.rtl-scroll-type>) and produces a result consistent
+	 * with Firefox's 'scrollLeft', which seems the sanest.
+	 *
+	 * (Firefox's scrollLeft handling is nice because it increases from left to right, consistently
+	 * with `getBoundingClientRect().left` and related APIs; because initial value is zero, so
+	 * resetting it is easy; because adapting a hardcoded scroll position to a symmetrical RTL
+	 * interface requires just negating it, rather than involving `clientWidth` and `scrollWidth`;
+	 * and because if you mess up and don't adapt your code to RTL, it will scroll to the beginning
+	 * rather than somewhere randomly in the middle but not where you wanted.)
+	 *
+	 * @static
+	 * @method
+	 * @param {HTMLElement|Window} el Element to measure
+	 * @return {number} Scroll position from the left.
+	 *  If the element's direction is LTR, this is a positive number between `0` (initial scroll
+	 *  position) and `el.scrollWidth - el.clientWidth` (furthest possible scroll position).
+	 *  If the element's direction is RTL, this is a negative number between `0` (initial scroll
+	 *  position) and `-el.scrollWidth + el.clientWidth` (furthest possible scroll position).
+	 */
+	OO.ui.Element.static.getScrollLeft = function ( el ) {
+		var scrollLeft = isRoot( el ) ? $( window ).scrollLeft() : el.scrollLeft;
+		scrollLeft = OO.ui.Element.static.computeNormalizedScrollLeft( scrollLeft, el );
 		return scrollLeft;
+	};
+
+	/**
+	 * Set the number of pixels that an element's content is scrolled to the left.
+	 *
+	 * See #getScrollLeft.
+	 *
+	 * @static
+	 * @method
+	 * @param {HTMLElement|Window} el Element to scroll (and to use in calculations)
+	 * @param {number} scrollLeft Scroll position from the left.
+	 *  If the element's direction is LTR, this must be a positive number between
+	 *  `0` (initial scroll position) and `el.scrollWidth - el.clientWidth`
+	 *  (furthest possible scroll position).
+	 *  If the element's direction is RTL, this must be a negative number between
+	 *  `0` (initial scroll position) and `-el.scrollWidth + el.clientWidth`
+	 *  (furthest possible scroll position).
+	 */
+	OO.ui.Element.static.setScrollLeft = function ( el, scrollLeft ) {
+		scrollLeft = OO.ui.Element.static.computeNativeScrollLeft( scrollLeft, el );
+		if ( isRoot( el ) ) {
+			$( window ).scrollLeft( scrollLeft );
+		} else {
+			el.scrollLeft = scrollLeft;
+		}
 	};
 }() );
 
@@ -658,8 +700,9 @@ OO.ui.Element.static.getClosestScrollableContainer = function ( el, dimension ) 
 		props = [ 'overflow-' + dimension ];
 	}
 
-	// Special case for the document root (which doesn't really have any scrollable container, since
-	// it is the ultimate scrollable container, but this is probably saner than null or exception)
+	// Special case for the document root (which doesn't really have any scrollable container,
+	// since it is the ultimate scrollable container, but this is probably saner than null or
+	// exception).
 	if ( $( el ).is( 'html, body' ) ) {
 		return this.getRootScrollableElement( el );
 	}
@@ -671,10 +714,11 @@ OO.ui.Element.static.getClosestScrollableContainer = function ( el, dimension ) 
 		i = props.length;
 		while ( i-- ) {
 			val = $parent.css( props[ i ] );
-			// We assume that elements with 'overflow' (in any direction) set to 'hidden' will never be
-			// scrolled in that direction, but they can actually be scrolled programatically. The user can
-			// unintentionally perform a scroll in such case even if the application doesn't scroll
-			// programatically, e.g. when jumping to an anchor, or when using built-in find functionality.
+			// We assume that elements with 'overflow' (in any direction) set to 'hidden' will
+			// never be scrolled in that direction, but they can actually be scrolled
+			// programatically. The user can unintentionally perform a scroll in such case even if
+			// the application doesn't scroll programatically, e.g. when jumping to an anchor, or
+			// when using built-in find functionality.
 			// This could cause funny issues...
 			if ( val === 'auto' || val === 'scroll' ) {
 				return $parent[ 0 ];
@@ -690,66 +734,111 @@ OO.ui.Element.static.getClosestScrollableContainer = function ( el, dimension ) 
  * Scroll element into view.
  *
  * @static
- * @param {HTMLElement} el Element to scroll into view
+ * @param {HTMLElement|Object} elOrPosition Element to scroll into view
  * @param {Object} [config] Configuration options
+ * @param {string} [config.animate=true] Animate to the new scroll offset.
  * @param {string} [config.duration='fast'] jQuery animation duration value
  * @param {string} [config.direction] Scroll in only one direction, e.g. 'x' or 'y', omit
  *  to scroll in both directions
+ * @param {Object} [config.padding] Additional padding on the container to scroll past.
+ *  Object containing any of 'top', 'bottom', 'left', or 'right' as numbers.
+ * @param {Object} [config.scrollContainer] Scroll container. Defaults to
+ *  getClosestScrollableContainer of the element.
  * @return {jQuery.Promise} Promise which resolves when the scroll is complete
  */
-OO.ui.Element.static.scrollIntoView = function ( el, config ) {
-	var position, animations, container, $container, elementDimensions, containerDimensions, $window,
+OO.ui.Element.static.scrollIntoView = function ( elOrPosition, config ) {
+	var position, animations, container, $container, elementPosition, containerDimensions,
+		$window, padding, animate, method,
 		deferred = $.Deferred();
 
 	// Configuration initialization
 	config = config || {};
 
+	padding = $.extend( {
+		top: 0,
+		bottom: 0,
+		left: 0,
+		right: 0
+	}, config.padding );
+
+	animate = config.animate !== false;
+
 	animations = {};
-	container = this.getClosestScrollableContainer( el, config.direction );
+	elementPosition = elOrPosition instanceof HTMLElement ?
+		this.getDimensions( elOrPosition ).rect :
+		elOrPosition;
+	container = config.scrollContainer || (
+		elOrPosition instanceof HTMLElement ?
+			this.getClosestScrollableContainer( elOrPosition, config.direction ) :
+			// No scrollContainer or element
+			this.getClosestScrollableContainer( document.body )
+	);
 	$container = $( container );
-	elementDimensions = this.getDimensions( el );
 	containerDimensions = this.getDimensions( container );
-	$window = $( this.getWindow( el ) );
+	$window = $( this.getWindow( container ) );
 
 	// Compute the element's position relative to the container
 	if ( $container.is( 'html, body' ) ) {
 		// If the scrollable container is the root, this is easy
 		position = {
-			top: elementDimensions.rect.top,
-			bottom: $window.innerHeight() - elementDimensions.rect.bottom,
-			left: elementDimensions.rect.left,
-			right: $window.innerWidth() - elementDimensions.rect.right
+			top: elementPosition.top,
+			bottom: $window.innerHeight() - elementPosition.bottom,
+			left: elementPosition.left,
+			right: $window.innerWidth() - elementPosition.right
 		};
 	} else {
 		// Otherwise, we have to subtract el's coordinates from container's coordinates
 		position = {
-			top: elementDimensions.rect.top - ( containerDimensions.rect.top + containerDimensions.borders.top ),
-			bottom: containerDimensions.rect.bottom - containerDimensions.borders.bottom - containerDimensions.scrollbar.bottom - elementDimensions.rect.bottom,
-			left: elementDimensions.rect.left - ( containerDimensions.rect.left + containerDimensions.borders.left ),
-			right: containerDimensions.rect.right - containerDimensions.borders.right - containerDimensions.scrollbar.right - elementDimensions.rect.right
+			top: elementPosition.top -
+				( containerDimensions.rect.top + containerDimensions.borders.top ),
+			bottom: containerDimensions.rect.bottom - containerDimensions.borders.bottom -
+				containerDimensions.scrollbar.bottom - elementPosition.bottom,
+			left: elementPosition.left -
+				( containerDimensions.rect.left + containerDimensions.borders.left ),
+			right: containerDimensions.rect.right - containerDimensions.borders.right -
+				containerDimensions.scrollbar.right - elementPosition.right
 		};
 	}
 
 	if ( !config.direction || config.direction === 'y' ) {
-		if ( position.top < 0 ) {
-			animations.scrollTop = containerDimensions.scroll.top + position.top;
-		} else if ( position.top > 0 && position.bottom < 0 ) {
-			animations.scrollTop = containerDimensions.scroll.top + Math.min( position.top, -position.bottom );
+		if ( position.top < padding.top ) {
+			animations.scrollTop = containerDimensions.scroll.top + position.top - padding.top;
+		} else if ( position.bottom < padding.bottom ) {
+			animations.scrollTop = containerDimensions.scroll.top +
+				// Scroll the bottom into view, but not at the expense
+				// of scrolling the top out of view
+				Math.min( position.top - padding.top, -position.bottom + padding.bottom );
 		}
 	}
 	if ( !config.direction || config.direction === 'x' ) {
-		if ( position.left < 0 ) {
-			animations.scrollLeft = containerDimensions.scroll.left + position.left;
-		} else if ( position.left > 0 && position.right < 0 ) {
-			animations.scrollLeft = containerDimensions.scroll.left + Math.min( position.left, -position.right );
+		if ( position.left < padding.left ) {
+			animations.scrollLeft = containerDimensions.scroll.left + position.left - padding.left;
+		} else if ( position.right < padding.right ) {
+			animations.scrollLeft = containerDimensions.scroll.left +
+				// Scroll the right into view, but not at the expense
+				// of scrolling the left out of view
+				Math.min( position.left - padding.left, -position.right + padding.right );
+		}
+		if ( animations.scrollLeft !== undefined ) {
+			animations.scrollLeft =
+				OO.ui.Element.static.computeNativeScrollLeft( animations.scrollLeft, container );
 		}
 	}
 	if ( !$.isEmptyObject( animations ) ) {
-		$container.stop( true ).animate( animations, config.duration === undefined ? 'fast' : config.duration );
-		$container.queue( function ( next ) {
+		if ( animate ) {
+			// eslint-disable-next-line no-jquery/no-animate
+			$container.stop( true ).animate( animations, config.duration === undefined ? 'fast' : config.duration );
+			$container.queue( function ( next ) {
+				deferred.resolve();
+				next();
+			} );
+		} else {
+			$container.stop( true );
+			for ( method in animations ) {
+				$container[ method ]( animations[ method ] );
+			}
 			deferred.resolve();
-			next();
-		} );
+		}
 	} else {
 		deferred.resolve();
 	}
@@ -762,8 +851,8 @@ OO.ui.Element.static.scrollIntoView = function ( el, config ) {
  *
  * Workaround primarily for <https://code.google.com/p/chromium/issues/detail?id=387290>, but also
  * similar bugs in other browsers. "Just" forcing a reflow is not sufficient in all cases, we need
- * to first actually detach (or hide, but detaching is simpler) all children, *then* force a reflow,
- * and then reattach (or show) them back.
+ * to first actually detach (or hide, but detaching is simpler) all children, *then* force a
+ * reflow, and then reattach (or show) them back.
  *
  * @static
  * @param {HTMLElement} el Element to reconsider the scrollbars on

@@ -1,5 +1,4 @@
-/* eslint-disable no-console */
-/* globals Prism, javascriptStringify, jQuery */
+/* globals Prism, javascriptStringify */
 /**
  * @class
  * @extends OO.ui.Element
@@ -21,23 +20,46 @@ window.Demo = function Demo() {
 	// Properties
 	this.stylesheetLinks = this.getStylesheetLinks();
 	this.mode = this.getCurrentMode();
+
+	OO.ui.isMobile = function () {
+		return demo.mode.platform === 'mobile';
+	};
+	OO.ui.theme = new OO.ui[ this.constructor.static.themes[ this.mode.theme ] + 'Theme' ]();
+
+	this.$header = $( '<div>' );
 	this.$menu = $( '<div>' );
-	this.expandButton = new OO.ui.ToggleButtonWidget( { icon: 'menu' } );
-	this.pageDropdown = new OO.ui.DropdownWidget( {
-		menu: {
-			items: [
-				new OO.ui.MenuOptionWidget( { data: 'dialogs', label: 'Dialogs' } ),
-				new OO.ui.MenuOptionWidget( { data: 'icons', label: 'Icons' } ),
-				new OO.ui.MenuOptionWidget( { data: 'toolbars', label: 'Toolbars' } ),
-				new OO.ui.MenuOptionWidget( { data: 'widgets', label: 'Widgets' } )
-			],
-			// Funny effect... This dropdown is considered to always be "out of viewport"
-			// due to the getViewportSpacing() override below. Don't let it disappear.
-			hideWhenOutOfView: false
-		},
-		classes: [ 'demo-pageDropdown' ]
+	this.expandButton = new OO.ui.ToggleButtonWidget( {
+		classes: [ 'demo-menuToggle' ],
+		icon: 'menu',
+		label: 'Menu',
+		invisibleLabel: true
 	} );
-	this.pageMenu = this.pageDropdown.getMenu();
+	this.pageSelect = new OO.ui.TabSelectWidget( {
+		classes: [ 'demo-pageSelect' ],
+		framed: false,
+		items: [
+			new OO.ui.TabOptionWidget( {
+				data: 'widgets',
+				label: 'Widgets'
+			} ),
+			new OO.ui.TabOptionWidget( {
+				data: 'layouts',
+				label: 'Layouts'
+			} ),
+			new OO.ui.TabOptionWidget( {
+				data: 'dialogs',
+				label: 'Dialogs'
+			} ),
+			new OO.ui.TabOptionWidget( {
+				data: 'icons',
+				label: 'Icons'
+			} ),
+			new OO.ui.TabOptionWidget( {
+				data: 'toolbars',
+				label: 'Toolbars'
+			} )
+		]
+	} );
 	this.themeSelect = new OO.ui.ButtonSelectWidget();
 	Object.keys( this.constructor.static.themes ).forEach( function ( theme ) {
 		demo.themeSelect.addItems( [
@@ -48,14 +70,22 @@ window.Demo = function Demo() {
 		] );
 	} );
 	this.directionSelect = new OO.ui.ButtonSelectWidget().addItems( [
-		new OO.ui.ButtonOptionWidget( { data: 'ltr', label: 'LTR' } ),
-		new OO.ui.ButtonOptionWidget( { data: 'rtl', label: 'RTL' } )
+		new OO.ui.ButtonOptionWidget( {
+			data: 'ltr',
+			icon: 'textDirLTR',
+			title: 'Switch to left-to-right direction demo'
+		} ),
+		new OO.ui.ButtonOptionWidget( {
+			data: 'rtl',
+			icon: 'textDirRTL',
+			title: 'Switch to right-to-left direction demo'
+		} )
 	] );
 	this.jsPhpSelect = new OO.ui.ButtonGroupWidget().addItems( [
 		new OO.ui.ButtonWidget( { label: 'JS' } ).setActive( true ),
 		new OO.ui.ButtonWidget( {
 			label: 'PHP',
-			href: 'demos.php' + this.getUrlQuery( this.getCurrentFactorValues() )
+			href: 'demos.php' + this.getUrlQuery()
 		} )
 	] );
 	this.platformSelect = new OO.ui.ButtonSelectWidget().addItems( [
@@ -63,29 +93,32 @@ window.Demo = function Demo() {
 		new OO.ui.ButtonOptionWidget( { data: 'mobile', label: 'Mobile' } )
 	] );
 
-	this.documentationLink = new OO.ui.ButtonWidget( {
+	this.linkDocs = new OO.ui.ButtonWidget( {
+		classes: [ 'demo-menuLink', 'demo-menuLink-docs' ],
 		label: 'Docs',
 		icon: 'journal',
 		href: '../js/',
+		framed: false,
 		flags: [ 'progressive' ]
 	} );
-
-	this.tutorialsLink = new OO.ui.ButtonWidget( {
+	this.linkTutorials = new OO.ui.ButtonWidget( {
+		classes: [ 'demo-menuLink', 'demo-menuLink-tutorials' ],
 		label: 'Tutorials',
 		icon: 'book',
 		href: 'tutorials/index.html',
+		framed: false,
 		flags: [ 'progressive' ]
 	} );
 
 	// Events
 	this.expandButton.on( 'change', OO.ui.bind( this.onExpandButtonChange, this ) );
-	this.pageMenu.on( 'choose', OO.ui.bind( this.onModeChange, this ) );
+	this.pageSelect.on( 'choose', OO.ui.bind( this.onModeChange, this ) );
 	this.themeSelect.on( 'choose', OO.ui.bind( this.onModeChange, this ) );
 	this.directionSelect.on( 'choose', OO.ui.bind( this.onModeChange, this ) );
 	this.platformSelect.on( 'choose', OO.ui.bind( this.onModeChange, this ) );
 
 	// Initialization
-	this.pageMenu.selectItemByData( this.mode.page );
+	this.pageSelect.selectItemByData( this.mode.page );
 	this.themeSelect.selectItemByData( this.mode.theme );
 	this.directionSelect.selectItemByData( this.mode.direction );
 	this.platformSelect.selectItemByData( this.mode.platform );
@@ -94,25 +127,26 @@ window.Demo = function Demo() {
 		.attr( 'role', 'navigation' )
 		.append(
 			this.expandButton.$element,
-			this.pageDropdown.$element,
 			this.themeSelect.$element,
 			this.directionSelect.$element,
 			this.jsPhpSelect.$element,
 			this.platformSelect.$element,
-			this.documentationLink.$element,
-			this.tutorialsLink.$element
+			this.linkDocs.$element,
+			this.linkTutorials.$element
 		);
+	this.$header
+		.addClass( 'demo-header' )
+		.attr( 'role', 'banner' )
+		.append( $( '<h1>' ).text( 'OOUI' ) )
+		.append( ' ' )
+		.append( $( '<h2>' ).attr( 'dir', 'ltr' ).html( 'Demos <span>– Rapidly create web-applications in JS or PHP. Cross-browser, i18n and a11y ready.</span>' ) )
+		.append( this.$menu, this.pageSelect.$element );
 	this.$element
-		.addClass( 'demo' )
-		.append( this.$menu );
-	$( 'html' ).attr( 'dir', this.mode.direction );
-	$( 'head' ).append( this.stylesheetLinks );
-	$( 'body' ).addClass( 'oo-ui-theme-' + this.mode.theme );
-	// eslint-disable-next-line new-cap
-	OO.ui.theme = new OO.ui[ this.constructor.static.themes[ this.mode.theme ] + 'Theme' ]();
-	OO.ui.isMobile = function () {
-		return demo.mode.platform === 'mobile';
-	};
+		.addClass( 'demo-root' )
+		.append( this.$header );
+	$( document.documentElement ).attr( 'dir', this.mode.direction );
+	$( document.head ).append( this.stylesheetLinks );
+	$( document.body ).addClass( 'oo-ui-theme-' + this.mode.theme );
 	OO.ui.getViewportSpacing = function () {
 		return {
 			// Contents of dialogs are shown on top of the fixed menu
@@ -123,6 +157,7 @@ window.Demo = function Demo() {
 		};
 	};
 	if ( OO.ui.isMobile() ) {
+		this.$header.addClass( 'demo-header-mobile' );
 		this.onExpandButtonChange( false );
 	} else {
 		// Hide the button on desktop
@@ -145,7 +180,7 @@ OO.mixinClass( Demo, OO.EventEmitter );
  *
  * @static
  * @property {Object.<string,Function>} pages List of functions that render a page, keyed by
- *   symbolic page name
+ *  symbolic page name
  */
 Demo.static.pages = {};
 
@@ -162,51 +197,6 @@ Demo.static.themes = {
 	discord: 'Discord',
 	wikimediaui: 'WikimediaUI', // Do not change this line or you'll break `grunt add-theme`
 	apex: 'Apex'
-};
-
-/**
- * Additional suffixes for which each theme defines image modules.
- *
- * @static
- * @property {Object.<string,string[]>
- */
-Demo.static.additionalThemeImagesSuffixes = {
-	wikimediaui: [
-		'-icons-movement',
-		'-icons-content',
-		'-icons-alerts',
-		'-icons-interactions',
-		'-icons-moderation',
-		'-icons-editing-core',
-		'-icons-editing-styling',
-		'-icons-editing-list',
-		'-icons-editing-advanced',
-		'-icons-editing-citation',
-		'-icons-media',
-		'-icons-location',
-		'-icons-user',
-		'-icons-layout',
-		'-icons-accessibility',
-		'-icons-wikimedia'
-	],
-	apex: [
-		'-icons-movement',
-		'-icons-content',
-		'-icons-alerts',
-		'-icons-interactions',
-		'-icons-moderation',
-		'-icons-editing-core',
-		'-icons-editing-styling',
-		'-icons-editing-list',
-		'-icons-editing-advanced',
-		'-icons-editing-citation',
-		'-icons-media',
-		'-icons-location',
-		'-icons-user',
-		'-icons-layout',
-		'-icons-accessibility',
-		'-icons-wikimedia'
-	]
 };
 
 /**
@@ -269,19 +259,6 @@ Demo.static.defaultDirection = 'ltr';
  */
 Demo.static.defaultPlatform = 'desktop';
 
-/* Static Methods */
-
-/**
- * Scroll to current fragment identifier. We have to do this manually because of the fixed header.
- */
-Demo.static.scrollToFragment = function () {
-	var elem = document.getElementById( location.hash.slice( 1 ) );
-	if ( elem ) {
-		// The additional '10' is just because it looks nicer.
-		$( window ).scrollTop( $( elem ).offset().top - $( '.demo-menu' ).outerHeight() - 10 );
-	}
-};
-
 /* Methods */
 
 /**
@@ -320,12 +297,21 @@ Demo.prototype.initialize = function () {
  * Will load a new page.
  */
 Demo.prototype.onModeChange = function () {
-	var page = this.pageMenu.findSelectedItem().getData(),
+	var page = this.pageSelect.findSelectedItem().getData(),
 		theme = this.themeSelect.findSelectedItem().getData(),
 		direction = this.directionSelect.findSelectedItem().getData(),
 		platform = this.platformSelect.findSelectedItem().getData();
 
-	history.pushState( null, document.title, this.getUrlQuery( [ page, theme, direction, platform ] ) );
+	history.pushState(
+		null,
+		document.title,
+		this.getUrlQuery( {
+			page: page,
+			theme: theme,
+			direction: direction,
+			platform: platform
+		} )
+	);
 	$( window ).triggerHandler( 'popstate' );
 };
 
@@ -340,23 +326,25 @@ Demo.prototype.onExpandButtonChange = function ( value ) {
 	this.directionSelect.toggle( value );
 	this.jsPhpSelect.toggle( value );
 	this.platformSelect.toggle( value );
-	this.documentationLink.toggle( value );
-	this.tutorialsLink.toggle( value );
+	this.linkDocs.toggle( value );
+	this.linkTutorials.toggle( value );
 };
 
 /**
  * Get URL query for given factors describing the demo's mode.
  *
- * @param {string[]} factors Factors, as returned e.g. by #getCurrentFactorValues
+ * @param {Object} [mode] Factors, defaults to values provided by #getCurrentMode
+ * @param {string} [fragment] URL fragment, excluding the '#'
  * @return {string} URL query part, starting with '?'
  */
-Demo.prototype.getUrlQuery = function ( factors ) {
-	return '?page=' + factors[ 0 ] +
-		'&theme=' + factors[ 1 ] +
-		'&direction=' + factors[ 2 ] +
-		'&platform=' + factors[ 3 ] +
+Demo.prototype.getUrlQuery = function ( mode, fragment ) {
+	mode = $.extend( this.getCurrentMode(), mode );
+	return '?page=' + mode.page +
+		'&theme=' + mode.theme +
+		'&direction=' + mode.direction +
+		'&platform=' + mode.platform +
 		// Preserve current URL 'fragment' part
-		location.hash;
+		( fragment ? '#' + fragment : location.hash );
 };
 
 /**
@@ -432,10 +420,11 @@ Demo.prototype.getCurrentFactorValues = function () {
  *
  * Generated from parsed URL query values.
  *
+ * @param {string[]} [factorValues] Values to use instead of getCurrentFactorValues
  * @return {Object} List of factor values keyed by factor name
  */
-Demo.prototype.getCurrentMode = function () {
-	var factorValues = this.getCurrentFactorValues();
+Demo.prototype.getCurrentMode = function ( factorValues ) {
+	factorValues = factorValues || this.getCurrentFactorValues();
 
 	return {
 		page: factorValues[ 0 ],
@@ -451,10 +440,8 @@ Demo.prototype.getCurrentMode = function () {
  * @return {HTMLElement[]} List of link elements
  */
 Demo.prototype.getStylesheetLinks = function () {
-	var i, len, links, fragments,
+	var links, fragments,
 		factors = this.getFactors(),
-		theme = this.getCurrentFactorValues()[ 1 ],
-		suffixes = this.constructor.static.additionalThemeImagesSuffixes[ theme ] || [],
 		urls = [];
 
 	// Translate modes to filename fragments
@@ -464,9 +451,6 @@ Demo.prototype.getStylesheetLinks = function () {
 
 	// Theme styles
 	urls.push( 'dist/oojs-ui' + fragments.slice( 1 ).join( '' ) + '.css' );
-	for ( i = 0, len = suffixes.length; i < len; i++ ) {
-		urls.push( 'dist/oojs-ui' + fragments[ 1 ] + suffixes[ i ] + fragments[ 2 ] + '.css' );
-	}
 
 	// Demo styles
 	urls.push( 'styles/demo' + fragments[ 2 ] + '.css' );
@@ -495,27 +479,39 @@ Demo.prototype.getStylesheetLinks = function () {
  */
 Demo.prototype.normalizeQuery = function () {
 	var i, len, factorValues, match, valid, factorValue,
-		modes = [],
 		factors = this.getFactors(),
-		defaults = this.getDefaultFactorValues();
+		modes = this.getDefaultFactorValues();
 
 	factorValues = this.getCurrentFactorValues();
 	for ( i = 0, len = factors.length; i < len; i++ ) {
 		factorValue = factorValues[ i ];
-		modes[ i ] = factors[ i ][ factorValue ] !== undefined ? factorValue : defaults[ i ];
+		if ( factors[ i ][ factorValue ] !== undefined ) {
+			modes[ i ] = factorValue;
+		}
 	}
 
 	// Backwards-compatibility with old URLs that used the 'fragment' part to link to demo sections:
 	// if a fragment is specified and it describes valid factors, turn the URL into the new style.
-	match = location.hash.match( /^#(\w+)-(\w+)-(\w+)-(\w+)$/ );
+	match = location.hash.match( /^#(\w+)-(\w+)-(\w+)(?:-(\w+))?$/ );
 	if ( match ) {
-		factorValues = [];
+		factorValues = Array.prototype.slice.call( match, 1 );
+		// Backwards-compatibility with changed theme name (I8ee1fab4)
+		if ( factorValues[ 1 ] === 'mediawiki' ) {
+			factorValues[ 1 ] = 'wikimediaui';
+		}
+		// Backwards-compatibility with old graphics distributions (Ic6309b4e)
+		if ( factorValues[ 2 ] === 'mixed' || factorValues[ 2 ] === 'vector' || factorValues[ 2 ] === 'raster' ) {
+			factorValues[ 2 ] = factorValues[ 3 ];
+			factorValues[ 3 ] = null;
+		}
+		// Backwards-compatibility with no platforms (Idc49819c)
+		if ( !factorValues[ 3 ] ) {
+			factorValues[ 3 ] = 'desktop';
+		}
 		valid = true;
 		for ( i = 0, len = factors.length; i < len; i++ ) {
-			factorValue = match[ i + 1 ];
-			if ( factors[ i ][ factorValue ] !== undefined ) {
-				factorValues[ i ] = factorValue;
-			} else {
+			factorValue = factorValues[ i ];
+			if ( factors[ i ][ factorValue ] === undefined ) {
 				valid = false;
 				break;
 			}
@@ -527,15 +523,16 @@ Demo.prototype.normalizeQuery = function () {
 	}
 
 	// Update query
-	history.replaceState( null, document.title, this.getUrlQuery( modes ) );
+	history.replaceState( null, document.title, this.getUrlQuery( this.getCurrentMode( modes ) ) );
 };
 
 /**
  * Destroy demo.
  */
 Demo.prototype.destroy = function () {
-	$( 'body' ).removeClass( 'oo-ui-ltr oo-ui-rtl' );
-	$( 'body' ).removeClass( 'oo-ui-theme-' + this.mode.theme );
+	$( document.body )
+		.removeClass( 'oo-ui-ltr oo-ui-rtl' )
+		.removeClass( 'oo-ui-theme-' + this.mode.theme );
 	$( this.stylesheetLinks ).remove();
 	this.$element.remove();
 	this.emit( 'destroy' );
@@ -633,7 +630,12 @@ Demo.prototype.buildConsole = function ( item, layout, widget, showLayoutCode ) 
 
 		// Prevent the default config from being part of the code
 		if ( item instanceof OO.ui.ActionFieldLayout ) {
-			defaultConfig = ( new item.constructor( new OO.ui.TextInputWidget(), new OO.ui.ButtonWidget() ) ).initialConfig;
+			defaultConfig = (
+				new item.constructor(
+					new OO.ui.TextInputWidget(),
+					new OO.ui.ButtonWidget()
+				)
+			).initialConfig;
 		} else if ( item instanceof OO.ui.FieldLayout ) {
 			defaultConfig = ( new item.constructor( new OO.ui.ButtonWidget() ) ).initialConfig;
 		} else {
@@ -723,8 +725,10 @@ Demo.prototype.buildConsole = function ( item, layout, widget, showLayoutCode ) 
 		.on( 'click', function ( e ) {
 			var code;
 			e.preventDefault();
+			// eslint-disable-next-line no-jquery/no-class-state
 			$console.toggleClass( 'demo-console-collapsed demo-console-expanded' );
-			if ( $input.is( ':visible' ) ) {
+			// eslint-disable-next-line no-jquery/no-class-state
+			if ( $console.hasClass( 'demo-console-expanded' ) ) {
 				$input[ 0 ].focus();
 				if ( console && console.log ) {
 					window[ layout ] = item;
@@ -795,36 +799,39 @@ Demo.prototype.buildConsole = function ( item, layout, widget, showLayoutCode ) 
  * Build a link to this example.
  *
  * @param {OO.ui.Layout} item
- * @param {OO.ui.FieldsetLayout} parentItem
  * @return {jQuery} Link interface element
  */
-Demo.prototype.buildLinkExample = function ( item, parentItem ) {
+Demo.prototype.buildLinkExample = function ( item ) {
 	var $linkExample, label, fragment;
 
 	if ( item.$label.text() === '' ) {
-		item = parentItem;
+		item = this.getElementGroup();
+		if ( !item ) {
+			return $( [] );
+		}
 	}
 	fragment = item.elementId;
 	if ( !fragment ) {
 		label = item.$label.text();
 		fragment = label.replace( /[^\w]+/g, '-' ).replace( /^-|-$/g, '' );
-		item.setElementId( fragment );
+	}
+
+	if ( !( item instanceof Demo.LinkedFieldsetLayout ) ) {
+		item.$element.addClass( 'demo-linked-field' );
+
+		// Move anchor down below floating header.
+		item.$element.removeAttr( 'id' );
+		item.$header.append(
+			$( '<span>' )
+				.addClass( 'demo-linked-field-anchor' )
+				.attr( 'id', fragment )
+		);
 	}
 
 	$linkExample = $( '<a>' )
 		.addClass( 'demo-link-example' )
 		.attr( 'title', 'Link to this example' )
-		.attr( 'href', '#' + fragment )
-		.on( 'click', function ( e ) {
-			// We have to handle this manually in order to call .scrollToFragment() even if it's the same
-			// fragment. Normally, the browser will scroll but not fire a 'hashchange' event in this
-			// situation, and the scroll position will be off because of our fixed header.
-			if ( e.which === OO.ui.MouseButtons.LEFT ) {
-				location.hash = $( this ).attr( 'href' );
-				Demo.static.scrollToFragment();
-				e.preventDefault();
-			}
-		} );
+		.attr( 'href', '#' + fragment );
 
 	return $linkExample;
 };

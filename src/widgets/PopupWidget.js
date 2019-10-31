@@ -6,14 +6,14 @@
  * Unlike most widgets, PopupWidget is initially hidden and must be shown by calling #toggle.
  *
  *     @example
- *     // A popup widget.
+ *     // A PopupWidget.
  *     var popup = new OO.ui.PopupWidget( {
  *         $content: $( '<p>Hi there!</p>' ),
  *         padded: true,
  *         width: 300
  *     } );
  *
- *     $( 'body' ).append( popup.$element );
+ *     $( document.body ).append( popup.$element );
  *     // To display the popup, toggle the visibility to 'true'.
  *     popup.toggle( true );
  *
@@ -32,22 +32,22 @@
  * @cfg {boolean} [anchor=true] Show anchor pointing to origin of popup
  * @cfg {string} [position='below'] Where to position the popup relative to $floatableContainer
  *  'above': Put popup above $floatableContainer; anchor points down to the horizontal center
- *           of $floatableContainer
+ *    of $floatableContainer
  *  'below': Put popup below $floatableContainer; anchor points up to the horizontal center
- *           of $floatableContainer
+ *    of $floatableContainer
  *  'before': Put popup to the left (LTR) / right (RTL) of $floatableContainer; anchor points
- *            endwards (right/left) to the vertical center of $floatableContainer
+ *    endwards (right/left) to the vertical center of $floatableContainer
  *  'after': Put popup to the right (LTR) / left (RTL) of $floatableContainer; anchor points
- *            startwards (left/right) to the vertical center of $floatableContainer
+ *    startwards (left/right) to the vertical center of $floatableContainer
  * @cfg {string} [align='center'] How to align the popup to $floatableContainer
- *  'forwards': If position is above/below, move the popup as far endwards (right in LTR, left in RTL)
- *              as possible while still keeping the anchor within the popup;
- *              if position is before/after, move the popup as far downwards as possible.
- *  'backwards': If position is above/below, move the popup as far startwards (left in LTR, right in RTL)
- *               as possible while still keeping the anchor within the popup;
- *               if position in before/after, move the popup as far upwards as possible.
- *  'center': Horizontally (if position is above/below) or vertically (before/after) align the center
- *            of the popup with the center of $floatableContainer.
+ *  'forwards': If position is above/below, move the popup as far endwards (right in LTR, left in
+ *    RTL) as possible while still keeping the anchor within the popup; if position is before/after,
+ *    move the popup as far downwards as possible.
+ *  'backwards': If position is above/below, move the popup as far startwards (left in LTR, right in
+ *    RTL) as possible while still keeping the anchor within the popup; if position is before/after,
+ *     move the popup as far upwards as possible.
+ *  'center': Horizontally (if position is above/below) or vertically (before/after) align the
+ *     center of the popup with the center of $floatableContainer.
  * 'force-left': Alias for 'forwards' in LTR and 'backwards' in RTL
  * 'force-right': Alias for 'backwards' in RTL and 'forwards' in LTR
  * @cfg {boolean} [autoFlip=true] Whether to automatically switch the popup's position between
@@ -56,13 +56,14 @@
  * @cfg {jQuery} [$container] Constrain the popup to the boundaries of the specified container.
  *  See the [OOUI docs on MediaWiki][3] for an example.
  *  [3]: https://www.mediawiki.org/wiki/OOUI/Widgets/Popups#containerExample
- * @cfg {number} [containerPadding=10] Padding between the popup and its container, specified as a number of pixels.
+ * @cfg {number} [containerPadding=10] Padding between the popup and its container, specified as a
+ *  number of pixels.
  * @cfg {jQuery} [$content] Content to append to the popup's body
  * @cfg {jQuery} [$footer] Content to append to the popup's footer
  * @cfg {boolean} [autoClose=false] Automatically close the popup when it loses focus.
  * @cfg {jQuery} [$autoCloseIgnore] Elements that will not close the popup when clicked.
- *  This config option is only relevant if #autoClose is set to `true`. See the [OOUI documentation on MediaWiki][2]
- *  for an example.
+ *  This config option is only relevant if #autoClose is set to `true`. See the
+ *  [OOUI documentation on MediaWiki][2] for an example.
  *  [2]: https://www.mediawiki.org/wiki/OOUI/Widgets/Popups#autocloseExample
  * @cfg {boolean} [head=false] Show a popup header that contains a #label (if specified) and close
  *  button.
@@ -81,10 +82,10 @@ OO.ui.PopupWidget = function OoUiPopupWidget( config ) {
 
 	// Mixin constructors
 	OO.ui.mixin.LabelElement.call( this, config );
-	OO.ui.mixin.ClippableElement.call( this, $.extend( {}, config, {
+	OO.ui.mixin.ClippableElement.call( this, $.extend( {
 		$clippable: this.$body,
 		$clippableContainer: this.$popup
-	} ) );
+	}, config ) );
 	OO.ui.mixin.FloatableElement.call( this, config );
 
 	// Properties
@@ -124,8 +125,13 @@ OO.ui.PopupWidget = function OoUiPopupWidget( config ) {
 	}
 
 	if ( config.head ) {
-		this.closeButton = new OO.ui.ButtonWidget( { framed: false, icon: 'close' } );
-		this.closeButton.connect( this, { click: 'onCloseButtonClick' } );
+		this.closeButton = new OO.ui.ButtonWidget( {
+			framed: false,
+			icon: 'close'
+		} );
+		this.closeButton.connect( this, {
+			click: 'onCloseButtonClick'
+		} );
 		this.$head = $( '<div>' )
 			.addClass( 'oo-ui-popupWidget-head' )
 			.append( this.$label, this.closeButton.$element );
@@ -178,12 +184,6 @@ OO.ui.PopupWidget.prototype.onDocumentMouseDown = function ( e ) {
 	}
 };
 
-// Deprecated alias since 0.28.3
-OO.ui.PopupWidget.prototype.onMouseDown = function () {
-	OO.ui.warnDeprecation( 'onMouseDown is deprecated, use onDocumentMouseDown instead' );
-	this.onDocumentMouseDown.apply( this, arguments );
-};
-
 /**
  * Bind document mouse down listener.
  *
@@ -199,12 +199,6 @@ OO.ui.PopupWidget.prototype.bindDocumentMouseDownListener = function () {
 	// that it should be emitting, so we add it to this and will operate the event handler
 	// on whichever of these events was triggered first
 	this.getElementDocument().addEventListener( 'click', this.onDocumentMouseDownHandler, true );
-};
-
-// Deprecated alias since 0.28.3
-OO.ui.PopupWidget.prototype.bindMouseDownListener = function () {
-	OO.ui.warnDeprecation( 'bindMouseDownListener is deprecated, use bindDocumentMouseDownListener instead' );
-	this.bindDocumentMouseDownListener.apply( this, arguments );
 };
 
 /**
@@ -226,12 +220,6 @@ OO.ui.PopupWidget.prototype.onCloseButtonClick = function () {
 OO.ui.PopupWidget.prototype.unbindDocumentMouseDownListener = function () {
 	this.getElementDocument().removeEventListener( 'mousedown', this.onDocumentMouseDownHandler, true );
 	this.getElementDocument().removeEventListener( 'click', this.onDocumentMouseDownHandler, true );
-};
-
-// Deprecated alias since 0.28.3
-OO.ui.PopupWidget.prototype.unbindMouseDownListener = function () {
-	OO.ui.warnDeprecation( 'unbindMouseDownListener is deprecated, use unbindDocumentMouseDownListener instead' );
-	this.unbindDocumentMouseDownListener.apply( this, arguments );
 };
 
 /**
@@ -260,12 +248,6 @@ OO.ui.PopupWidget.prototype.bindDocumentKeyDownListener = function () {
 	this.getElementDocument().addEventListener( 'keydown', this.onDocumentKeyDownHandler, true );
 };
 
-// Deprecated alias since 0.28.3
-OO.ui.PopupWidget.prototype.bindKeyDownListener = function () {
-	OO.ui.warnDeprecation( 'bindKeyDownListener is deprecated, use bindDocumentKeyDownListener instead' );
-	this.bindDocumentKeyDownListener.apply( this, arguments );
-};
-
 /**
  * Unbind document key down listener.
  *
@@ -273,12 +255,6 @@ OO.ui.PopupWidget.prototype.bindKeyDownListener = function () {
  */
 OO.ui.PopupWidget.prototype.unbindDocumentKeyDownListener = function () {
 	this.getElementDocument().removeEventListener( 'keydown', this.onDocumentKeyDownHandler, true );
-};
-
-// Deprecated alias since 0.28.3
-OO.ui.PopupWidget.prototype.unbindKeyDownListener = function () {
-	OO.ui.warnDeprecation( 'unbindKeyDownListener is deprecated, use unbindDocumentKeyDownListener instead' );
-	this.unbindDocumentKeyDownListener.apply( this, arguments );
 };
 
 /**
@@ -356,8 +332,8 @@ OO.ui.PopupWidget.prototype.toggle = function ( show ) {
 	}
 
 	if ( change && show && this.autoFlip ) {
-		// Reset auto-flipping before showing the popup again. It's possible we no longer need to flip
-		// (e.g. if the user scrolled).
+		// Reset auto-flipping before showing the popup again. It's possible we no longer need to
+		// flip (e.g. if the user scrolled).
 		this.isAutoFlipped = false;
 	}
 
@@ -378,8 +354,8 @@ OO.ui.PopupWidget.prototype.toggle = function ( show ) {
 			if ( this.autoFlip ) {
 				if ( this.popupPosition === 'above' || this.popupPosition === 'below' ) {
 					if ( this.isClippedVertically() || this.isFloatableOutOfView() ) {
-						// If opening the popup in the normal direction causes it to be clipped, open
-						// in the opposite one instead
+						// If opening the popup in the normal direction causes it to be clipped,
+						// open in the opposite one instead
 						normalHeight = this.$element.height();
 						this.isAutoFlipped = !this.isAutoFlipped;
 						this.position();
@@ -396,12 +372,13 @@ OO.ui.PopupWidget.prototype.toggle = function ( show ) {
 				}
 				if ( this.popupPosition === 'before' || this.popupPosition === 'after' ) {
 					if ( this.isClippedHorizontally() || this.isFloatableOutOfView() ) {
-						// If opening the popup in the normal direction causes it to be clipped, open
-						// in the opposite one instead
+						// If opening the popup in the normal direction causes it to be clipped,
+						// open in the opposite one instead
 						normalWidth = this.$element.width();
 						this.isAutoFlipped = !this.isAutoFlipped;
-						// Due to T180173 horizontally clipped PopupWidgets have messed up dimensions,
-						// which causes positioning to be off. Toggle clipping back and fort to work around.
+						// Due to T180173 horizontally clipped PopupWidgets have messed up
+						// dimensions, which causes positioning to be off. Toggle clipping back and
+						// forth to work around.
 						this.toggleClipping( false );
 						this.position();
 						this.toggleClipping( true );
@@ -411,8 +388,9 @@ OO.ui.PopupWidget.prototype.toggle = function ( show ) {
 							oppositeWidth = this.$element.width();
 							if ( oppositeWidth < normalWidth ) {
 								this.isAutoFlipped = !this.isAutoFlipped;
-								// Due to T180173 horizontally clipped PopupWidgets have messed up dimensions,
-								// which causes positioning to be off. Toggle clipping back and fort to work around.
+								// Due to T180173, horizontally clipped PopupWidgets have messed up
+								// dimensions, which causes positioning to be off. Toggle clipping
+								// back and forth to work around.
 								this.toggleClipping( false );
 								this.position();
 								this.toggleClipping( true );
@@ -489,9 +467,9 @@ OO.ui.PopupWidget.prototype.updateDimensions = function ( transition ) {
  * @inheritdoc
  */
 OO.ui.PopupWidget.prototype.computePosition = function () {
-	var direction, align, vertical, start, end, near, far, sizeProp, popupSize, anchorSize, anchorPos,
-		anchorOffset, anchorMargin, parentPosition, positionProp, positionAdjustment, floatablePos,
-		offsetParentPos, containerPos, popupPosition, viewportSpacing,
+	var direction, align, vertical, start, end, near, far, sizeProp, popupSize, anchorSize,
+		anchorPos, anchorOffset, anchorMargin, parentPosition, positionProp, positionAdjustment,
+		floatablePos, offsetParentPos, containerPos, popupPosition, viewportSpacing,
 		popupPos = {},
 		anchorCss = { left: '', right: '', top: '', bottom: '' },
 		popupPositionOppositeMap = {
@@ -546,14 +524,17 @@ OO.ui.PopupWidget.prototype.computePosition = function () {
 		popupPosition = popupPositionOppositeMap[ popupPosition ];
 	}
 
-	// If the popup is positioned before or after, then the anchor positioning is vertical, otherwise horizontal
+	// If the popup is positioned before or after, then the anchor positioning is vertical,
+	// otherwise horizontal
 	vertical = popupPosition === 'before' || popupPosition === 'after';
 	start = vertical ? 'top' : ( direction === 'rtl' ? 'right' : 'left' );
 	end = vertical ? 'bottom' : ( direction === 'rtl' ? 'left' : 'right' );
 	near = vertical ? 'top' : 'left';
 	far = vertical ? 'bottom' : 'right';
 	sizeProp = vertical ? 'Height' : 'Width';
-	popupSize = vertical ? ( this.height || this.$popup.height() ) : ( this.width || this.$popup.width() );
+	popupSize = vertical ?
+		( this.height || this.$popup.height() ) :
+		( this.width || this.$popup.width() );
 
 	this.setAnchorEdge( anchorEdgeMap[ popupPosition ] );
 	this.horizontalPosition = vertical ? popupPosition : hPosMap[ align ];
@@ -584,12 +565,14 @@ OO.ui.PopupWidget.prototype.computePosition = function () {
 	}
 
 	if ( this.anchored ) {
-		// Position the anchor (which is positioned relative to the popup) to point to $floatableContainer
+		// Position the anchor (which is positioned relative to the popup) to point to
+		// $floatableContainer
 		anchorPos = ( floatablePos[ start ] + floatablePos[ end ] ) / 2;
 		anchorOffset = ( start === far ? -1 : 1 ) * ( anchorPos - popupPos[ start ] );
 
-		// If the anchor is less than 2*anchorSize from either edge, move the popup to make more space
-		// this.$anchor.width()/height() returns 0 because of the CSS trickery we use, so use scrollWidth/Height
+		// If the anchor is less than 2*anchorSize from either edge, move the popup to make more
+		// space this.$anchor.width()/height() returns 0 because of the CSS trickery we use, so use
+		// scrollWidth/Height
 		anchorSize = this.$anchor[ 0 ][ 'scroll' + sizeProp ];
 		anchorMargin = parseFloat( this.$anchor.css( 'margin-' + start ) );
 		if ( anchorOffset + anchorMargin < 2 * anchorSize ) {

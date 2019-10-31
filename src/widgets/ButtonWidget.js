@@ -7,13 +7,13 @@
  * [1]: https://www.mediawiki.org/wiki/OOUI/Widgets/Buttons_and_Switches
  *
  *     @example
- *     // A button widget
+ *     // A button widget.
  *     var button = new OO.ui.ButtonWidget( {
  *         label: 'Button with Icon',
  *         icon: 'trash',
  *         title: 'Remove'
  *     } );
- *     $( 'body' ).append( button.$element );
+ *     $( document.body ).append( button.$element );
  *
  * NOTE: HTML form buttons should use the OO.ui.ButtonInputWidget class.
  *
@@ -47,10 +47,16 @@ OO.ui.ButtonWidget = function OoUiButtonWidget( config ) {
 	OO.ui.mixin.IconElement.call( this, config );
 	OO.ui.mixin.IndicatorElement.call( this, config );
 	OO.ui.mixin.LabelElement.call( this, config );
-	OO.ui.mixin.TitledElement.call( this, $.extend( {}, config, { $titled: this.$button } ) );
+	OO.ui.mixin.TitledElement.call( this, $.extend( {
+		$titled: this.$button
+	}, config ) );
 	OO.ui.mixin.FlaggedElement.call( this, config );
-	OO.ui.mixin.TabIndexedElement.call( this, $.extend( {}, config, { $tabIndexed: this.$button } ) );
-	OO.ui.mixin.AccessKeyedElement.call( this, $.extend( {}, config, { $accessKeyed: this.$button } ) );
+	OO.ui.mixin.TabIndexedElement.call( this, $.extend( {
+		$tabIndexed: this.$button
+	}, config ) );
+	OO.ui.mixin.AccessKeyedElement.call( this, $.extend( {
+		$accessKeyed: this.$button
+	}, config ) );
 
 	// Properties
 	this.href = null;
@@ -58,7 +64,9 @@ OO.ui.ButtonWidget = function OoUiButtonWidget( config ) {
 	this.noFollow = false;
 
 	// Events
-	this.connect( this, { disable: 'onDisable' } );
+	this.connect( this, {
+		disable: 'onDisable'
+	} );
 
 	// Initialization
 	this.$button.append( this.$icon, this.$label, this.$indicator );

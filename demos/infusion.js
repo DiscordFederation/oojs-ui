@@ -13,19 +13,28 @@
 
 	// Add a button to infuse everything!
 	// (You wouldn't typically do this: you'd only infuse those objects which you needed to attach
-	// client-side behaviors to, or where the JS implementation provides additional features over PHP,
-	// like DropdownInputWidget. We do it here because it's a good overall test.)
+	// client-side behaviors to, or where the JS implementation provides additional features
+	// over PHP, like DropdownInputWidget. We do it here because it's a good overall test.)
 	function infuseAll() {
-		var start, end;
-		start = now();
-		$( '*[data-ooui]' ).each( function () {
-			OO.ui.infuse( this );
-		} );
-		end = now();
-		window.console.log( 'Took ' + Math.round( end - start ) + ' ms to infuse demo page.' );
-		infuseButton.setDisabled( true );
+		var start, end,
+			isInfused = infuseButton.isActive();
+		if ( isInfused ) {
+			// Can't actually uninfuse, just reload the page
+			location.reload();
+		} else {
+			start = now();
+			// eslint-disable-next-line no-jquery/no-global-selector
+			$( '*[data-ooui]' ).each( function () {
+				OO.ui.infuse( this );
+			} );
+			end = now();
+			window.console.log( 'Took ' + Math.round( end - start ) + ' ms to infuse demo page.' );
+		}
+		// Pretend to behave like a ToggleButtonWidget (not available in PHP)
+		infuseButton.setActive( !isInfused );
 	}
 
+	// eslint-disable-next-line no-jquery/no-global-selector
 	$demoMenu = $( '.demo-menu' );
 
 	OO.ui.getViewportSpacing = function () {
@@ -37,12 +46,10 @@
 		};
 	};
 
-	// More typical usage: we take the existing server-side
-	// button group and do things to it, here adding a new button.
-	infuseButton = new OO.ui.ButtonWidget( { label: 'Infuse' } )
-		.on( 'click', infuseAll );
-
-	OO.ui.ButtonGroupWidget.static.infuse( 'demo-menu-infuse' )
-		.addItems( [ infuseButton ] );
-
+	// More typical usage: we take an existing server-side button and do things to it,
+	// here enabling it and adding a click event handler.
+	// eslint-disable-next-line no-jquery/no-global-selector
+	infuseButton = OO.ui.infuse( $( '.demo-menu-infuse' ) )
+		.on( 'click', infuseAll )
+		.setDisabled( false );
 }() );

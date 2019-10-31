@@ -1,9 +1,10 @@
 /**
- * MenuSectionOptionWidgets are used inside {@link OO.ui.MenuSelectWidget menu select widgets} to group one or more related
- * {@link OO.ui.MenuOptionWidget menu options}. MenuSectionOptionWidgets cannot be highlighted or selected.
+ * MenuSectionOptionWidgets are used inside {@link OO.ui.MenuSelectWidget menu select widgets} to
+ * group one or more related {@link OO.ui.MenuOptionWidget menu options}. MenuSectionOptionWidgets
+ * cannot be highlighted or selected.
  *
  *     @example
- *     var myDropdown = new OO.ui.DropdownWidget( {
+ *     var dropdown = new OO.ui.DropdownWidget( {
  *         menu: {
  *             items: [
  *                 new OO.ui.MenuSectionOptionWidget( {
@@ -27,7 +28,7 @@
  *             ]
  *         }
  *     } );
- *     $( 'body' ).append( myDropdown.$element );
+ *     $( document.body ).append( dropdown.$element );
  *
  * @class
  * @extends OO.ui.DecoratedOptionWidget
@@ -40,8 +41,10 @@ OO.ui.MenuSectionOptionWidget = function OoUiMenuSectionOptionWidget( config ) {
 	OO.ui.MenuSectionOptionWidget.parent.call( this, config );
 
 	// Initialization
-	this.$element.addClass( 'oo-ui-menuSectionOptionWidget' )
+	this.$element
+		.addClass( 'oo-ui-menuSectionOptionWidget' )
 		.removeAttr( 'role aria-selected' );
+	this.selected = false;
 };
 
 /* Setup */

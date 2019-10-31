@@ -1,17 +1,18 @@
-@import '../common';
+@import '../common.less';
 
 .oo-ui-popupWidget {
 	position: absolute;
+	z-index: 1;
 
 	&-popup {
 		position: relative;
 		overflow: hidden;
-		z-index: 1;
+		word-wrap: break-word;
+		overflow-wrap: break-word;
 	}
 
 	&-anchor {
 		display: none;
-		z-index: 1;
 	}
 
 	&-anchored {

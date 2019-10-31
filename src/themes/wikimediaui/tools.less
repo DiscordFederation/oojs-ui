@@ -1,4 +1,4 @@
-@import 'common';
+@import 'common.less';
 
 .theme-oo-ui-toolbar() {
 	&-bar {
@@ -41,51 +41,6 @@
 			border-top: @border-toolbar;
 		}
 	}
-
-	&-actions {
-		> .oo-ui-buttonElement {
-			margin-right: 0;
-
-			> .oo-ui-buttonElement-button {
-				border: 0;
-				border-radius: 0;
-				padding-top: @padding-top-tool;
-				padding-left: @padding-horizontal-toolbar-action-buttons;
-				padding-right: @padding-horizontal-toolbar-action-buttons;
-
-				.oo-ui-toolbar-narrow & {
-					padding-left: @padding-horizontal-base;
-					padding-right: @padding-horizontal-base;
-				}
-			}
-
-			&.oo-ui-widget-enabled.oo-ui-flaggedElement-primary.oo-ui-flaggedElement-progressive {
-				> .oo-ui-buttonElement-button:focus {
-					box-shadow: @box-shadow-toolbar-action-button--focus;
-				}
-			}
-
-			&.oo-ui-labelElement {
-				> .oo-ui-buttonElement-button {
-					padding-top: @padding-top-tool-label;
-					padding-bottom: @padding-bottom-tool-label;
-				}
-			}
-		}
-
-		> .oo-ui-buttonGroupWidget {
-			> .oo-ui-buttonElement > .oo-ui-buttonElement-button {
-				border-radius: 0;
-				border-width: 0 0 0 @border-width-base;
-				padding-top: @padding-top-tool-label;
-				padding-bottom: @padding-bottom-tool-label;
-			}
-
-			> .oo-ui-popupToolGroup.oo-ui-widget-enabled.oo-ui-flaggedElement-primary.oo-ui-flaggedElement-progressive {
-				.mw-framed-primary-button-colored( ~'.oo-ui-popupToolGroup-handle', @color-progressive, @color-progressive--hover, @color-progressive--active, @color-progressive--focus );
-			}
-		}
-	}
 }
 
 .theme-oo-ui-tool() {
@@ -102,8 +57,12 @@
 		}
 	}
 
-	&-with-label .oo-ui-tool-link {
-		padding: @padding-top-tool-label @padding-horizontal-base @padding-bottom-tool-label @padding-start-tool;
+	&.oo-ui-tool-with-label .oo-ui-tool-link {
+		padding: @padding-vertical-tool-label @padding-horizontal-base @padding-vertical-tool-label @padding-horizontal-base;
+	}
+
+	&.oo-ui-tool-with-icon.oo-ui-tool-with-label .oo-ui-tool-link {
+		padding: @padding-vertical-tool-label @padding-horizontal-base @padding-vertical-tool-label @padding-start-tool;
 	}
 
 	.oo-ui-iconElement-icon {
@@ -116,17 +75,19 @@
 	}
 
 	.oo-ui-tool-title {
-		line-height: @line-height-widget-singleline;
+		line-height: @line-height-base;
 	}
 
 	&.oo-ui-widget-enabled {
-		.oo-ui-transition( background-color @transition-base );
+		.oo-ui-tool-link {
+			.oo-ui-transition( background-color @transition-base );
 
-		.oo-ui-tool-link:focus {
-			outline: @border-width-base @border-style-base @border-color-base--focus;
-			box-shadow: @box-shadow-base--focus;
-			// Slightly elevate on focus
-			z-index: 1;
+			&:focus {
+				outline: @border-width-base @border-style-base @border-color-base--focus;
+				box-shadow: @box-shadow-base--focus;
+				// Slightly elevate on focus
+				z-index: 1;
+			}
 		}
 
 		.oo-ui-iconElement-icon {
@@ -150,10 +111,39 @@
 				opacity: @opacity-base;
 			}
 		}
-	}
 
-	&.oo-ui-widget-disabled .oo-ui-iconElement-icon {
-		opacity: @opacity-tool--disabled;
+		.mw-tool-colored( ~'.oo-ui-tool-link', inherit, @background-color-tool--hover, @color-progressive--active, @color-progressive--focus, @color-tool--active );
+
+		&.oo-ui-flaggedElement {
+			&-progressive {
+				.mw-tool-colored( ~'.oo-ui-tool-link', @color-progressive, @background-color-tool--hover, @color-progressive--active, @color-progressive--focus );
+			}
+
+			&-destructive {
+				.mw-tool-colored( ~'.oo-ui-tool-link', @color-destructive-non-primary, @background-color-tool--hover, @color-destructive--active, @color-destructive--focus );
+			}
+		}
+
+		&.oo-ui-flaggedElement-primary {
+			&.oo-ui-flaggedElement {
+				&-progressive {
+					.mw-primary-tool-colored( ~'.oo-ui-tool-link', @color-progressive, @color-progressive--hover, @color-progressive--active, @color-progressive--focus );
+				}
+
+				&-destructive {
+					.mw-primary-tool-colored( ~'.oo-ui-tool-link', @color-destructive, @color-destructive--hover, @color-destructive--active, @color-destructive--focus );
+				}
+			}
+
+			> .oo-ui-tool-link {
+				font-weight: bold;
+
+				> .oo-ui-iconElement-icon,
+				> .oo-ui-indicatorElement-indicator {
+					opacity: @opacity-icon-base--selected;
+				}
+			}
+		}
 	}
 }
 
@@ -178,10 +168,12 @@
 		}
 	}
 
-	&.oo-ui-widget-disabled .oo-ui-indicatorElement-indicator,
-	&.oo-ui-widget-disabled .oo-ui-iconElement-icon {
-		// `!important` necessary until T106914 is resolved
-		opacity: @opacity-tool--disabled !important; // stylelint-disable-line declaration-no-important
+	&.oo-ui-widget-disabled:not( .oo-ui-flaggedElement-primary ) {
+		.oo-ui-indicatorElement-indicator,
+		.oo-ui-iconElement-icon {
+			// `!important` necessary until T106914 is resolved
+			opacity: @opacity-tool--disabled !important; // stylelint-disable-line declaration-no-important
+		}
 	}
 }
 
@@ -192,37 +184,33 @@
 		}
 	}
 
-	&-tools.oo-ui-toolGroup-enabled-tools > .oo-ui-tool:not( .oo-ui-toolGroupTool ) {
-		&.oo-ui-widget-enabled {
-			&:hover {
-				background-color: @background-color-tool--hover;
-			}
-
-			> .oo-ui-tool-link .oo-ui-tool-title {
-				color: @color-base;
-				.oo-ui-transition( color @transition-base );
-			}
-		}
-
-		&.oo-ui-tool-active {
-			background-color: @background-color-tool--active;
-
-			&:hover {
-				background-color: @background-color-tool--active-hover;
-			}
-
-			> .oo-ui-tool-link .oo-ui-tool-title {
-				color: @color-tool--active;
-			}
-		}
-	}
-
 	&-tools.oo-ui-toolGroup-enabled-tools .oo-ui-tool.oo-ui-widget-disabled,
 	&-tools.oo-ui-toolGroup-disabled-tools .oo-ui-tool {
-		> .oo-ui-tool-link {
-			.oo-ui-tool-title {
-				color: @color-base--disabled;
+		.oo-ui-iconElement-icon {
+			opacity: @opacity-tool--disabled;
+		}
+
+		&.oo-ui-flaggedElement-primary {
+			> .oo-ui-tool-link {
+				background-color: @background-color-filled--disabled;
+				border-color: @border-color-base--disabled;
+
+				.oo-ui-tool-title {
+					color: @color-base--inverted;
+				}
 			}
+
+			&.oo-ui-tool-active > .oo-ui-tool-link {
+				background-color: mix( @color-progressive--active, @background-color-filled--disabled, 35% );
+			}
+
+			.oo-ui-iconElement-icon {
+				opacity: @opacity-icon-base--selected;
+			}
+		}
+
+		> .oo-ui-tool-link .oo-ui-tool-title {
+			color: @color-base--disabled;
 		}
 	}
 }
@@ -341,15 +329,15 @@
 	}
 
 	&.oo-ui-labelElement &-handle {
-		padding: @padding-top-tool-label @padding-horizontal-base @padding-bottom-tool-label;
+		padding: @padding-vertical-tool-label @padding-horizontal-base;
 
 		.oo-ui-labelElement-label {
-			line-height: @line-height-widget-singleline;
+			line-height: @line-height-base;
 		}
 
 		.oo-ui-toolbar-narrow & {
-			padding-left: @padding-horizontal-base - @size-toolbar-narrow-modifier;
-			padding-right: @padding-horizontal-base - @size-toolbar-narrow-modifier;
+			padding-left: @padding-horizontal-base-iconized - @size-toolbar-narrow-modifier;
+			padding-right: @padding-horizontal-base-iconized - @size-toolbar-narrow-modifier;
 		}
 	}
 
@@ -389,7 +377,7 @@
 		line-height: @size-base; // Doesn't work with `padding` in header, due to clippable logic
 
 		.oo-ui-toolbar-narrow & {
-			padding: 0 ( @padding-horizontal-base - @size-toolbar-narrow-modifier );
+			padding: 0 ( @padding-horizontal-base-iconized - @size-toolbar-narrow-modifier );
 		}
 	}
 
@@ -403,27 +391,23 @@
 
 		.oo-ui-tool-link {
 			// Tool-Links in PopupToolGroups always have a `-title` element
-			padding: @padding-top-tool-label @padding-horizontal-base @padding-bottom-tool-label @padding-horizontal-base;
+			padding: @padding-vertical-tool-label @padding-horizontal-base;
 
 			.oo-ui-toolbar-narrow & {
-				padding-left: @padding-horizontal-base - @size-toolbar-narrow-modifier;
-				padding-right: @padding-horizontal-base - @size-toolbar-narrow-modifier;
-			}
-
-			.oo-ui-tool-title {
-				color: @color-base;
+				padding-left: @padding-horizontal-base-iconized - @size-toolbar-narrow-modifier;
+				padding-right: @padding-horizontal-base-iconized - @size-toolbar-narrow-modifier;
 			}
 
 			.oo-ui-tool-accel {
 				color: @color-base--subtle;
-				line-height: @line-height-widget-singleline;
+				line-height: @line-height-base;
 
 				&:not( :empty ) {
 					// Push away from tool's title
-					padding-left: @padding-horizontal-base * 1.5;
+					padding-left: @padding-horizontal-base-iconized * 1.5;
 
 					.oo-ui-toolbar-narrow & {
-						padding-left: ( @padding-horizontal-base * 1.5 ) - @size-toolbar-narrow-modifier;
+						padding-left: ( @padding-horizontal-base-iconized * 1.5 ) - @size-toolbar-narrow-modifier;
 					}
 				}
 			}
@@ -530,5 +514,34 @@
 	&-tools .oo-ui-tool.oo-ui-widget-enabled .oo-ui-tool-link:focus {
 		outline: 0;
 		box-shadow: @box-shadow-popuptoolgroup-tool--focus;
+	}
+
+	&.oo-ui-flaggedElement {
+		&-progressive {
+			.mw-tool-colored( ~'.oo-ui-popupToolGroup-handle', @color-progressive, @background-color-framed--hover, @color-progressive--active, @color-progressive--focus );
+		}
+
+		&-destructive {
+			.mw-tool-colored( ~'.oo-ui-popupToolGroup-handle', @color-destructive-non-primary, @background-color-framed--hover, @color-destructive--active, @color-destructive--focus );
+		}
+	}
+
+	&.oo-ui-flaggedElement-primary {
+		&.oo-ui-flaggedElement {
+			&-progressive {
+				.mw-primary-tool-colored( ~'.oo-ui-popupToolGroup-handle', @color-progressive, @color-progressive--hover, @color-progressive--active, @color-progressive--focus );
+			}
+
+			&-destructive {
+				.mw-primary-tool-colored( ~'.oo-ui-popupToolGroup-handle', @color-destructive, @color-destructive--hover, @color-destructive--active, @color-destructive--focus );
+			}
+		}
+
+		> .oo-ui-popupToolGroup-handle {
+			> .oo-ui-iconElement-icon,
+			> .oo-ui-indicatorElement-indicator {
+				opacity: @opacity-icon-base--selected;
+			}
+		}
 	}
 }

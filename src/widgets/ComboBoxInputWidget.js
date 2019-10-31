@@ -14,10 +14,11 @@
  *
  * This widget can be used inside an HTML form, such as a OO.ui.FormLayout.
  *
- * For more information about menus and options, please see the [OOUI documentation on MediaWiki][1].
+ * For more information about menus and options, please see the
+ * [OOUI documentation on MediaWiki][1].
  *
  *     @example
- *     // Example: A ComboBoxInputWidget.
+ *     // A ComboBoxInputWidget.
  *     var comboBox = new OO.ui.ComboBoxInputWidget( {
  *         value: 'Option 1',
  *         options: [
@@ -26,7 +27,7 @@
  *             { data: 'Option 3' }
  *         ]
  *     } );
- *     $( 'body' ).append( comboBox.$element );
+ *     $( document.body ).append( comboBox.$element );
  *
  *     @example
  *     // Example: A ComboBoxInputWidget with additional option labels.
@@ -47,7 +48,7 @@
  *             }
  *         ]
  *     } );
- *     $( 'body' ).append( comboBox.$element );
+ *     $( document.body ).append( comboBox.$element );
  *
  * [1]: https://www.mediawiki.org/wiki/OOUI/Widgets/Selects_and_Options#Menu_selects_and_options
  *
@@ -57,10 +58,12 @@
  * @constructor
  * @param {Object} [config] Configuration options
  * @cfg {Object[]} [options=[]] Array of menu options in the format `{ data: …, label: … }`
- * @cfg {Object} [menu] Configuration options to pass to the {@link OO.ui.MenuSelectWidget menu select widget}.
- * @cfg {jQuery} [$overlay] Render the menu into a separate layer. This configuration is useful in cases where
- *  the expanded menu is larger than its containing `<div>`. The specified overlay layer is usually on top of the
- *  containing `<div>` and has a larger area. By default, the menu uses relative positioning.
+ * @cfg {Object} [menu] Configuration options to pass to the {@link OO.ui.MenuSelectWidget menu
+ *  select widget}.
+ * @cfg {jQuery} [$overlay] Render the menu into a separate layer. This configuration is useful
+ *  in cases where the expanded menu is larger than its containing `<div>`. The specified overlay
+ *  layer is usually on top of the containing `<div>` and has a larger area. By default, the menu
+ *  uses relative positioning.
  *  See <https://www.mediawiki.org/wiki/OOUI/Concepts#Overlays>.
  */
 OO.ui.ComboBoxInputWidget = function OoUiComboBoxInputWidget( config ) {
@@ -81,7 +84,8 @@ OO.ui.ComboBoxInputWidget = function OoUiComboBoxInputWidget( config ) {
 	OO.ui.ComboBoxInputWidget.parent.call( this, config );
 
 	// Properties
-	this.$overlay = ( config.$overlay === true ? OO.ui.getDefaultOverlay() : config.$overlay ) || this.$element;
+	this.$overlay = ( config.$overlay === true ?
+		OO.ui.getDefaultOverlay() : config.$overlay ) || this.$element;
 	this.dropdownButton = new OO.ui.ButtonWidget( {
 		classes: [ 'oo-ui-comboBoxInputWidget-dropdownButton' ],
 		label: OO.ui.msg( 'ooui-combobox-button-label' ),
@@ -117,7 +121,6 @@ OO.ui.ComboBoxInputWidget = function OoUiComboBoxInputWidget( config ) {
 	// Initialization
 	this.$input.attr( {
 		role: 'combobox',
-		'aria-expanded': 'false',
 		'aria-owns': this.menu.getElementId(),
 		'aria-autocomplete': 'list'
 	} );
@@ -237,19 +240,40 @@ OO.ui.ComboBoxInputWidget.prototype.onMenuToggle = function ( isVisible ) {
 };
 
 /**
- * @inheritdoc
+ * Update the disabled state of the controls
+ *
+ * @chainable
+ * @protected
+ * @return {OO.ui.ComboBoxInputWidget} The widget, for chaining
  */
-OO.ui.ComboBoxInputWidget.prototype.setDisabled = function ( disabled ) {
-	// Parent method
-	OO.ui.ComboBoxInputWidget.parent.prototype.setDisabled.call( this, disabled );
-
+OO.ui.ComboBoxInputWidget.prototype.updateControlsDisabled = function () {
+	var disabled = this.isDisabled() || this.isReadOnly();
 	if ( this.dropdownButton ) {
-		this.dropdownButton.setDisabled( this.isDisabled() );
+		this.dropdownButton.setDisabled( disabled );
 	}
 	if ( this.menu ) {
-		this.menu.setDisabled( this.isDisabled() );
+		this.menu.setDisabled( disabled );
 	}
+	return this;
+};
 
+/**
+ * @inheritdoc
+ */
+OO.ui.ComboBoxInputWidget.prototype.setDisabled = function () {
+	// Parent method
+	OO.ui.ComboBoxInputWidget.parent.prototype.setDisabled.apply( this, arguments );
+	this.updateControlsDisabled();
+	return this;
+};
+
+/**
+ * @inheritdoc
+ */
+OO.ui.ComboBoxInputWidget.prototype.setReadOnly = function () {
+	// Parent method
+	OO.ui.ComboBoxInputWidget.parent.prototype.setReadOnly.apply( this, arguments );
+	this.updateControlsDisabled();
 	return this;
 };
 

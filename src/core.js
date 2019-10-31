@@ -113,7 +113,7 @@ OO.ui.isFocusableElement = function ( $element ) {
 };
 
 /**
- * Find a focusable child
+ * Find a focusable child.
  *
  * @param {jQuery} $container Container to search in
  * @param {boolean} [backwards] Search backwards
@@ -190,14 +190,15 @@ OO.ui.getLocalValue = function ( obj, lang, fallback ) {
 };
 
 /**
- * Check if a node is contained within another node
+ * Check if a node is contained within another node.
  *
  * Similar to jQuery#contains except a list of containers can be supplied
  * and a boolean argument allows you to include the container in the match list
  *
  * @param {HTMLElement|HTMLElement[]} containers Container node(s) to search in
  * @param {HTMLElement} contained Node to find
- * @param {boolean} [matchContainers] Include the container(s) in the list of nodes to match, otherwise only match descendants
+ * @param {boolean} [matchContainers] Include the container(s) in the list of nodes to match,
+ *  otherwise only match descendants
  * @return {boolean} The node is in the list of target nodes
  */
 OO.ui.contains = function ( containers, contained, matchContainers ) {
@@ -206,7 +207,10 @@ OO.ui.contains = function ( containers, contained, matchContainers ) {
 		containers = [ containers ];
 	}
 	for ( i = containers.length - 1; i >= 0; i-- ) {
-		if ( ( matchContainers && contained === containers[ i ] ) || $.contains( containers[ i ], contained ) ) {
+		if (
+			( matchContainers && contained === containers[ i ] ) ||
+			$.contains( containers[ i ], contained )
+		) {
 			return true;
 		}
 	}
@@ -274,10 +278,10 @@ OO.ui.warnDeprecation = function ( message ) {
  */
 OO.ui.throttle = function ( func, wait ) {
 	var context, args, timeout,
-		previous = 0,
+		previous = Date.now() - wait,
 		run = function () {
 			timeout = null;
-			previous = OO.ui.now();
+			previous = Date.now();
 			func.apply( context, args );
 		};
 	return function () {
@@ -286,29 +290,15 @@ OO.ui.throttle = function ( func, wait ) {
 		// period. If it's less, run the function immediately. If it's more,
 		// set a timeout for the remaining time -- but don't replace an
 		// existing timeout, since that'd indefinitely prolong the wait.
-		var remaining = wait - ( OO.ui.now() - previous );
+		var remaining = Math.max( wait - ( Date.now() - previous ), 0 );
 		context = this;
 		args = arguments;
-		if ( remaining <= 0 ) {
-			// Note: unless wait was ridiculously large, this means we'll
-			// automatically run the first time the function was called in a
-			// given period. (If you provide a wait period larger than the
-			// current Unix timestamp, you *deserve* unexpected behavior.)
-			clearTimeout( timeout );
-			run();
-		} else if ( !timeout ) {
+		if ( !timeout ) {
+			// If time is up, do setTimeout( run, 0 ) so the function
+			// always runs asynchronously, just like Promise#then .
 			timeout = setTimeout( run, remaining );
 		}
 	};
-};
-
-/**
- * A (possibly faster) way to get the current timestamp as an integer
- *
- * @return {number} Current timestamp, in milliseconds since the Unix epoch
- */
-OO.ui.now = Date.now || function () {
-	return new Date().getTime();
 };
 
 /**
@@ -327,122 +317,74 @@ OO.ui.infuse = function ( idOrNode, config ) {
 	return OO.ui.Element.static.infuse( idOrNode, config );
 };
 
-( function () {
-	/**
-	 * Message store for the default implementation of OO.ui.msg
-	 *
-	 * Environments that provide a localization system should not use this, but should override
-	 * OO.ui.msg altogether.
-	 *
-	 * @private
-	 */
-	var messages = {
-		// Tool tip for a button that moves items in a list down one place
-		'ooui-outline-control-move-down': 'Move item down',
-		// Tool tip for a button that moves items in a list up one place
-		'ooui-outline-control-move-up': 'Move item up',
-		// Tool tip for a button that removes items from a list
-		'ooui-outline-control-remove': 'Remove item',
-		// Label for the toolbar group that contains a list of all other available tools
-		'ooui-toolbar-more': 'More',
-		// Label for the fake tool that expands the full list of tools in a toolbar group
-		'ooui-toolgroup-expand': 'More',
-		// Label for the fake tool that collapses the full list of tools in a toolbar group
-		'ooui-toolgroup-collapse': 'Fewer',
-		// Default label for the tooltip for the button that removes a tag item
-		'ooui-item-remove': 'Remove',
-		// Default label for the accept button of a confirmation dialog
-		'ooui-dialog-message-accept': 'OK',
-		// Default label for the reject button of a confirmation dialog
-		'ooui-dialog-message-reject': 'Cancel',
-		// Title for process dialog error description
-		'ooui-dialog-process-error': 'Something went wrong',
-		// Label for process dialog dismiss error button, visible when describing errors
-		'ooui-dialog-process-dismiss': 'Dismiss',
-		// Label for process dialog retry action button, visible when describing only recoverable errors
-		'ooui-dialog-process-retry': 'Try again',
-		// Label for process dialog retry action button, visible when describing only warnings
-		'ooui-dialog-process-continue': 'Continue',
-		// Label for button in combobox input that triggers its dropdown
-		'ooui-combobox-button-label': 'Dropdown for combobox',
-		// Label for the file selection widget's select file button
-		'ooui-selectfile-button-select': 'Select a file',
-		// Label for the file selection widget if file selection is not supported
-		'ooui-selectfile-not-supported': 'File selection is not supported',
-		// Label for the file selection widget when no file is currently selected
-		'ooui-selectfile-placeholder': 'No file is selected',
-		// Label for the file selection widget's drop target
-		'ooui-selectfile-dragdrop-placeholder': 'Drop file here',
-		// Label for the help icon attached to a form field
-		'ooui-field-help': 'Help'
-	};
-
-	/**
-	 * Get a localized message.
-	 *
-	 * After the message key, message parameters may optionally be passed. In the default implementation,
-	 * any occurrences of $1 are replaced with the first parameter, $2 with the second parameter, etc.
-	 * Alternative implementations of OO.ui.msg may use any substitution system they like, as long as
-	 * they support unnamed, ordered message parameters.
-	 *
-	 * In environments that provide a localization system, this function should be overridden to
-	 * return the message translated in the user's language. The default implementation always returns
-	 * English messages. An example of doing this with [jQuery.i18n](https://github.com/wikimedia/jquery.i18n)
-	 * follows.
-	 *
-	 *     @example
-	 *     var i, iLen, button,
-	 *         messagePath = 'oojs-ui/dist/i18n/',
-	 *         languages = [ $.i18n().locale, 'ur', 'en' ],
-	 *         languageMap = {};
-	 *
-	 *     for ( i = 0, iLen = languages.length; i < iLen; i++ ) {
-	 *         languageMap[ languages[ i ] ] = messagePath + languages[ i ].toLowerCase() + '.json';
-	 *     }
-	 *
-	 *     $.i18n().load( languageMap ).done( function() {
-	 *         // Replace the built-in `msg` only once we've loaded the internationalization.
-	 *         // OOUI uses `OO.ui.deferMsg` for all initially-loaded messages. So long as
-	 *         // you put off creating any widgets until this promise is complete, no English
-	 *         // will be displayed.
-	 *         OO.ui.msg = $.i18n;
-	 *
-	 *         // A button displaying "OK" in the default locale
-	 *         button = new OO.ui.ButtonWidget( {
-	 *             label: OO.ui.msg( 'ooui-dialog-message-accept' ),
-	 *             icon: 'check'
-	 *         } );
-	 *         $( 'body' ).append( button.$element );
-	 *
-	 *         // A button displaying "OK" in Urdu
-	 *         $.i18n().locale = 'ur';
-	 *         button = new OO.ui.ButtonWidget( {
-	 *             label: OO.ui.msg( 'ooui-dialog-message-accept' ),
-	 *             icon: 'check'
-	 *         } );
-	 *         $( 'body' ).append( button.$element );
-	 *     } );
-	 *
-	 * @param {string} key Message key
-	 * @param {...Mixed} [params] Message parameters
-	 * @return {string} Translated message with parameters substituted
-	 */
-	OO.ui.msg = function ( key ) {
-		var message = messages[ key ],
-			params = Array.prototype.slice.call( arguments, 1 );
-		if ( typeof message === 'string' ) {
-			// Perform $1 substitution
-			message = message.replace( /\$(\d+)/g, function ( unused, n ) {
-				var i = parseInt( n, 10 );
-				return params[ i - 1 ] !== undefined ? params[ i - 1 ] : '$' + n;
-			} );
-		} else {
-			// Return placeholder if message not found
-			message = '[' + key + ']';
-		}
-		return message;
-	};
-}() );
+/**
+ * Get a localized message.
+ *
+ * After the message key, message parameters may optionally be passed. In the default
+ * implementation, any occurrences of $1 are replaced with the first parameter, $2 with the
+ * second parameter, etc.
+ * Alternative implementations of OO.ui.msg may use any substitution system they like, as long
+ * as they support unnamed, ordered message parameters.
+ *
+ * In environments that provide a localization system, this function should be overridden to
+ * return the message translated in the user's language. The default implementation always
+ * returns English messages. An example of doing this with
+ * [jQuery.i18n](https://github.com/wikimedia/jquery.i18n) follows.
+ *
+ *     @example
+ *     var i, iLen, button,
+ *         messagePath = 'oojs-ui/dist/i18n/',
+ *         languages = [ $.i18n().locale, 'ur', 'en' ],
+ *         languageMap = {};
+ *
+ *     for ( i = 0, iLen = languages.length; i < iLen; i++ ) {
+ *         languageMap[ languages[ i ] ] = messagePath + languages[ i ].toLowerCase() + '.json';
+ *     }
+ *
+ *     $.i18n().load( languageMap ).done( function() {
+ *         // Replace the built-in `msg` only once we've loaded the internationalization.
+ *         // OOUI uses `OO.ui.deferMsg` for all initially-loaded messages. So long as
+ *         // you put off creating any widgets until this promise is complete, no English
+ *         // will be displayed.
+ *         OO.ui.msg = $.i18n;
+ *
+ *         // A button displaying "OK" in the default locale
+ *         button = new OO.ui.ButtonWidget( {
+ *             label: OO.ui.msg( 'ooui-dialog-message-accept' ),
+ *             icon: 'check'
+ *         } );
+ *         $( document.body ).append( button.$element );
+ *
+ *         // A button displaying "OK" in Urdu
+ *         $.i18n().locale = 'ur';
+ *         button = new OO.ui.ButtonWidget( {
+ *             label: OO.ui.msg( 'ooui-dialog-message-accept' ),
+ *             icon: 'check'
+ *         } );
+ *         $( document.body ).append( button.$element );
+ *     } );
+ *
+ * @param {string} key Message key
+ * @param {...Mixed} [params] Message parameters
+ * @return {string} Translated message with parameters substituted
+ */
+OO.ui.msg = function ( key ) {
+	// `OO.ui.msg.messages` is defined in code generated during the build process
+	var messages = OO.ui.msg.messages,
+		message = messages[ key ],
+		params = Array.prototype.slice.call( arguments, 1 );
+	if ( typeof message === 'string' ) {
+		// Perform $1 substitution
+		message = message.replace( /\$(\d+)/g, function ( unused, n ) {
+			var i = parseInt( n, 10 );
+			return params[ i - 1 ] !== undefined ? params[ i - 1 ] : '$' + n;
+		} );
+	} else {
+		// Return placeholder if message not found
+		message = '[' + key + ']';
+	}
+	return message;
+};
 
 /**
  * Package a message and arguments for deferred resolution.
@@ -536,7 +478,7 @@ OO.ui.isMobile = function () {
  * such menus overlapping any fixed headers/toolbars/navigation used by the site.
  *
  * @return {Object} Object with the properties 'top', 'right', 'bottom', 'left', each representing
- *     the extra spacing from that edge of viewport (in pixels)
+ *  the extra spacing from that edge of viewport (in pixels)
  */
 OO.ui.getViewportSpacing = function () {
 	return {
@@ -556,7 +498,7 @@ OO.ui.getViewportSpacing = function () {
 OO.ui.getDefaultOverlay = function () {
 	if ( !OO.ui.$defaultOverlay ) {
 		OO.ui.$defaultOverlay = $( '<div>' ).addClass( 'oo-ui-defaultOverlay' );
-		$( 'body' ).append( OO.ui.$defaultOverlay );
+		$( document.body ).append( OO.ui.$defaultOverlay );
 	}
 	return OO.ui.$defaultOverlay;
 };

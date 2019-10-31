@@ -7,7 +7,7 @@
  * OO.ui.DropdownInputWidget instead.
  *
  *     @example
- *     // Example: A DropdownWidget with a menu that contains three options
+ *     // A DropdownWidget with a menu that contains three options.
  *     var dropDown = new OO.ui.DropdownWidget( {
  *         label: 'Dropdown menu: Select a menu option',
  *         menu: {
@@ -28,11 +28,11 @@
  *         }
  *     } );
  *
- *     $( 'body' ).append( dropDown.$element );
+ *     $( document.body ).append( dropDown.$element );
  *
  *     dropDown.getMenu().selectItemByData( 'b' );
  *
- *     dropDown.getMenu().findSelectedItem().getData(); // returns 'b'
+ *     dropDown.getMenu().findSelectedItem().getData(); // Returns 'b'.
  *
  * For more information, please see the [OOUI documentation on MediaWiki] [1].
  *
@@ -48,10 +48,12 @@
  *
  * @constructor
  * @param {Object} [config] Configuration options
- * @cfg {Object} [menu] Configuration options to pass to {@link OO.ui.MenuSelectWidget menu select widget}
- * @cfg {jQuery} [$overlay] Render the menu into a separate layer. This configuration is useful in cases where
- *  the expanded menu is larger than its containing `<div>`. The specified overlay layer is usually on top of the
- *  containing `<div>` and has a larger area. By default, the menu uses relative positioning.
+ * @cfg {Object} [menu] Configuration options to pass to
+ *  {@link OO.ui.MenuSelectWidget menu select widget}.
+ * @cfg {jQuery|boolean} [$overlay] Render the menu into a separate layer. This configuration is
+ *  useful in cases where the expanded menu is larger than its containing `<div>`. The specified
+ *  overlay layer is usually on top of the containing `<div>` and has a larger area. By default,
+ *  the menu uses relative positioning. Pass 'true' to use the default overlay.
  *  See <https://www.mediawiki.org/wiki/OOUI/Concepts#Overlays>.
  */
 OO.ui.DropdownWidget = function OoUiDropdownWidget( config ) {
@@ -62,15 +64,20 @@ OO.ui.DropdownWidget = function OoUiDropdownWidget( config ) {
 	OO.ui.DropdownWidget.parent.call( this, config );
 
 	// Properties (must be set before TabIndexedElement constructor call)
-	this.$handle = $( '<button>' );
-	this.$overlay = ( config.$overlay === true ? OO.ui.getDefaultOverlay() : config.$overlay ) || this.$element;
+	this.$handle = $( '<span>' );
+	this.$overlay = ( config.$overlay === true ?
+		OO.ui.getDefaultOverlay() : config.$overlay ) || this.$element;
 
 	// Mixin constructors
 	OO.ui.mixin.IconElement.call( this, config );
 	OO.ui.mixin.IndicatorElement.call( this, config );
 	OO.ui.mixin.LabelElement.call( this, config );
-	OO.ui.mixin.TitledElement.call( this, $.extend( {}, config, { $titled: this.$label } ) );
-	OO.ui.mixin.TabIndexedElement.call( this, $.extend( {}, config, { $tabIndexed: this.$handle } ) );
+	OO.ui.mixin.TitledElement.call( this, $.extend( {
+		$titled: this.$label
+	}, config ) );
+	OO.ui.mixin.TabIndexedElement.call( this, $.extend( {
+		$tabIndexed: this.$handle
+	}, config ) );
 
 	// Properties
 	this.menu = new OO.ui.MenuSelectWidget( $.extend( {
@@ -82,7 +89,7 @@ OO.ui.DropdownWidget = function OoUiDropdownWidget( config ) {
 	this.$handle.on( {
 		click: this.onClick.bind( this ),
 		keydown: this.onKeyDown.bind( this ),
-		// Hack? Handle type-to-search when menu is not expanded and not handling its own events
+		// Hack? Handle type-to-search when menu is not expanded and not handling its own events.
 		keypress: this.menu.onDocumentKeyPressHandler,
 		blur: this.menu.clearKeyPressBuffer.bind( this.menu )
 	} );
@@ -92,13 +99,21 @@ OO.ui.DropdownWidget = function OoUiDropdownWidget( config ) {
 	} );
 
 	// Initialization
+	this.$label
+		.attr( {
+			role: 'textbox',
+			'aria-readonly': 'true'
+		} );
 	this.$handle
 		.addClass( 'oo-ui-dropdownWidget-handle' )
+		.append( this.$icon, this.$label, this.$indicator )
 		.attr( {
-			'aria-owns': this.menu.getElementId(),
-			'aria-haspopup': 'listbox'
-		} )
-		.append( this.$icon, this.$label, this.$indicator );
+			role: 'combobox',
+			'aria-autocomplete': 'list',
+			'aria-expanded': 'false',
+			'aria-haspopup': 'true',
+			'aria-owns': this.menu.getElementId()
+		} );
 	this.$element
 		.addClass( 'oo-ui-dropdownWidget' )
 		.append( this.$handle );
@@ -157,10 +172,6 @@ OO.ui.DropdownWidget.prototype.onMenuSelect = function ( item ) {
  */
 OO.ui.DropdownWidget.prototype.onMenuToggle = function ( isVisible ) {
 	this.$element.toggleClass( 'oo-ui-dropdownWidget-open', isVisible );
-	this.$handle.attr(
-		'aria-expanded',
-		this.$element.hasClass( 'oo-ui-dropdownWidget-open' ).toString()
-	);
 };
 
 /**
@@ -168,7 +179,7 @@ OO.ui.DropdownWidget.prototype.onMenuToggle = function ( isVisible ) {
  *
  * @private
  * @param {jQuery.Event} e Mouse click event
- * @return {undefined/boolean} False to prevent default if event is handled
+ * @return {undefined|boolean} False to prevent default if event is handled
  */
 OO.ui.DropdownWidget.prototype.onClick = function ( e ) {
 	if ( !this.isDisabled() && e.which === OO.ui.MouseButtons.LEFT ) {
@@ -182,7 +193,7 @@ OO.ui.DropdownWidget.prototype.onClick = function ( e ) {
  *
  * @private
  * @param {jQuery.Event} e Key down event
- * @return {undefined/boolean} False to prevent default if event is handled
+ * @return {undefined|boolean} False to prevent default if event is handled
  */
 OO.ui.DropdownWidget.prototype.onKeyDown = function ( e ) {
 	if (

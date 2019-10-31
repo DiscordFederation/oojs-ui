@@ -5,7 +5,7 @@ OO.inheritClass( Demo.DialogWithPopupAndDropdown, OO.ui.ProcessDialog );
 Demo.DialogWithPopupAndDropdown.static.title = 'Dialog with popup and dropdown (ClippableElement test)';
 Demo.DialogWithPopupAndDropdown.static.actions = [
 	{ action: 'save', label: 'Done', flags: [ 'primary', 'progressive' ] },
-	{ action: 'cancel', label: 'Cancel', flags: [ 'safe', 'back' ] }
+	{ action: 'cancel', label: 'Cancel', flags: [ 'safe', 'close' ] }
 ];
 Demo.DialogWithPopupAndDropdown.prototype.getBodyHeight = function () {
 	return 300;
@@ -42,6 +42,7 @@ Demo.DialogWithPopupAndDropdown.prototype.initialize = function () {
 				popup: {
 					head: true,
 					label: 'More information',
+					// eslint-disable-next-line no-jquery/no-parse-html-literal
 					$content: $( '<p>Extra information here.</p>' ),
 					padded: true
 				}

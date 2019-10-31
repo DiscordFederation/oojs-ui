@@ -87,7 +87,8 @@ OO.ui.mixin.GroupElement.prototype.findItemFromData = function ( data ) {
 /**
  * Find items by their data.
  *
- * All items with matching data will be returned. To return only the first match, use the #findItemFromData method instead.
+ * All items with matching data will be returned. To return only the first match, use the
+ * #findItemFromData method instead.
  *
  * @param {Object} data Item data to search for
  * @return {OO.ui.Element[]} Items with equivalent data
@@ -110,8 +111,9 @@ OO.ui.mixin.GroupElement.prototype.findItemsFromData = function ( data ) {
 /**
  * Add items to the group.
  *
- * Items will be added to the end of the group array unless the optional `index` parameter specifies
- * a different insertion point. Adding an existing item will move it to the end of the array or the point specified by the `index`.
+ * Items will be added to the end of the group array unless the optional `index` parameter
+ * specifies a different insertion point. Adding an existing item will move it to the end of the
+ * array or the point specified by the `index`.
  *
  * @param {OO.ui.Element[]} items An array of items to add to the group
  * @param {number} [index] Index of the insertion point
@@ -119,6 +121,11 @@ OO.ui.mixin.GroupElement.prototype.findItemsFromData = function ( data ) {
  * @return {OO.ui.Element} The element, for chaining
  */
 OO.ui.mixin.GroupElement.prototype.addItems = function ( items, index ) {
+
+	if ( items.length === 0 ) {
+		return this;
+	}
+
 	// Mixin method
 	OO.EmitterList.prototype.addItems.call( this, items, index );
 
@@ -127,7 +134,18 @@ OO.ui.mixin.GroupElement.prototype.addItems = function ( items, index ) {
 };
 
 /**
- * @inheritdoc
+ * Move an item from its current position to a new index.
+ *
+ * The item is expected to exist in the list. If it doesn't,
+ * the method will throw an exception.
+ *
+ * See https://doc.wikimedia.org/oojs/master/OO.EmitterList.html
+ *
+ * @private
+ * @param {OO.EventEmitter} items Item to add
+ * @param {number} newIndex Index to move the item to
+ * @return {number} The index the item was moved to
+ * @throws {Error} If item is not in the list
  */
 OO.ui.mixin.GroupElement.prototype.moveItem = function ( items, newIndex ) {
 	// insertItemElements expects this.items to not have been modified yet, so call before the mixin
@@ -140,7 +158,29 @@ OO.ui.mixin.GroupElement.prototype.moveItem = function ( items, newIndex ) {
 };
 
 /**
- * @inheritdoc
+ * Utility method to insert an item into the list, and
+ * connect it to aggregate events.
+ *
+ * Don't call this directly unless you know what you're doing.
+ * Use #addItems instead.
+ *
+ * This method can be extended in child classes to produce
+ * different behavior when an item is inserted. For example,
+ * inserted items may also be attached to the DOM or may
+ * interact with some other nodes in certain ways. Extending
+ * this method is allowed, but if overridden, the aggregation
+ * of events must be preserved, or behavior of emitted events
+ * will be broken.
+ *
+ * If you are extending this method, please make sure the
+ * parent method is called.
+ *
+ * See https://doc.wikimedia.org/oojs/master/OO.EmitterList.html
+ *
+ * @protected
+ * @param {OO.EventEmitter|Object} item Item to add
+ * @param {number} index Index to add items at
+ * @return {number} The index the item was added at
  */
 OO.ui.mixin.GroupElement.prototype.insertItem = function ( item, index ) {
 	item.setElementGroup( this );
@@ -181,6 +221,10 @@ OO.ui.mixin.GroupElement.prototype.insertItemElements = function ( itemWidget, i
  */
 OO.ui.mixin.GroupElement.prototype.removeItems = function ( items ) {
 	var i, len, item, index;
+
+	if ( items.length === 0 ) {
+		return this;
+	}
 
 	// Remove specific items elements
 	for ( i = 0, len = items.length; i < len; i++ ) {

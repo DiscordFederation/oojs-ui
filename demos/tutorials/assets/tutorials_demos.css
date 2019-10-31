@@ -1,9 +1,5 @@
-.todo-error input {
+.todo-error .oo-ui-inputWidget-input {
 	background-color: #ff9696;
-}
-
-.wrapper {
-	width: 100%;
 }
 
 .todo-list {
@@ -23,20 +19,20 @@
 	margin-left: 0.25em;
 }
 
-.embed-app .oo-ui-labelElement .oo-ui-optionWidget {
+.tutorials-embed-app .oo-ui-labelElement .oo-ui-optionWidget {
 	padding: 0.25em;
 }
 
-.basics2-button-rules .todo-itemWidget {
+.tutorials-basics2-button-rules .todo-itemWidget {
 	display: inline-table;
 }
 
-.basics2-button-rules .todo-itemWidget.oo-ui-optionWidget.oo-ui-labelElement > .oo-ui-labelElement-label {
+.tutorials-basics2-button-rules .todo-itemWidget.oo-ui-optionWidget.oo-ui-labelElement > .oo-ui-labelElement-label {
 	display: table-cell;
 	width: 100%;
 	padding: 0.5em;
 }
 
-.basics2-button-rules .todo-itemWidget .oo-ui-buttonWidget {
+.tutorials-basics2-button-rules .todo-itemWidget .oo-ui-buttonWidget {
 	display: table-cell;
 }

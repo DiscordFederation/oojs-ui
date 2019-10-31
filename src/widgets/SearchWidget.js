@@ -1,8 +1,10 @@
 /**
- * SearchWidgets combine a {@link OO.ui.TextInputWidget text input field}, where users can type a search query,
- * and a menu of search results, which is displayed beneath the query
- * field. Unlike {@link OO.ui.mixin.LookupElement lookup menus}, search result menus are always visible to the user.
- * Users can choose an item from the menu or type a query into the text field to search for a matching result item.
+ * SearchWidgets combine a {@link OO.ui.TextInputWidget text input field},
+ * where users can type a search query, and a menu of search results,
+ * which is displayed beneath the query field.
+ * Unlike {@link OO.ui.mixin.LookupElement lookup menus}, search result menus are always visible
+ * to the user. Users can choose an item from the menu or type a query into the text field to
+ * search for a matching result item.
  * In general, search widgets are used inside a separate {@link OO.ui.Dialog dialog} window.
  *
  * Each time the query is changed, the search result menu is cleared and repopulated. Please see
@@ -17,6 +19,8 @@
  * @param {Object} [config] Configuration options
  * @cfg {string|jQuery} [placeholder] Placeholder text for query input
  * @cfg {string} [value] Initial query value
+ * @cfg {OO.ui.InputWidget} [input] {@link OO.ui.InputWidget Input widget} for search. Defaults
+ *  to a {@link OO.ui.SearchInputWidget search input widget} if not provided.
  */
 OO.ui.SearchWidget = function OoUiSearchWidget( config ) {
 	// Configuration initialization
@@ -26,8 +30,7 @@ OO.ui.SearchWidget = function OoUiSearchWidget( config ) {
 	OO.ui.SearchWidget.parent.call( this, config );
 
 	// Properties
-	this.query = new OO.ui.TextInputWidget( {
-		icon: 'search',
+	this.query = config.input || new OO.ui.SearchInputWidget( {
 		placeholder: config.placeholder,
 		value: config.value
 	} );

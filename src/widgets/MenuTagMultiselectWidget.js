@@ -1,9 +1,9 @@
 /**
- * MenuTagMultiselectWidget is a {@link OO.ui.TagMultiselectWidget OO.ui.TagMultiselectWidget} intended
- * to use a menu of selectable options.
+ * MenuTagMultiselectWidget is a {@link OO.ui.TagMultiselectWidget OO.ui.TagMultiselectWidget}
+ * intended to use a menu of selectable options.
  *
  *     @example
- *     // Example: A basic MenuTagMultiselectWidget.
+ *     // A basic MenuTagMultiselectWidget.
  *     var widget = new OO.ui.MenuTagMultiselectWidget( {
  *         inputPosition: 'outline',
  *         options: [
@@ -13,7 +13,7 @@
  *         ],
  *         selected: [ 'option1', 'option2' ]
  *     } );
- *     $( 'body' ).append( widget.$element );
+ *     $( document.body ).append( widget.$element );
  *
  * @class
  * @extends OO.ui.TagMultiselectWidget
@@ -27,20 +27,30 @@
  * @cfg {Object[]} [options=[]] Array of menu options in the format `{ data: …, label: … }`
  */
 OO.ui.MenuTagMultiselectWidget = function OoUiMenuTagMultiselectWidget( config ) {
+	var $autoCloseIgnore = $( [] );
 	config = config || {};
 
 	// Parent constructor
 	OO.ui.MenuTagMultiselectWidget.parent.call( this, config );
 
-	this.$overlay = ( config.$overlay === true ? OO.ui.getDefaultOverlay() : config.$overlay ) || this.$element;
-	this.clearInputOnChoose = config.clearInputOnChoose === undefined || !!config.clearInputOnChoose;
+	$autoCloseIgnore = $autoCloseIgnore.add( this.$group );
+	if ( this.hasInput ) {
+		$autoCloseIgnore = $autoCloseIgnore.add( this.input.$element );
+	}
+
+	this.$overlay = ( config.$overlay === true ?
+		OO.ui.getDefaultOverlay() : config.$overlay ) || this.$element;
+	this.clearInputOnChoose = config.clearInputOnChoose === undefined ||
+		!!config.clearInputOnChoose;
 	this.menu = this.createMenuWidget( $.extend( {
 		widget: this,
+		hideOnChoose: false,
 		input: this.hasInput ? this.input : null,
 		$input: this.hasInput ? this.input.$input : null,
 		filterFromInput: !!this.hasInput,
-		$autoCloseIgnore: this.hasInput ?
-			this.input.$element : $( [] ),
+		highlightOnFilter: !this.allowArbitrary,
+		multiselect: true,
+		$autoCloseIgnore: $autoCloseIgnore,
 		$floatableContainer: this.hasInput && this.inputPosition === 'outline' ?
 			this.input.$element : this.$element,
 		$overlay: this.$overlay,
@@ -54,17 +64,22 @@ OO.ui.MenuTagMultiselectWidget = function OoUiMenuTagMultiselectWidget( config )
 		toggle: 'onMenuToggle'
 	} );
 	if ( this.hasInput ) {
-		this.input.connect( this, { change: 'onInputChange' } );
+		this.input.connect( this, {
+			change: 'onInputChange'
+		} );
 	}
-	this.connect( this, { resize: 'onResize' } );
+	this.connect( this, {
+		resize: 'onResize'
+	} );
 
 	// Initialization
-	this.$overlay
-		.append( this.menu.$element );
-	this.$element
-		.addClass( 'oo-ui-menuTagMultiselectWidget' );
-	// TagMultiselectWidget already does this, but it doesn't work right because this.menu is not yet
-	// set up while the parent constructor runs, and #getAllowedValues rejects everything.
+	this.$overlay.append( this.menu.$element );
+	this.$element.addClass( 'oo-ui-menuTagMultiselectWidget' );
+	// Remove MenuSelectWidget's generic focus owner ARIA attribute
+	// TODO: Should this widget have a `role` that is compatible with this attribute?
+	this.menu.$focusOwner.removeAttr( 'aria-expanded' );
+	// TagMultiselectWidget already does this, but it doesn't work right because this.menu is
+	// not yet set up while the parent constructor runs, and #getAllowedValues rejects everything.
 	if ( config.selected ) {
 		this.setValue( config.selected );
 	}
@@ -95,34 +110,30 @@ OO.ui.MenuTagMultiselectWidget.prototype.onInputFocus = function () {
 };
 
 /**
- * @inheritdoc
- */
-OO.ui.MenuTagMultiselectWidget.prototype.onInputBlur = function () {
-	// Parent method
-	OO.ui.MenuTagMultiselectWidget.parent.prototype.onInputBlur.call( this );
-
-	this.menu.toggle( false );
-};
-
-/**
  * Respond to input change event
  */
 OO.ui.MenuTagMultiselectWidget.prototype.onInputChange = function () {
 	this.menu.toggle( true );
-	this.initializeMenuSelection();
 };
 
 /**
- * Respond to menu choose event
+ * Respond to menu choose event, which is intentional by the user.
  *
- * @param {OO.ui.OptionWidget} menuItem Chosen menu item
+ * @param {OO.ui.OptionWidget} menuItem Selected menu items
+ * @param {boolean} selected Item is selected
  */
-OO.ui.MenuTagMultiselectWidget.prototype.onMenuChoose = function ( menuItem ) {
+OO.ui.MenuTagMultiselectWidget.prototype.onMenuChoose = function ( menuItem, selected ) {
 	if ( this.hasInput && this.clearInputOnChoose ) {
 		this.input.setValue( '' );
 	}
-	// Add tag
-	this.addTag( menuItem.getData(), menuItem.getLabel() );
+
+	if ( selected && !this.findItemFromData( menuItem.getData() ) ) {
+		// The menu item is selected, add it to the tags
+		this.addTag( menuItem.getData(), menuItem.getLabel() );
+	} else {
+		// The menu item was unselected, remove the tag
+		this.removeTagByData( menuItem.getData() );
+	}
 };
 
 /**
@@ -132,11 +143,14 @@ OO.ui.MenuTagMultiselectWidget.prototype.onMenuChoose = function ( menuItem ) {
  */
 OO.ui.MenuTagMultiselectWidget.prototype.onMenuToggle = function ( isVisible ) {
 	if ( !isVisible ) {
-		this.menu.selectItem( null );
 		this.menu.highlightItem( null );
-	} else {
-		this.initializeMenuSelection();
+		this.menu.scrollToTop();
 	}
+	setTimeout( function () {
+		// Remove MenuSelectWidget's generic focus owner ARIA attribute
+		// TODO: Should this widget have a `role` that is compatible with this attribute?
+		this.menu.$focusOwner.removeAttr( 'aria-expanded' );
+	}.bind( this ) );
 };
 
 /**
@@ -155,14 +169,73 @@ OO.ui.MenuTagMultiselectWidget.prototype.onTagSelect = function ( tagItem ) {
 			this.input.setValue( '' );
 		}
 
-		// Select the menu item
-		this.menu.selectItem( menuItem );
-
 		this.focus();
+
+		// Highlight the menu item
+		this.menu.highlightItem( menuItem );
+		this.menu.scrollItemIntoView( menuItem );
+
 	} else {
 		// Use the default
 		OO.ui.MenuTagMultiselectWidget.parent.prototype.onTagSelect.call( this, tagItem );
 	}
+};
+
+/**
+ * @inheritdoc
+ */
+OO.ui.MenuTagMultiselectWidget.prototype.removeItems = function ( items ) {
+	var widget = this;
+
+	// Parent
+	OO.ui.MenuTagMultiselectWidget.parent.prototype.removeItems.call( this, items );
+
+	items.forEach( function ( tagItem ) {
+		var menuItem = widget.menu.findItemFromData( tagItem.getData() );
+		if ( menuItem ) {
+			// Synchronize the menu selection - unselect the removed tag
+			widget.menu.unselectItem( menuItem );
+		}
+	} );
+};
+
+/**
+ * @inheritdoc
+ */
+OO.ui.MenuTagMultiselectWidget.prototype.setValue = function ( valueObject ) {
+	valueObject = Array.isArray( valueObject ) ? valueObject : [ valueObject ];
+
+	// We override this method from the parent, to make sure we are adding proper
+	// menu items, and are accounting for cases where we have this widget with
+	// a menu but also 'allowArbitrary'
+	if ( !this.menu ) {
+		return;
+	}
+
+	this.clearItems();
+	valueObject.forEach( function ( obj ) {
+		var data, label, menuItem;
+
+		if ( typeof obj === 'string' ) {
+			data = label = obj;
+		} else {
+			data = obj.data;
+			label = obj.label;
+		}
+
+		// Check if the item is in the menu
+		menuItem = this.menu.getItemFromLabel( label ) || this.menu.findItemFromData( data );
+		if ( menuItem ) {
+			// Menu item found, add the menu item
+			this.addTag( menuItem.getData(), menuItem.getLabel() );
+			// Make sure that item is also selected
+			this.menu.selectItem( menuItem );
+		} else if ( this.allowArbitrary ) {
+			// If the item isn't in the menu, only add it if we
+			// allow for arbitrary values
+			this.addTag( data, label );
+		}
+	}.bind( this ) );
 };
 
 /**
@@ -185,12 +258,17 @@ OO.ui.MenuTagMultiselectWidget.prototype.setDisabled = function ( isDisabled ) {
  * @chainable
  */
 OO.ui.MenuTagMultiselectWidget.prototype.initializeMenuSelection = function () {
-	if ( !this.menu.findSelectedItem() ) {
-		this.menu.highlightItem(
-			this.allowArbitrary ?
-				null :
-				this.menu.findFirstSelectableItem()
-		);
+	var highlightedItem;
+	this.menu.highlightItem(
+		this.allowArbitrary ?
+			null :
+			this.menu.findFirstSelectableItem()
+	);
+
+	highlightedItem = this.menu.findHighlightedItem();
+	// Scroll to the highlighted item, if it exists
+	if ( highlightedItem ) {
+		this.menu.scrollItemIntoView( highlightedItem );
 	}
 };
 

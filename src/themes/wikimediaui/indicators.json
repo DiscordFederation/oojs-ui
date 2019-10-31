@@ -1,7 +1,7 @@
 {
 	"selectorWithoutVariant": ".oo-ui-indicator-{name}",
 	"selectorWithVariant": ".oo-ui-image-{variant}.oo-ui-indicator-{name}",
-	"intro": "@import '../../../../src/styles/common';",
+	"intro": "@import '../../../../src/styles/common.less';",
 	"variants": {
 		"invert": {
 			"color": "#fff",
@@ -20,10 +20,6 @@
 		},
 		"required": {
 			"file": "images/indicators/required.svg"
-		},
-		"search": {
-			"file": "images/indicators/search.svg",
-			"deprecated": "This will be removed in v0.31.0."
 		}
 	}
 }

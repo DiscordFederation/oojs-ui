@@ -15,7 +15,6 @@
 			WikimediaUITheme: new OO.ui.WikimediaUITheme()
 		};
 
-		// eslint-disable-next-line qunit/require-expect, no-loop-func
 		QUnit.test( JSON.stringify( test.config ), function ( assert ) {
 			var config, instance, infused, $fromPhp, theme;
 
@@ -28,6 +27,7 @@
 				instance = new OO.ui[ test.class ]( config );
 				$fromPhp = $( testSuitePHPOutput[ theme ][ className ][ i ] );
 
+				// eslint-disable-next-line no-jquery/no-global-selector
 				$( '#qunit-fixture' ).append( instance.$element, $fromPhp );
 
 				if ( !infuseOnly ) {
@@ -40,9 +40,10 @@
 			}
 
 			if ( i % 20 === 0 ) {
-				// Make this test async to allow the browser to respond. Running code in a single thread
-				// for several seconds/minutes causes Karma timeouts when the browser becomes uninteractive.
-				// This slows down the tests though, so only do it every 20 tests (arbitrarily chosen).
+				// Make this test async to allow the browser to respond. Running code in a single
+				// thread for several seconds/minutes causes Karma timeouts when the browser
+				// becomes uninteractive. This slows down the tests though, so only do it every
+				// 20 tests (arbitrarily chosen).
 				assert.async()();
 			}
 		} );

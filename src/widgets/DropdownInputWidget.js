@@ -1,25 +1,26 @@
 /**
  * DropdownInputWidget is a {@link OO.ui.DropdownWidget DropdownWidget} intended to be used
- * within an HTML form, such as a OO.ui.FormLayout. The selected value is synchronized with the value
- * of a hidden HTML `input` tag. Please see the [OOUI documentation on MediaWiki][1] for
+ * within an HTML form, such as a OO.ui.FormLayout. The selected value is synchronized with the
+ * value of a hidden HTML `input` tag. Please see the [OOUI documentation on MediaWiki][1] for
  * more information about input widgets.
  *
  * A DropdownInputWidget always has a value (one of the options is always selected), unless there
  * are no options. If no `value` configuration option is provided, the first option is selected.
  * If you need a state representing no value (no option being selected), use a DropdownWidget.
  *
- * This and OO.ui.RadioSelectInputWidget support the same configuration options.
+ * This and OO.ui.RadioSelectInputWidget support similar configuration options.
  *
  *     @example
- *     // Example: A DropdownInputWidget with three options
+ *     // A DropdownInputWidget with three options.
  *     var dropdownInput = new OO.ui.DropdownInputWidget( {
  *         options: [
  *             { data: 'a', label: 'First' },
- *             { data: 'b', label: 'Second'},
- *             { data: 'c', label: 'Third' }
+ *             { data: 'b', label: 'Second', disabled: true },
+ *             { optgroup: 'Group label' },
+ *             { data: 'c', label: 'First sub-item)' }
  *         ]
  *     } );
- *     $( 'body' ).append( dropdownInput.$element );
+ *     $( document.body ).append( dropdownInput.$element );
  *
  * [1]: https://www.mediawiki.org/wiki/OOUI/Widgets/Inputs
  *
@@ -28,11 +29,12 @@
  *
  * @constructor
  * @param {Object} [config] Configuration options
- * @cfg {Object[]} [options=[]] Array of menu options in the format `{ data: …, label: … }`
+ * @cfg {Object[]} [options=[]] Array of menu options in the format described above.
  * @cfg {Object} [dropdown] Configuration options for {@link OO.ui.DropdownWidget DropdownWidget}
- * @cfg {jQuery} [$overlay] Render the menu into a separate layer. This configuration is useful in cases where
- *  the expanded menu is larger than its containing `<div>`. The specified overlay layer is usually on top of the
- *  containing `<div>` and has a larger area. By default, the menu uses relative positioning.
+ * @cfg {jQuery|boolean} [$overlay] Render the menu into a separate layer. This configuration is
+ *  useful in cases where the expanded menu is larger than its containing `<div>`. The specified
+ *  overlay layer is usually on top of the containing `<div>` and has a larger area. By default,
+ *  the menu uses relative positioning. Pass 'true' to use the default overlay.
  *  See <https://www.mediawiki.org/wiki/OOUI/Concepts#Overlays>.
  */
 OO.ui.DropdownInputWidget = function OoUiDropdownInputWidget( config ) {
@@ -54,12 +56,17 @@ OO.ui.DropdownInputWidget = function OoUiDropdownInputWidget( config ) {
 	OO.ui.DropdownInputWidget.parent.call( this, config );
 
 	// Events
-	this.dropdownWidget.getMenu().connect( this, { select: 'onMenuSelect' } );
+	this.dropdownWidget.getMenu().connect( this, {
+		select: 'onMenuSelect'
+	} );
 
 	// Initialization
 	this.$element
 		.addClass( 'oo-ui-dropdownInputWidget' )
 		.append( this.dropdownWidget.$element );
+	if ( OO.ui.isMobile() ) {
+		this.$element.addClass( 'oo-ui-isMobile' );
+	}
 	this.setTabIndexedElement( this.dropdownWidget.$tabIndexed );
 	this.setTitledElement( this.dropdownWidget.$handle );
 };
@@ -75,7 +82,7 @@ OO.inheritClass( OO.ui.DropdownInputWidget, OO.ui.InputWidget );
  * @protected
  */
 OO.ui.DropdownInputWidget.prototype.getInputElement = function () {
-	return $( '<select>' );
+	return $( '<select>' ).addClass( 'oo-ui-indicator-down' );
 };
 
 /**
@@ -140,32 +147,48 @@ OO.ui.DropdownInputWidget.prototype.setOptions = function ( options ) {
  * Set the internal list of options, used e.g. by setValue() to see which options are allowed.
  *
  * This method may be called before the parent constructor, so various properties may not be
- * intialized yet.
+ * initialized yet.
  *
- * @param {Object[]} options Array of menu options in the format `{ data: …, label: … }`
+ * @param {Object[]} options Array of menu options (see #constructor for details).
  * @private
  */
 OO.ui.DropdownInputWidget.prototype.setOptionsData = function ( options ) {
-	var
-		optionWidgets,
+	var optionWidgets, optIndex, opt, previousOptgroup, optionWidget, optValue,
 		widget = this;
 
 	this.optionsDirty = true;
 
-	optionWidgets = options.map( function ( opt ) {
-		var optValue;
+	// Go through all the supplied option configs and create either
+	// MenuSectionOption or MenuOption widgets from each.
+	optionWidgets = [];
+	for ( optIndex = 0; optIndex < options.length; optIndex++ ) {
+		opt = options[ optIndex ];
 
 		if ( opt.optgroup !== undefined ) {
-			return widget.createMenuSectionOptionWidget( opt.optgroup );
+			// Create a <optgroup> menu item.
+			optionWidget = widget.createMenuSectionOptionWidget( opt.optgroup );
+			previousOptgroup = optionWidget;
+
+		} else {
+			// Create a normal <option> menu item.
+			optValue = widget.cleanUpValue( opt.data );
+			optionWidget = widget.createMenuOptionWidget(
+				optValue,
+				opt.label !== undefined ? opt.label : optValue
+			);
 		}
 
-		optValue = widget.cleanUpValue( opt.data );
-		return widget.createMenuOptionWidget(
-			optValue,
-			opt.label !== undefined ? opt.label : optValue
-		);
+		// Disable the menu option if it is itself disabled or if its parent optgroup is disabled.
+		if (
+			opt.disabled !== undefined ||
+			previousOptgroup instanceof OO.ui.MenuSectionOptionWidget &&
+			previousOptgroup.isDisabled()
+		) {
+			optionWidget.setDisabled( true );
+		}
 
-	} );
+		optionWidgets.push( optionWidget );
+	}
 
 	this.dropdownWidget.getMenu().clearItems().addItems( optionWidgets );
 };
@@ -231,6 +254,11 @@ OO.ui.DropdownInputWidget.prototype.updateOptionsInterface = function () {
 				.attr( 'label', optionWidget.getLabel() );
 			widget.$input.append( $optionNode );
 			$optionsContainer = $optionNode;
+		}
+
+		// Disable the option or optgroup if required.
+		if ( optionWidget.isDisabled() ) {
+			$optionNode.prop( 'disabled', true );
 		}
 	} );
 

@@ -1,7 +1,8 @@
 /**
- * FormLayouts are used to wrap {@link OO.ui.FieldsetLayout FieldsetLayouts} when you intend to use browser-based
- * form submission for the fields instead of handling them in JavaScript. Form layouts can be configured with an
- * HTML form action, an encoding type, and a method using the #action, #enctype, and #method configs, respectively.
+ * FormLayouts are used to wrap {@link OO.ui.FieldsetLayout FieldsetLayouts} when you intend to use
+ * browser-based form submission for the fields instead of handling them in JavaScript. Form layouts
+ * can be configured with an HTML form action, an encoding type, and a method using the #action,
+ * #enctype, and #method configs, respectively.
  * See the [OOUI documentation on MediaWiki] [1] for more information and examples.
  *
  * Only widgets from the {@link OO.ui.InputWidget InputWidget} family support form submission. It
@@ -16,21 +17,21 @@
  * [2]: https://www.mediawiki.org/wiki/OOUI/Widgets/Inputs
  *
  *     @example
- *     // Example of a form layout that wraps a fieldset layout
+ *     // Example of a form layout that wraps a fieldset layout.
  *     var input1 = new OO.ui.TextInputWidget( {
- *         placeholder: 'Username'
- *     } );
- *     var input2 = new OO.ui.TextInputWidget( {
- *         placeholder: 'Password',
- *         type: 'password'
- *     } );
- *     var submit = new OO.ui.ButtonInputWidget( {
- *         label: 'Submit'
- *     } );
+ *             placeholder: 'Username'
+ *         } ),
+ *         input2 = new OO.ui.TextInputWidget( {
+ *             placeholder: 'Password',
+ *             type: 'password'
+ *         } ),
+ *         submit = new OO.ui.ButtonInputWidget( {
+ *             label: 'Submit'
+ *         } ),
+ *         fieldset = new OO.ui.FieldsetLayout( {
+ *             label: 'A form layout'
+ *         } );
  *
- *     var fieldset = new OO.ui.FieldsetLayout( {
- *         label: 'A form layout'
- *     } );
  *     fieldset.addItems( [
  *         new OO.ui.FieldLayout( input1, {
  *             label: 'Username',
@@ -47,7 +48,7 @@
  *         action: '/api/formhandler',
  *         method: 'get'
  *     } )
- *     $( 'body' ).append( form.$element );
+ *     $( document.body ).append( form.$element );
  *
  * @class
  * @extends OO.ui.Layout
@@ -70,7 +71,7 @@ OO.ui.FormLayout = function OoUiFormLayout( config ) {
 	OO.ui.FormLayout.parent.call( this, config );
 
 	// Mixin constructors
-	OO.ui.mixin.GroupElement.call( this, $.extend( {}, config, { $group: this.$element } ) );
+	OO.ui.mixin.GroupElement.call( this, $.extend( { $group: this.$element }, config ) );
 
 	// Events
 	this.$element.on( 'submit', this.onFormSubmit.bind( this ) );

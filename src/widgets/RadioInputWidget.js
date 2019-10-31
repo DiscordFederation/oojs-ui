@@ -28,7 +28,7 @@
  *         new OO.ui.FieldLayout( radio2, { label: 'Unselected', align: 'inline' } ),
  *         new OO.ui.FieldLayout( radio3, { label: 'Disabled', align: 'inline' } ),
  *     ] );
- *     $( 'body' ).append( fieldset.$element );
+ *     $( document.body ).append( fieldset.$element );
  *
  * [1]: https://www.mediawiki.org/wiki/OOUI/Widgets/Inputs
  *
@@ -37,7 +37,8 @@
  *
  * @constructor
  * @param {Object} [config] Configuration options
- * @cfg {boolean} [selected=false] Select the radio button initially. By default, the radio button is not selected.
+ * @cfg {boolean} [selected=false] Select the radio button initially. By default, the radio button
+ *  is not selected.
  */
 OO.ui.RadioInputWidget = function OoUiRadioInputWidget( config ) {
 	// Configuration initialization
@@ -128,7 +129,7 @@ OO.ui.RadioInputWidget.prototype.isSelected = function () {
  */
 OO.ui.RadioInputWidget.prototype.simulateLabelClick = function () {
 	if ( !this.isDisabled() ) {
-		this.$input.click();
+		this.$input.trigger( 'click' );
 	}
 	this.focus();
 };

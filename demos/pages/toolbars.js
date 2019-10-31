@@ -1,6 +1,8 @@
 Demo.static.pages.toolbars = function ( demo ) {
-	var i, toolGroups, actionButton, actionButtonDelete, actionButtonDisabled, actionGroup, publishButton, AlertTool, PopupTool, ToolGroupTool,
+	var i, toolGroups,
+		AlertTool, PopupTool, ToolGroupTool,
 		setDisabled = function () { this.setDisabled( true ); },
+		setInactive = function () { this.setActive( false ); },
 		$demo = demo.$element,
 		$containers = $(),
 		toolFactories = [],
@@ -8,13 +10,10 @@ Demo.static.pages.toolbars = function ( demo ) {
 		toolbars = [],
 		configs = [
 			{ $overlay: true },
-			{ $overlay: true, actions: true },
 			{},
 			{ actions: true },
 			{ position: 'bottom' },
-			{ actions: true, position: 'bottom' },
-			{ $overlay: true },
-			{ $overlay: true, actions: true }
+			{ actions: true, position: 'bottom' }
 		];
 
 	// Show some random accelerator keys that don't actually work
@@ -28,14 +27,19 @@ Demo.static.pages.toolbars = function ( demo ) {
 		}[ name ];
 	}
 
-	for ( i = 0; i <= 7; i++ ) {
+	for ( i = 0; i <= 4; i++ ) {
 		toolFactories.push( new OO.ui.ToolFactory() );
 		toolGroupFactories.push( new OO.ui.ToolGroupFactory() );
-		toolbars.push( new OO.ui.Toolbar( toolFactories[ i ], toolGroupFactories[ i ], configs[ i ] ) );
+		toolbars.push( new OO.ui.Toolbar(
+			toolFactories[ i ],
+			toolGroupFactories[ i ],
+			configs[ i ]
+		) );
 		toolbars[ i ].getToolAccelerator = getToolAccelerator;
 	}
 
-	function createTool( toolbar, group, name, icon, title, init, onSelect, displayBothIconAndLabel ) {
+	// eslint-disable-next-line max-len
+	function createTool( toolbar, group, name, icon, title, flags, init, onSelect, displayBothIconAndLabel ) {
 		var Tool = function () {
 			Tool.parent.apply( this, arguments );
 			this.toggled = false;
@@ -61,13 +65,13 @@ Demo.static.pages.toolbars = function ( demo ) {
 		Tool.static.group = group;
 		Tool.static.icon = icon;
 		Tool.static.title = title;
+		Tool.static.flags = flags;
 		Tool.static.displayBothIconAndLabel = !!displayBothIconAndLabel;
 		return Tool;
 	}
 
 	function createToolGroup( toolbar, group ) {
-		// eslint-disable-next-line jquery/no-each-util
-		$.each( toolGroups[ group ], function ( i, tool ) {
+		toolGroups[ group ].forEach( function ( tool ) {
 			var args = tool.slice();
 			args.splice( 0, 0, toolbar, group );
 			toolFactories[ toolbar ].register( createTool.apply( null, args ) );
@@ -103,6 +107,7 @@ Demo.static.pages.toolbars = function ( demo ) {
 			head: true
 		} }, config ) );
 
+		// eslint-disable-next-line no-jquery/no-parse-html-literal
 		this.popup.$body.append( '<p>Alert contents</p>' );
 	};
 
@@ -112,8 +117,8 @@ Demo.static.pages.toolbars = function ( demo ) {
 	AlertTool.static.group = 'popupTools';
 	AlertTool.static.icon = 'alert';
 
-	toolFactories[ 2 ].register( AlertTool );
-	toolFactories[ 4 ].register( AlertTool );
+	toolFactories[ 1 ].register( AlertTool );
+	toolFactories[ 3 ].register( AlertTool );
 
 	PopupTool = function ( toolGroup, config ) {
 		// Parent constructor
@@ -123,6 +128,7 @@ Demo.static.pages.toolbars = function ( demo ) {
 			head: true
 		} }, config ) );
 
+		// eslint-disable-next-line no-jquery/no-parse-html-literal
 		this.popup.$body.append( '<p>Popup contents</p>' );
 	};
 
@@ -132,8 +138,8 @@ Demo.static.pages.toolbars = function ( demo ) {
 	PopupTool.static.group = 'popupTools';
 	PopupTool.static.icon = 'help';
 
-	toolFactories[ 2 ].register( PopupTool );
-	toolFactories[ 4 ].register( PopupTool );
+	toolFactories[ 1 ].register( PopupTool );
+	toolFactories[ 3 ].register( PopupTool );
 
 	ToolGroupTool = function ( toolGroup, config ) {
 		// Parent constructor
@@ -150,8 +156,8 @@ Demo.static.pages.toolbars = function ( demo ) {
 	};
 
 	toolFactories[ 0 ].register( ToolGroupTool );
-	toolFactories[ 3 ].register( ToolGroupTool );
-	toolFactories[ 5 ].register( ToolGroupTool );
+	toolFactories[ 2 ].register( ToolGroupTool );
+	toolFactories[ 4 ].register( ToolGroupTool );
 
 	// Toolbars setup, in order of toolbar items appearance
 	// Toolbar
@@ -195,34 +201,8 @@ Demo.static.pages.toolbars = function ( demo ) {
 			include: '*'
 		}
 	] );
-	// Toolbar with action buttons
+	// Action toolbar for toolbars[ 2 ] below
 	toolbars[ 1 ].setup( [
-		{
-			name: 'menu',
-			type: 'menu',
-			header: 'Popup-/MenuToolGroup header',
-			icon: 'image',
-			include: [ { group: 'menuTools' } ]
-		},
-		{
-			name: 'disabledMenu',
-			type: 'disabledMenu',
-			icon: 'image',
-			include: [ { group: 'disabledMenuTools' } ]
-		},
-		{
-			name: 'cite',
-			type: 'bar',
-			include: [ { group: 'cite' } ]
-		},
-		{
-			name: 'citeDisabled',
-			type: 'bar',
-			include: [ { group: 'citeDisabled' } ]
-		}
-	] );
-	// Action toolbar for toolbars[ 3 ] below
-	toolbars[ 2 ].setup( [
 		{
 			name: 'popup',
 			include: [ { group: 'popupTools' } ]
@@ -239,10 +219,24 @@ Demo.static.pages.toolbars = function ( demo ) {
 			type: 'list',
 			icon: 'edit',
 			include: [ { group: 'editorSwitchTools' } ]
+		},
+		{
+			name: 'publish',
+			type: 'bar',
+			include: [ { group: 'publish' } ]
 		}
+		// TODO: Show a flagged list tool in another demo,
+		// or when VE adds one.
+		// {
+		// name: 'list',
+		// type: 'list',
+		// icon: 'ellipsis',
+		// flags: [ 'primary', 'progressive' ],
+		// include: [ { group: 'listTools' } ]
+		// }
 	] );
 	// Word processor toolbar
-	toolbars[ 3 ].setup( [
+	toolbars[ 2 ].setup( [
 		{
 			name: 'history',
 			type: 'bar',
@@ -293,8 +287,8 @@ Demo.static.pages.toolbars = function ( demo ) {
 			include: [ { group: 'specialCharacters' } ]
 		}
 	] );
-	// Action toolbar for toolbars[ 5 ] below
-	toolbars[ 4 ].setup( [
+	// Action toolbar for toolbars[ 4 ] below
+	toolbars[ 3 ].setup( [
 		{
 			name: 'popup',
 			include: [ { group: 'popupTools' } ]
@@ -318,7 +312,7 @@ Demo.static.pages.toolbars = function ( demo ) {
 		}
 	] );
 	// Word processor toolbar set to `position: 'bottom'`
-	toolbars[ 5 ].setup( [
+	toolbars[ 4 ].setup( [
 		{
 			name: 'history',
 			type: 'bar',
@@ -368,47 +362,10 @@ Demo.static.pages.toolbars = function ( demo ) {
 			include: [ { group: 'specialCharacters' } ]
 		}
 	] );
-	// Action toolbar for toolbars[7]
-	toolbars[ 6 ].setup( [
-		{
-			name: 'list',
-			type: 'list',
-			indicator: 'down',
-			flags: [ 'primary', 'progressive' ],
-			include: [ { group: 'listTools' } ]
-		}
-	] );
-	// Toolbar with action buttons, in a ButtonGroup
-	toolbars[ 7 ].setup( [
-		{
-			name: 'menu',
-			type: 'menu',
-			icon: 'image',
-			include: [ { group: 'menuTools' } ]
-		},
-		{
-			name: 'disabledMenu',
-			type: 'disabledMenu',
-			icon: 'image',
-			include: [ { group: 'disabledMenuTools' } ]
-		}
-	] );
 
-	actionButton = new OO.ui.ButtonWidget( { label: 'Action' } );
-	actionButtonDisabled = new OO.ui.ButtonWidget( { label: 'Disabled', disabled: true } );
-	toolbars[ 1 ].$actions.append( actionButton.$element, actionButtonDisabled.$element );
-
-	for ( i = 3; i <= 5; i += 2 ) {
-		publishButton = new OO.ui.ButtonWidget( { label: 'Publish changes…', flags: [ 'progressive', 'primary' ] } );
-		toolbars[ i ].$actions.append( toolbars[ i - 1 ].$element, publishButton.$element );
+	for ( i = 2; i <= 4; i += 2 ) {
+		toolbars[ i ].$actions.append( toolbars[ i - 1 ].$element );
 	}
-
-	actionButtonDelete = new OO.ui.ButtonWidget( { label: 'Delete', flags: [ 'destructive' ] } );
-	publishButton = new OO.ui.ButtonWidget( { label: 'Publish changes…', flags: [ 'progressive', 'primary' ] } );
-	actionGroup = new OO.ui.ButtonGroupWidget( {
-		items: [ actionButtonDelete, publishButton, toolbars[ 6 ].items[ 0 ] ]
-	} );
-	toolbars[ 7 ].$actions.append( actionGroup.$element );
 
 	for ( i = 0; i < toolbars.length; i++ ) {
 		toolbars[ i ].emit( 'updateState' );
@@ -419,7 +376,7 @@ Demo.static.pages.toolbars = function ( demo ) {
 		// Parameters like in createTool() function above (starting with 'name')
 		barTools: [
 			[ 'barTool', 'image', 'Basic tool in bar' ],
-			[ 'disabledBarTool', 'image', 'Basic tool in bar disabled', setDisabled ]
+			[ 'disabledBarTool', 'image', 'Basic tool in bar disabled', null, setDisabled ]
 		],
 
 		disabledBarTools: [
@@ -427,11 +384,17 @@ Demo.static.pages.toolbars = function ( demo ) {
 		],
 
 		cite: [
-			[ 'citeTool', 'quotes', 'Cite', null, null, true ]
+			[ 'citeTool', 'quotes', 'Cite', null, null, null, true ]
+		],
+
+		publish: [
+			// TODO: Show a destructive tool in another demo
+			// [ 'cancel', null, 'Cancel', [ 'destructive' ], null, setInactive, true ],
+			[ 'publish', null, 'Publish changes…', [ 'primary', 'progressive' ], null, setInactive, true ]
 		],
 
 		citeDisabled: [
-			[ 'citeToolDisabled', 'quotes', 'Cite', setDisabled, null, true ]
+			[ 'citeToolDisabled', 'quotes', 'Cite', null, setDisabled, null, true ]
 		],
 
 		editorSwitchTools: [
@@ -478,7 +441,7 @@ Demo.static.pages.toolbars = function ( demo ) {
 		listTools: [
 			[ 'listTool', 'image', 'First basic tool in list' ],
 			[ 'listTool1', 'image', 'Basic tool in list' ],
-			[ 'listTool3', 'image', 'Basic disabled tool in list', setDisabled ],
+			[ 'listTool3', 'image', 'Basic disabled tool in list', null, setDisabled ],
 			[ 'listTool6', 'image', 'A final tool' ]
 		],
 
@@ -493,13 +456,13 @@ Demo.static.pages.toolbars = function ( demo ) {
 		],
 
 		autoDisableListTools: [
-			[ 'autoDisableListTool', 'image', 'Click to disable this tool', null, setDisabled ]
+			[ 'autoDisableListTool', 'image', 'Click to disable this tool', null, null, setDisabled ]
 		],
 
 		menuTools: [
 			[ 'menuTool', 'image', 'Basic tool' ],
 			[ 'iconlessMenuTool', null, 'Tool without an icon' ],
-			[ 'disabledMenuTool', 'image', 'Basic tool disabled', setDisabled ]
+			[ 'disabledMenuTool', 'image', 'Basic tool disabled', null, setDisabled ]
 		],
 
 		disabledMenuTools: [
@@ -513,7 +476,7 @@ Demo.static.pages.toolbars = function ( demo ) {
 			[ 'advanced', 'advanced', 'Advanced settings' ],
 			[ 'textLanguage', 'language', 'Languages' ],
 			[ 'templatesUsed', 'puzzle', 'Templates used' ],
-			[ 'codeMirror', 'highlight', 'Syntax highlighting', setDisabled ],
+			[ 'codeMirror', 'highlight', 'Syntax highlighting', null, setDisabled ],
 			[ 'changeDirectionality', 'textDirRTL', 'View as right-to-left' ],
 			[ 'find', 'articleSearch', 'Find and replace' ]
 		],
@@ -545,7 +508,7 @@ Demo.static.pages.toolbars = function ( demo ) {
 			[ 'language', 'language', 'Language' ],
 			[ 'big', 'bigger', 'Big' ],
 			[ 'small', 'smaller', 'Small' ],
-			[ 'clear', 'cancel', 'Clear Styling', setDisabled ]
+			[ 'clear', 'cancel', 'Clear Styling', null, setDisabled ]
 		],
 
 		unusedStuff: [
@@ -563,19 +526,16 @@ Demo.static.pages.toolbars = function ( demo ) {
 	createToolGroup( 0, 'autoDisableListTools' );
 	createToolGroup( 0, 'unusedStuff' );
 
-	createToolGroup( 1, 'cite' );
-	createToolGroup( 1, 'citeDisabled' );
-	createToolGroup( 1, 'menuTools' );
-	createToolGroup( 1, 'disabledMenuTools' );
+	createToolGroup( 3, 'listTools' );
 
-	createToolGroup( 6, 'listTools' );
+	createToolGroup( 4, 'menuTools' );
+	createToolGroup( 4, 'disabledMenuTools' );
 
-	createToolGroup( 7, 'menuTools' );
-	createToolGroup( 7, 'disabledMenuTools' );
-
-	for ( i = 3; i <= 5; i += 2 ) {
+	for ( i = 2; i <= 4; i += 2 ) {
 		createToolGroup( i - 1, 'overflowTools' );
 		createToolGroup( i - 1, 'editorSwitchTools' );
+		createToolGroup( i - 1, 'publish' );
+		createToolGroup( i - 1, 'listTools' );
 		createToolGroup( i, 'cite' );
 		createToolGroup( i, 'formatTools' );
 		createToolGroup( i, 'insertTools' );
@@ -592,7 +552,7 @@ Demo.static.pages.toolbars = function ( demo ) {
 	}
 
 	for ( i = 0; i < toolbars.length; i++ ) {
-		if ( i === 2 || i === 4 || i === 6 ) {
+		if ( i === 1 || i === 3 ) {
 			// Action toolbars
 			continue;
 		}
@@ -606,7 +566,7 @@ Demo.static.pages.toolbars = function ( demo ) {
 
 		$containers.last().append( toolbars[ i ].$element );
 	}
-	$containers.append( '' );
+
 	$demo.append(
 		new OO.ui.PanelLayout( {
 			expanded: false,
@@ -614,13 +574,13 @@ Demo.static.pages.toolbars = function ( demo ) {
 		} ).$element
 			.addClass( 'demo-container demo-toolbars' )
 			.attr( 'role', 'main' )
+			/* eslint-disable no-jquery/no-parse-html-literal */
 			.append(
 				$containers.eq( 0 ).append( '<div class="demo-toolbars-contents">Toolbar</div>' ),
-				$containers.eq( 1 ).append( '<div class="demo-toolbars-contents">Toolbar with action buttons</div>' ),
-				$containers.eq( 2 ).append( '<div class="demo-toolbars-contents">Word processor toolbar</div>' ),
-				$containers.eq( 3 ).prepend( '<div class="demo-toolbars-contents">Word processor toolbar set to <code>position: &#39;bottom&#39;</code></div>' ),
-				$containers.eq( 4 ).append( '<div class="demo-toolbars-contents">Toolbar with action buttons in a group</div>' )
+				$containers.eq( 1 ).append( '<div class="demo-toolbars-contents">Word processor toolbar</div>' ),
+				$containers.eq( 2 ).prepend( '<div class="demo-toolbars-contents">Word processor toolbar set to <code>position: &#39;bottom&#39;</code></div>' )
 			)
+			/* eslint-enable no-jquery/no-parse-html-literal */
 	);
 	for ( i = 0; i < toolbars.length; i++ ) {
 		toolbars[ i ].initialize();

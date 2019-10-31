@@ -1,12 +1,21 @@
 {
 	"prefix": "oo-ui-icon",
-	"intro": "@import '../../../../src/styles/common';",
+	"intro": "@import '../../../../src/styles/common.less';",
 	"images": {
 		"userAnonymous": {
 			"file": "../wikimediaui/images/icons/userAnonymous.svg"
 		},
 		"userAvatar": {
 			"file": "../wikimediaui/images/icons/userAvatar.svg"
+		},
+		"userAvatarOutline": {
+			"file": "../wikimediaui/images/icons/userAvatarOutline.svg"
+		},
+		"userGroup": {
+			"file": {
+				"ltr": "../wikimediaui/images/icons/userGroup-ltr.svg",
+				"rtl": "../wikimediaui/images/icons/userGroup-rtl.svg"
+			}
 		},
 		"userTalk": {
 			"file": {

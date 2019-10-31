@@ -1,7 +1,8 @@
 /**
  * MultiselectWidget allows selecting multiple options from a list.
  *
- * For more information about menus and options, please see the [OOUI documentation on MediaWiki][1].
+ * For more information about menus and options, please see the [OOUI documentation
+ * on MediaWiki][1].
  *
  * [1]: https://www.mediawiki.org/wiki/OOUI/Widgets/Selects_and_Options#Menu_selects_and_options
  *
@@ -9,6 +10,7 @@
  * @abstract
  * @extends OO.ui.Widget
  * @mixins OO.ui.mixin.GroupWidget
+ * @mixins OO.ui.mixin.TitledElement
  *
  * @constructor
  * @param {Object} [config] Configuration options
@@ -23,12 +25,17 @@ OO.ui.MultiselectWidget = function OoUiMultiselectWidget( config ) {
 
 	// Mixin constructors
 	OO.ui.mixin.GroupWidget.call( this, config );
+	OO.ui.mixin.TitledElement.call( this, config );
 
 	// Events
-	this.aggregate( { change: 'select' } );
+	this.aggregate( {
+		change: 'select'
+	} );
 	// This is mostly for compatibility with TagMultiselectWidget... normally, 'change' is emitted
 	// by GroupElement only when items are added/removed
-	this.connect( this, { select: [ 'emit', 'change' ] } );
+	this.connect( this, {
+		select: [ 'emit', 'change' ]
+	} );
 
 	// Initialization
 	if ( config.items ) {
@@ -43,6 +50,7 @@ OO.ui.MultiselectWidget = function OoUiMultiselectWidget( config ) {
 
 OO.inheritClass( OO.ui.MultiselectWidget, OO.ui.Widget );
 OO.mixinClass( OO.ui.MultiselectWidget, OO.ui.mixin.GroupWidget );
+OO.mixinClass( OO.ui.MultiselectWidget, OO.ui.mixin.TitledElement );
 
 /* Events */
 

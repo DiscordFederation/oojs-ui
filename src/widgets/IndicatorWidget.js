@@ -4,17 +4,18 @@
  * indicators included in the library, please see the [OOUI documentation on MediaWiki][1].
  *
  *     @example
- *     // Example of an indicator widget
+ *     // An indicator widget.
  *     var indicator1 = new OO.ui.IndicatorWidget( {
- *         indicator: 'required'
- *     } );
- *
- *     // Create a fieldset layout to add a label
- *     var fieldset = new OO.ui.FieldsetLayout();
+ *             indicator: 'required'
+ *         } ),
+ *         // Create a fieldset layout to add a label.
+ *         fieldset = new OO.ui.FieldsetLayout();
  *     fieldset.addItems( [
- *         new OO.ui.FieldLayout( indicator1, { label: 'A required indicator:' } )
+ *         new OO.ui.FieldLayout( indicator1, {
+ *             label: 'A required indicator:'
+ *         } )
  *     ] );
- *     $( 'body' ).append( fieldset.$element );
+ *     $( document.body ).append( fieldset.$element );
  *
  * [1]: https://www.mediawiki.org/wiki/OOUI/Widgets/Icons,_Indicators,_and_Labels#Indicators
  *
@@ -35,9 +36,16 @@ OO.ui.IndicatorWidget = function OoUiIndicatorWidget( config ) {
 	OO.ui.IndicatorWidget.parent.call( this, config );
 
 	// Mixin constructors
-	OO.ui.mixin.IndicatorElement.call( this, $.extend( {}, config, { $indicator: this.$element } ) );
-	OO.ui.mixin.TitledElement.call( this, $.extend( {}, config, { $titled: this.$element } ) );
-	OO.ui.mixin.LabelElement.call( this, $.extend( {}, config, { $label: this.$element, invisibleLabel: true } ) );
+	OO.ui.mixin.IndicatorElement.call( this, $.extend( {
+		$indicator: this.$element
+	}, config ) );
+	OO.ui.mixin.TitledElement.call( this, $.extend( {
+		$titled: this.$element
+	}, config ) );
+	OO.ui.mixin.LabelElement.call( this, $.extend( {
+		$label: this.$element,
+		invisibleLabel: true
+	}, config ) );
 
 	// Initialization
 	this.$element.addClass( 'oo-ui-indicatorWidget' );

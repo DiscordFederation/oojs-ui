@@ -1,12 +1,13 @@
 /**
  * DecoratedOptionWidgets are {@link OO.ui.OptionWidget options} that can be configured
- * with an {@link OO.ui.mixin.IconElement icon} and/or {@link OO.ui.mixin.IndicatorElement indicator}.
+ * with an {@link OO.ui.mixin.IconElement icon} and/or
+ * {@link OO.ui.mixin.IndicatorElement indicator}.
  * This class is used with OO.ui.SelectWidget to create a selection of mutually exclusive
  * options. For more information about options and selects, please see the
  * [OOUI documentation on MediaWiki][1].
  *
  *     @example
- *     // Decorated options in a select widget
+ *     // Decorated options in a select widget.
  *     var select = new OO.ui.SelectWidget( {
  *         items: [
  *             new OO.ui.DecoratedOptionWidget( {
@@ -21,7 +22,7 @@
  *             } )
  *         ]
  *     } );
- *     $( 'body' ).append( select.$element );
+ *     $( document.body ).append( select.$element );
  *
  * [1]: https://www.mediawiki.org/wiki/OOUI/Widgets/Selects_and_Options
  *

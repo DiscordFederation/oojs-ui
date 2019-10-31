@@ -1,4 +1,21 @@
 /**
+ * MultilineTextInputWidgets, like HTML textareas, are featuring customization options to
+ * configure number of rows visible. In addition, these widgets can be autosized to fit user
+ * inputs and can show {@link OO.ui.mixin.IconElement icons} and
+ * {@link OO.ui.mixin.IndicatorElement indicators}.
+ * Please see the [OOUI documentation on MediaWiki] [1] for more information and examples.
+ *
+ * This widget can be used inside an HTML form, such as a OO.ui.FormLayout.
+ *
+ *     @example
+ *     // A MultilineTextInputWidget.
+ *     var multilineTextInput = new OO.ui.MultilineTextInputWidget( {
+ *         value: 'Text input on multiple lines'
+ *     } );
+ *     $( document.body ).append( multilineTextInput.$element );
+ *
+ * [1]: https://www.mediawiki.org/wiki/OOUI/Widgets/Inputs#MultilineTextInputWidget
+ *
  * @class
  * @extends OO.ui.TextInputWidget
  *
@@ -20,6 +37,7 @@ OO.ui.MultilineTextInputWidget = function OoUiMultilineTextInputWidget( config )
 
 	// Properties
 	this.autosize = !!config.autosize;
+	this.styleHeight = null;
 	this.minRows = config.rows !== undefined ? config.rows : '';
 	this.maxRows = config.maxRows || Math.max( 2 * ( this.minRows || 0 ), 10 );
 
@@ -100,7 +118,7 @@ OO.ui.MultilineTextInputWidget.prototype.updatePosition = function () {
 OO.ui.MultilineTextInputWidget.prototype.onKeyPress = function ( e ) {
 	if (
 		( e.which === OO.ui.Keys.ENTER && ( e.ctrlKey || e.metaKey ) ) ||
-		// Some platforms emit keycode 10 for ctrl+enter in a textarea
+		// Some platforms emit keycode 10 for Control+Enter keypress in a textarea
 		e.which === 10
 	) {
 		this.emit( 'enter', e );

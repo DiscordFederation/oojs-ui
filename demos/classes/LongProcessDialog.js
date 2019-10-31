@@ -4,9 +4,10 @@ Demo.LongProcessDialog = function DemoLongProcessDialog( config ) {
 OO.inheritClass( Demo.LongProcessDialog, OO.ui.ProcessDialog );
 Demo.LongProcessDialog.static.title = 'Process dialog';
 Demo.LongProcessDialog.static.actions = [
-	{ action: 'save', label: 'Done', flags: [ 'primary', 'progressive' ] },
-	{ action: 'cancel', label: 'Cancel', flags: [ 'safe', 'back' ] },
-	{ action: 'other', label: 'Other', flags: 'other' }
+	{ action: 'save', label: 'Done', icon: 'check', flags: [ 'primary', 'progressive' ] },
+	{ action: 'cancel', label: 'Abort', flags: [ 'safe' ] },
+	{ action: 'other', label: 'Other' },
+	{ action: 'other2', label: 'Additional other' }
 ];
 Demo.LongProcessDialog.prototype.initialize = function () {
 	var i;
@@ -14,6 +15,7 @@ Demo.LongProcessDialog.prototype.initialize = function () {
 	Demo.LongProcessDialog.parent.prototype.initialize.apply( this, arguments );
 	this.content = new OO.ui.PanelLayout( { padded: true, expanded: false } );
 	for ( i = 0; i < 100; i++ ) {
+		// eslint-disable-next-line no-jquery/no-parse-html-literal
 		this.content.$element.append( '<p>Dialog content</p>' );
 	}
 	this.$body.append( this.content.$element );

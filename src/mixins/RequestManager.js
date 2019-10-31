@@ -1,16 +1,20 @@
 /**
- * RequestManager is a mixin that manages the lifecycle of a promise-backed request for a widget, such as
- * the {@link OO.ui.mixin.LookupElement}.
+ * RequestManager is a mixin that manages the lifecycle of a promise-backed request for a widget,
+ * such as the {@link OO.ui.mixin.LookupElement}.
  *
  * @class
  * @abstract
  *
  * @constructor
+ * @param {Object} [config] Configuration options
+ * @cfg {boolean} [showPendingRequest=true] Show pending state while request data is being fetched.
+ *  Requires widget to have also mixed in {@link OO.ui.mixin.PendingElement}.
  */
-OO.ui.mixin.RequestManager = function OoUiMixinRequestManager() {
+OO.ui.mixin.RequestManager = function OoUiMixinRequestManager( config ) {
 	this.requestCache = {};
 	this.requestQuery = null;
 	this.requestRequest = null;
+	this.showPendingRequest = !!this.pushPending && config.showPendingRequest !== false;
 };
 
 /* Setup */
@@ -20,9 +24,9 @@ OO.initClass( OO.ui.mixin.RequestManager );
 /**
  * Get request results for the current query.
  *
- * @return {jQuery.Promise} Promise object which will be passed response data as the first argument of
- *   the done event. If the request was aborted to make way for a subsequent request, this promise
- *   may not be rejected, depending on what jQuery feels like doing.
+ * @return {jQuery.Promise} Promise object which will be passed response data as the first argument
+ *  of the done event. If the request was aborted to make way for a subsequent request, this
+ *  promise may not be rejected, depending on what jQuery feels like doing.
  */
 OO.ui.mixin.RequestManager.prototype.getRequestData = function () {
 	var widget = this,
@@ -34,7 +38,7 @@ OO.ui.mixin.RequestManager.prototype.getRequestData = function () {
 	if ( Object.prototype.hasOwnProperty.call( this.requestCache, value ) ) {
 		deferred.resolve( this.requestCache[ value ] );
 	} else {
-		if ( this.pushPending ) {
+		if ( this.showPendingRequest ) {
 			this.pushPending();
 		}
 		this.requestQuery = value;
@@ -47,7 +51,7 @@ OO.ui.mixin.RequestManager.prototype.getRequestData = function () {
 				// being aborted, or at least eventually. It would be nice if we could popPending()
 				// at abort time, but only if we knew that we hadn't already called popPending()
 				// for that request.
-				if ( widget.popPending ) {
+				if ( widget.showPendingRequest ) {
 					widget.popPending();
 				}
 			} )
@@ -57,7 +61,8 @@ OO.ui.mixin.RequestManager.prototype.getRequestData = function () {
 				if ( ourRequest === widget.requestRequest ) {
 					widget.requestQuery = null;
 					widget.requestRequest = null;
-					widget.requestCache[ value ] = widget.getRequestCacheDataFromResponse( response );
+					widget.requestCache[ value ] =
+						widget.getRequestCacheDataFromResponse( response );
 					deferred.resolve( widget.requestCache[ value ] );
 				}
 			} )

@@ -4,12 +4,13 @@
  * with OO.ui.SelectWidget to create a selection of mutually exclusive options. For more information
  * and examples, please see the [OOUI documentation on MediaWiki][1].
  *
- * [1]: https://www.mediawiki.org/wiki/OOUI/Widgets/Selects_and_Multioptions
+ * [1]: https://www.mediawiki.org/wiki/OOUI/Widgets/Selects_and_Options
  *
  * @class
  * @extends OO.ui.Widget
  * @mixins OO.ui.mixin.ItemWidget
  * @mixins OO.ui.mixin.LabelElement
+ * @mixins OO.ui.mixin.TitledElement
  *
  * @constructor
  * @param {Object} [config] Configuration options
@@ -25,6 +26,7 @@ OO.ui.MultioptionWidget = function OoUiMultioptionWidget( config ) {
 	// Mixin constructors
 	OO.ui.mixin.ItemWidget.call( this );
 	OO.ui.mixin.LabelElement.call( this, config );
+	OO.ui.mixin.TitledElement.call( this, config );
 
 	// Properties
 	this.selected = null;
@@ -41,6 +43,7 @@ OO.ui.MultioptionWidget = function OoUiMultioptionWidget( config ) {
 OO.inheritClass( OO.ui.MultioptionWidget, OO.ui.Widget );
 OO.mixinClass( OO.ui.MultioptionWidget, OO.ui.mixin.ItemWidget );
 OO.mixinClass( OO.ui.MultioptionWidget, OO.ui.mixin.LabelElement );
+OO.mixinClass( OO.ui.MultioptionWidget, OO.ui.mixin.TitledElement );
 
 /* Events */
 
@@ -65,8 +68,8 @@ OO.ui.MultioptionWidget.prototype.isSelected = function () {
 
 /**
  * Set the option’s selected state. In general, all modifications to the selection
- * should be handled by the SelectWidget’s {@link OO.ui.SelectWidget#selectItem selectItem( [item] )}
- * method instead of this method.
+ * should be handled by the SelectWidget’s
+ * {@link OO.ui.SelectWidget#selectItem selectItem( [item] )} method instead of this method.
  *
  * @param {boolean} [state=false] Select option
  * @chainable

@@ -4,14 +4,14 @@
  * (to adjust the value in increments) to allow the user to enter a number.
  *
  *     @example
- *     // Example: A NumberInputWidget.
+ *     // A NumberInputWidget.
  *     var numberInput = new OO.ui.NumberInputWidget( {
  *         label: 'NumberInputWidget',
  *         input: { value: 5 },
  *         min: 1,
  *         max: 10
  *     } );
- *     $( 'body' ).append( numberInput.$element );
+ *     $( document.body ).append( numberInput.$element );
  *
  * @class
  * @extends OO.ui.TextInputWidget
@@ -25,15 +25,14 @@
  * @cfg {number} [min=-Infinity] Minimum allowed value
  * @cfg {number} [max=Infinity] Maximum allowed value
  * @cfg {number|null} [step] If specified, the field only accepts values that are multiples of this.
- * @cfg {number} [buttonStep=step||1] Delta when using the buttons or up/down arrow keys.
+ * @cfg {number} [buttonStep=step||1] Delta when using the buttons or Up/Down arrow keys.
  *  Defaults to `step` if specified, otherwise `1`.
- * @cfg {number} [pageStep=10*buttonStep] Delta when using the page-up/page-down keys.
+ * @cfg {number} [pageStep=10*buttonStep] Delta when using the Page-up/Page-down keys.
  *  Defaults to 10 times `buttonStep`.
  * @cfg {boolean} [showButtons=true] Whether to show the plus and minus buttons.
  */
 OO.ui.NumberInputWidget = function OoUiNumberInputWidget( config ) {
-	var $field = $( '<div>' )
-		.addClass( 'oo-ui-numberInputWidget-field' );
+	var $field = $( '<div>' ).addClass( 'oo-ui-numberInputWidget-field' );
 
 	// Configuration initialization
 	config = $.extend( {
@@ -166,7 +165,8 @@ OO.ui.NumberInputWidget.prototype.getRange = function () {
  *  Defaults to `step` if specified, otherwise `1`.
  * @param {number} [pageStep=10*buttonStep] Delta when using the page-up/page-down keys.
  *  Defaults to 10 times `buttonStep`.
- * @param {number|null} [step] If specified, the field only accepts values that are multiples of this.
+ * @param {number|null} [step] If specified, the field only accepts values that are multiples
+ *  of this.
  */
 OO.ui.NumberInputWidget.prototype.setStep = function ( buttonStep, pageStep, step ) {
 	if ( buttonStep === undefined ) {
@@ -291,12 +291,16 @@ OO.ui.NumberInputWidget.prototype.onButtonClick = function ( dir ) {
  *
  * @private
  * @param {jQuery.Event} event
- * @return {undefined/boolean} False to prevent default if event is handled
+ * @return {undefined|boolean} False to prevent default if event is handled
  */
 OO.ui.NumberInputWidget.prototype.onWheel = function ( event ) {
 	var delta = 0;
 
-	if ( !this.isDisabled() && this.$input.is( ':focus' ) ) {
+	if ( this.isDisabled() || this.isReadOnly() ) {
+		return;
+	}
+
+	if ( this.$input.is( ':focus' ) ) {
 		// Standard 'wheel' event
 		if ( event.originalEvent.deltaMode !== undefined ) {
 			this.sawWheelEvent = true;
@@ -334,25 +338,45 @@ OO.ui.NumberInputWidget.prototype.onWheel = function ( event ) {
  *
  * @private
  * @param {jQuery.Event} e Key down event
- * @return {undefined/boolean} False to prevent default if event is handled
+ * @return {undefined|boolean} False to prevent default if event is handled
  */
 OO.ui.NumberInputWidget.prototype.onKeyDown = function ( e ) {
-	if ( !this.isDisabled() ) {
-		switch ( e.which ) {
-			case OO.ui.Keys.UP:
-				this.adjustValue( this.buttonStep );
-				return false;
-			case OO.ui.Keys.DOWN:
-				this.adjustValue( -this.buttonStep );
-				return false;
-			case OO.ui.Keys.PAGEUP:
-				this.adjustValue( this.pageStep );
-				return false;
-			case OO.ui.Keys.PAGEDOWN:
-				this.adjustValue( -this.pageStep );
-				return false;
-		}
+	if ( this.isDisabled() || this.isReadOnly() ) {
+		return;
 	}
+
+	switch ( e.which ) {
+		case OO.ui.Keys.UP:
+			this.adjustValue( this.buttonStep );
+			return false;
+		case OO.ui.Keys.DOWN:
+			this.adjustValue( -this.buttonStep );
+			return false;
+		case OO.ui.Keys.PAGEUP:
+			this.adjustValue( this.pageStep );
+			return false;
+		case OO.ui.Keys.PAGEDOWN:
+			this.adjustValue( -this.pageStep );
+			return false;
+	}
+};
+
+/**
+ * Update the disabled state of the controls
+ *
+ * @chainable
+ * @protected
+ * @return {OO.ui.NumberInputWidget} The widget, for chaining
+ */
+OO.ui.NumberInputWidget.prototype.updateControlsDisabled = function () {
+	var disabled = this.isDisabled() || this.isReadOnly();
+	if ( this.minusButton ) {
+		this.minusButton.setDisabled( disabled );
+	}
+	if ( this.plusButton ) {
+		this.plusButton.setDisabled( disabled );
+	}
+	return this;
 };
 
 /**
@@ -361,13 +385,16 @@ OO.ui.NumberInputWidget.prototype.onKeyDown = function ( e ) {
 OO.ui.NumberInputWidget.prototype.setDisabled = function ( disabled ) {
 	// Parent method
 	OO.ui.NumberInputWidget.parent.prototype.setDisabled.call( this, disabled );
+	this.updateControlsDisabled();
+	return this;
+};
 
-	if ( this.minusButton ) {
-		this.minusButton.setDisabled( this.isDisabled() );
-	}
-	if ( this.plusButton ) {
-		this.plusButton.setDisabled( this.isDisabled() );
-	}
-
+/**
+ * @inheritdoc
+ */
+OO.ui.NumberInputWidget.prototype.setReadOnly = function () {
+	// Parent method
+	OO.ui.NumberInputWidget.parent.prototype.setReadOnly.apply( this, arguments );
+	this.updateControlsDisabled();
 	return this;
 };

@@ -3,10 +3,12 @@ Widgets.ToDoListWidget5 = function ToDoListWidget5( config ) {
 	ToDoListWidget5.parent.call( this, config );
 
 	this.aggregate( {
-		'delete': 'itemDelete'
+		delete: 'itemDelete'
 	} );
 
-	this.connect( this, { itemDelete: 'onItemDelete' } );
+	this.connect( this, {
+		itemDelete: 'onItemDelete'
+	} );
 };
 
 OO.inheritClass( Widgets.ToDoListWidget5, OO.ui.SelectWidget );

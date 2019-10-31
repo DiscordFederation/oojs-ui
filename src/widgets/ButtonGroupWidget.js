@@ -4,27 +4,28 @@
  * removed, and cleared from the group.
  *
  *     @example
- *     // Example: A ButtonGroupWidget with two buttons
+ *     // A ButtonGroupWidget with two buttons.
  *     var button1 = new OO.ui.PopupButtonWidget( {
- *         label: 'Select a category',
- *         icon: 'menu',
- *         popup: {
- *             $content: $( '<p>List of categories...</p>' ),
- *             padded: true,
- *             align: 'left'
- *         }
- *     } );
- *     var button2 = new OO.ui.ButtonWidget( {
- *         label: 'Add item'
- *     });
- *     var buttonGroup = new OO.ui.ButtonGroupWidget( {
- *         items: [button1, button2]
- *     } );
- *     $( 'body' ).append( buttonGroup.$element );
+ *             label: 'Select a category',
+ *             icon: 'menu',
+ *             popup: {
+ *                 $content: $( '<p>List of categories…</p>' ),
+ *                 padded: true,
+ *                 align: 'left'
+ *             }
+ *         } ),
+ *         button2 = new OO.ui.ButtonWidget( {
+ *             label: 'Add item'
+ *         } ),
+ *         buttonGroup = new OO.ui.ButtonGroupWidget( {
+ *             items: [ button1, button2 ]
+ *         } );
+ *     $( document.body ).append( buttonGroup.$element );
  *
  * @class
  * @extends OO.ui.Widget
  * @mixins OO.ui.mixin.GroupElement
+ * @mixins OO.ui.mixin.TitledElement
  *
  * @constructor
  * @param {Object} [config] Configuration options
@@ -38,7 +39,10 @@ OO.ui.ButtonGroupWidget = function OoUiButtonGroupWidget( config ) {
 	OO.ui.ButtonGroupWidget.parent.call( this, config );
 
 	// Mixin constructors
-	OO.ui.mixin.GroupElement.call( this, $.extend( {}, config, { $group: this.$element } ) );
+	OO.ui.mixin.GroupElement.call( this, $.extend( {
+		$group: this.$element
+	}, config ) );
+	OO.ui.mixin.TitledElement.call( this, config );
 
 	// Initialization
 	this.$element.addClass( 'oo-ui-buttonGroupWidget' );
@@ -51,6 +55,7 @@ OO.ui.ButtonGroupWidget = function OoUiButtonGroupWidget( config ) {
 
 OO.inheritClass( OO.ui.ButtonGroupWidget, OO.ui.Widget );
 OO.mixinClass( OO.ui.ButtonGroupWidget, OO.ui.mixin.GroupElement );
+OO.mixinClass( OO.ui.ButtonGroupWidget, OO.ui.mixin.TitledElement );
 
 /* Static Properties */
 

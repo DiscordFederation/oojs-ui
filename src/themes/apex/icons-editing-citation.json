@@ -1,6 +1,6 @@
 {
 	"prefix": "oo-ui-icon",
-	"intro": "@import '../../../../src/styles/common';",
+	"intro": "@import '../../../../src/styles/common.less';",
 	"images": {
 		"book": {
 			"file": {
@@ -19,9 +19,6 @@
 				"ltr": "../wikimediaui/images/icons/newspaper-ltr.svg",
 				"rtl": "../wikimediaui/images/icons/newspaper-rtl.svg"
 			}
-		},
-		"web": {
-			"file": "../wikimediaui/images/icons/web.svg"
 		},
 		"reference": {
 			"file": "../wikimediaui/images/icons/reference.svg"

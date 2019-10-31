@@ -4,28 +4,29 @@
  *
  * - String: a plaintext string
  * - jQuery selection: a jQuery selection, used for anything other than a plaintext label, e.g., a
- *   label that includes a link or special styling, such as a gray color or additional graphical elements.
+ *   label that includes a link or special styling, such as a gray color or additional
+ *   graphical elements.
  * - Function: a function that will produce a string in the future. Functions are used
  *   in cases where the value of the label is not currently defined.
  *
- * In addition, the LabelWidget can be associated with an {@link OO.ui.InputWidget input widget}, which
- * will come into focus when the label is clicked.
+ * In addition, the LabelWidget can be associated with an {@link OO.ui.InputWidget input widget},
+ * which will come into focus when the label is clicked.
  *
  *     @example
- *     // Examples of LabelWidgets
+ *     // Two LabelWidgets.
  *     var label1 = new OO.ui.LabelWidget( {
- *         label: 'plaintext label'
- *     } );
- *     var label2 = new OO.ui.LabelWidget( {
- *         label: $( '<a>' ).attr( 'href', 'default.html' ).text( 'jQuery label' )
- *     } );
- *     // Create a fieldset layout with fields for each example
- *     var fieldset = new OO.ui.FieldsetLayout();
+ *             label: 'plaintext label'
+ *         } ),
+ *         label2 = new OO.ui.LabelWidget( {
+ *             label: $( '<a>' ).attr( 'href', 'default.html' ).text( 'jQuery label' )
+ *         } ),
+ *         // Create a fieldset layout with fields for each example.
+ *         fieldset = new OO.ui.FieldsetLayout();
  *     fieldset.addItems( [
  *         new OO.ui.FieldLayout( label1 ),
  *         new OO.ui.FieldLayout( label2 )
  *     ] );
- *     $( 'body' ).append( fieldset.$element );
+ *     $( document.body ).append( fieldset.$element );
  *
  * @class
  * @extends OO.ui.Widget
@@ -45,7 +46,9 @@ OO.ui.LabelWidget = function OoUiLabelWidget( config ) {
 	OO.ui.LabelWidget.parent.call( this, config );
 
 	// Mixin constructors
-	OO.ui.mixin.LabelElement.call( this, $.extend( {}, config, { $label: this.$element } ) );
+	OO.ui.mixin.LabelElement.call( this, $.extend( {
+		$label: this.$element
+	}, config ) );
 	OO.ui.mixin.TitledElement.call( this, config );
 
 	// Properties

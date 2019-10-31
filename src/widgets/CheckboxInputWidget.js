@@ -7,28 +7,28 @@
  * This widget can be used inside an HTML form, such as a OO.ui.FormLayout.
  *
  *     @example
- *     // An example of selected, unselected, and disabled checkbox inputs
- *     var checkbox1=new OO.ui.CheckboxInputWidget( {
- *          value: 'a',
- *          selected: true
- *     } );
- *     var checkbox2=new OO.ui.CheckboxInputWidget( {
- *         value: 'b'
- *     } );
- *     var checkbox3=new OO.ui.CheckboxInputWidget( {
- *         value:'c',
- *         disabled: true
- *     } );
- *     // Create a fieldset layout with fields for each checkbox.
- *     var fieldset = new OO.ui.FieldsetLayout( {
- *         label: 'Checkboxes'
- *     } );
+ *     // An example of selected, unselected, and disabled checkbox inputs.
+ *     var checkbox1 = new OO.ui.CheckboxInputWidget( {
+ *             value: 'a',
+ *              selected: true
+ *         } ),
+ *         checkbox2 = new OO.ui.CheckboxInputWidget( {
+ *             value: 'b'
+ *         } ),
+ *         checkbox3 = new OO.ui.CheckboxInputWidget( {
+ *             value:'c',
+ *             disabled: true
+ *         } ),
+ *         // Create a fieldset layout with fields for each checkbox.
+ *         fieldset = new OO.ui.FieldsetLayout( {
+ *             label: 'Checkboxes'
+ *         } );
  *     fieldset.addItems( [
  *         new OO.ui.FieldLayout( checkbox1, { label: 'Selected checkbox', align: 'inline' } ),
  *         new OO.ui.FieldLayout( checkbox2, { label: 'Unselected checkbox', align: 'inline' } ),
  *         new OO.ui.FieldLayout( checkbox3, { label: 'Disabled checkbox', align: 'inline' } ),
  *     ] );
- *     $( 'body' ).append( fieldset.$element );
+ *     $( document.body ).append( fieldset.$element );
  *
  * [1]: https://www.mediawiki.org/wiki/OOUI/Widgets/Inputs
  *
@@ -37,7 +37,9 @@
  *
  * @constructor
  * @param {Object} [config] Configuration options
- * @cfg {boolean} [selected=false] Select the checkbox initially. By default, the checkbox is not selected.
+ * @cfg {boolean} [selected=false] Select the checkbox initially. By default, the checkbox is
+ *  not selected.
+ * @cfg {boolean} [indeterminate=false] Whether the checkbox is in the indeterminate state.
  */
 OO.ui.CheckboxInputWidget = function OoUiCheckboxInputWidget( config ) {
 	// Configuration initialization
@@ -58,11 +60,23 @@ OO.ui.CheckboxInputWidget = function OoUiCheckboxInputWidget( config ) {
 		// Required for pretty styling in WikimediaUI theme
 		.append( this.checkIcon.$element );
 	this.setSelected( config.selected !== undefined ? config.selected : false );
+	this.setIndeterminate( config.indeterminate !== undefined ? config.indeterminate : false );
 };
 
 /* Setup */
 
 OO.inheritClass( OO.ui.CheckboxInputWidget, OO.ui.InputWidget );
+
+/* Events */
+
+/**
+ * @event change
+ *
+ * A change event is emitted when the state of the input changes.
+ *
+ * @param {boolean} selected
+ * @param {boolean} indeterminate
+ */
 
 /* Static Properties */
 
@@ -102,6 +116,7 @@ OO.ui.CheckboxInputWidget.prototype.onEdit = function () {
 		// Allow the stack to clear so the value will be updated
 		setTimeout( function () {
 			widget.setSelected( widget.$input.prop( 'checked' ) );
+			widget.setIndeterminate( widget.$input.prop( 'indeterminate' ) );
 		} );
 	}
 };
@@ -109,16 +124,20 @@ OO.ui.CheckboxInputWidget.prototype.onEdit = function () {
 /**
  * Set selection state of this checkbox.
  *
- * @param {boolean} state `true` for selected
+ * @param {boolean} state Selected state
+ * @param {boolean} internal Used for internal calls to suppress events
  * @chainable
- * @return {OO.ui.Widget} The widget, for chaining
+ * @return {OO.ui.CheckboxInputWidget} The widget, for chaining
  */
-OO.ui.CheckboxInputWidget.prototype.setSelected = function ( state ) {
+OO.ui.CheckboxInputWidget.prototype.setSelected = function ( state, internal ) {
 	state = !!state;
 	if ( this.selected !== state ) {
 		this.selected = state;
 		this.$input.prop( 'checked', this.selected );
-		this.emit( 'change', this.selected );
+		if ( !internal ) {
+			this.setIndeterminate( false, true );
+			this.emit( 'change', this.selected, this.indeterminate );
+		}
 	}
 	// The first time that the selection state is set (probably while constructing the widget),
 	// remember it in defaultSelected. This property can be later used to check whether
@@ -146,11 +165,47 @@ OO.ui.CheckboxInputWidget.prototype.isSelected = function () {
 };
 
 /**
+ * Set indeterminate state of this checkbox.
+ *
+ * @param {boolean} state Indeterminate state
+ * @param {boolean} internal Used for internal calls to suppress events
+ * @chainable
+ * @return {OO.ui.CheckboxInputWidget} The widget, for chaining
+ */
+OO.ui.CheckboxInputWidget.prototype.setIndeterminate = function ( state, internal ) {
+	state = !!state;
+	if ( this.indeterminate !== state ) {
+		this.indeterminate = state;
+		this.$input.prop( 'indeterminate', this.indeterminate );
+		if ( !internal ) {
+			this.setSelected( false, true );
+			this.emit( 'change', this.selected, this.indeterminate );
+		}
+	}
+	return this;
+};
+
+/**
+ * Check if this checkbox is selected.
+ *
+ * @return {boolean} Checkbox is selected
+ */
+OO.ui.CheckboxInputWidget.prototype.isIndeterminate = function () {
+	// Resynchronize our internal data with DOM data. Other scripts executing on the page can modify
+	// it, and we won't know unless they're kind enough to trigger a 'change' event.
+	var indeterminate = this.$input.prop( 'indeterminate' );
+	if ( this.indeterminate !== indeterminate ) {
+		this.setIndeterminate( indeterminate );
+	}
+	return this.indeterminate;
+};
+
+/**
  * @inheritdoc
  */
 OO.ui.CheckboxInputWidget.prototype.simulateLabelClick = function () {
 	if ( !this.isDisabled() ) {
-		this.$input.click();
+		this.$handle.trigger( 'click' );
 	}
 	this.focus();
 };

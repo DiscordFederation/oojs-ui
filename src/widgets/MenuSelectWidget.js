@@ -1,8 +1,9 @@
 /**
  * MenuSelectWidget is a {@link OO.ui.SelectWidget select widget} that contains options and
  * is used together with OO.ui.MenuOptionWidget. It is designed be used as part of another widget.
- * See {@link OO.ui.DropdownWidget DropdownWidget}, {@link OO.ui.ComboBoxInputWidget ComboBoxInputWidget},
- * and {@link OO.ui.mixin.LookupElement LookupElement} for examples of widgets that contain menus.
+ * See {@link OO.ui.DropdownWidget DropdownWidget},
+ * {@link OO.ui.ComboBoxInputWidget ComboBoxInputWidget}, and
+ * {@link OO.ui.mixin.LookupElement LookupElement} for examples of widgets that contain menus.
  * MenuSelectWidgets themselves are not instantiated directly, rather subclassed
  * and customized to be opened, closed, and displayed as needed.
  *
@@ -14,7 +15,7 @@
  * - Enter/Return key: choose and select a menu option
  * - Up-arrow key: highlight the previous menu option
  * - Down-arrow key: highlight the next menu option
- * - Esc key: hide the menu
+ * - Escape key: hide the menu
  *
  * Unlike most widgets, MenuSelectWidget is initially hidden and must be shown by calling #toggle.
  *
@@ -28,21 +29,27 @@
  *
  * @constructor
  * @param {Object} [config] Configuration options
- * @cfg {OO.ui.TextInputWidget} [input] Text input used to implement option highlighting for menu items that match
- *  the text the user types. This config is used by {@link OO.ui.ComboBoxInputWidget ComboBoxInputWidget}
- *  and {@link OO.ui.mixin.LookupElement LookupElement}
+ * @cfg {OO.ui.TextInputWidget} [input] Text input used to implement option highlighting for menu
+ *  items that match the text the user types. This config is used by
+ *  {@link OO.ui.ComboBoxInputWidget ComboBoxInputWidget} and
+ *  {@link OO.ui.mixin.LookupElement LookupElement}
  * @cfg {jQuery} [$input] Text input used to implement option highlighting for menu items that match
- *  the text the user types. This config is used by {@link OO.ui.TagMultiselectWidget TagMultiselectWidget}
- * @cfg {OO.ui.Widget} [widget] Widget associated with the menu's active state. If the user clicks the mouse
- *  anywhere on the page outside of this widget, the menu is hidden. For example, if there is a button
- *  that toggles the menu's visibility on click, the menu will be hidden then re-shown when the user clicks
- *  that button, unless the button (or its parent widget) is passed in here.
+ *  the text the user types. This config is used by
+ *  {@link OO.ui.TagMultiselectWidget TagMultiselectWidget}
+ * @cfg {OO.ui.Widget} [widget] Widget associated with the menu's active state. If the user clicks
+ *  the mouse anywhere on the page outside of this widget, the menu is hidden. For example, if
+ *  there is a button that toggles the menu's visibility on click, the menu will be hidden then
+ *  re-shown when the user clicks that button, unless the button (or its parent widget) is passed
+ *  in here.
  * @cfg {boolean} [autoHide=true] Hide the menu when the mouse is pressed outside the menu.
  * @cfg {jQuery} [$autoCloseIgnore] If these elements are clicked, don't auto-hide the menu.
  * @cfg {boolean} [hideOnChoose=true] Hide the menu when the user chooses an option.
  * @cfg {boolean} [filterFromInput=false] Filter the displayed options from the input
  * @cfg {boolean} [highlightOnFilter] Highlight the first result when filtering
- * @cfg {number} [width] Width of the menu
+ * @cfg {string} [filterMode='prefix'] The mode by which the menu filters the results.
+ *  Options are 'exact', 'prefix' or 'substring'. See `OO.ui.SelectWidget#getItemMatcher`
+ * @cfg {number|string} [width] Width of the menu as a number of pixels or CSS string with unit
+ *  suffix, used by {@link OO.ui.mixin.ClippableElement ClippableElement}
  */
 OO.ui.MenuSelectWidget = function OoUiMenuSelectWidget( config ) {
 	// Configuration initialization
@@ -52,7 +59,7 @@ OO.ui.MenuSelectWidget = function OoUiMenuSelectWidget( config ) {
 	OO.ui.MenuSelectWidget.parent.call( this, config );
 
 	// Mixin constructors
-	OO.ui.mixin.ClippableElement.call( this, $.extend( {}, config, { $clippable: this.$group } ) );
+	OO.ui.mixin.ClippableElement.call( this, $.extend( { $clippable: this.$group }, config ) );
 	OO.ui.mixin.FloatableElement.call( this, config );
 
 	// Initial vertical positions other than 'center' will result in
@@ -70,7 +77,9 @@ OO.ui.MenuSelectWidget = function OoUiMenuSelectWidget( config ) {
 	this.onDocumentMouseDownHandler = this.onDocumentMouseDown.bind( this );
 	this.onInputEditHandler = OO.ui.debounce( this.updateItemVisibility.bind( this ), 100 );
 	this.highlightOnFilter = !!config.highlightOnFilter;
+	this.lastHighlightedItem = null;
 	this.width = config.width;
+	this.filterMode = config.filterMode;
 
 	// Initialization
 	this.$element.addClass( 'oo-ui-menuSelectWidget' );
@@ -83,6 +92,7 @@ OO.ui.MenuSelectWidget = function OoUiMenuSelectWidget( config ) {
 	// TODO: Find a better way to handle post-constructor setup
 	this.visible = false;
 	this.$element.addClass( 'oo-ui-element-hidden' );
+	this.$focusOwner.attr( 'aria-expanded', 'false' );
 };
 
 /* Setup */
@@ -152,7 +162,7 @@ OO.ui.MenuSelectWidget.prototype.onDocumentKeyDown = function ( e ) {
 				break;
 			case OO.ui.Keys.ESCAPE:
 			case OO.ui.Keys.TAB:
-				if ( currentItem ) {
+				if ( currentItem && !this.multiselect ) {
 					currentItem.setHighlighted( false );
 				}
 				this.toggle( false );
@@ -183,8 +193,8 @@ OO.ui.MenuSelectWidget.prototype.updateItemVisibility = function () {
 		exactMatch = false;
 
 	if ( this.$input && this.filterFromInput ) {
-		filter = showAll ? null : this.getItemMatcher( this.$input.val() );
-		exactFilter = this.getItemMatcher( this.$input.val(), true );
+		filter = showAll ? null : this.getItemMatcher( this.$input.val(), this.filterMode );
+		exactFilter = this.getItemMatcher( this.$input.val(), 'exact' );
 		// Hide non-matching options, and also hide section headers if all options
 		// in their section are hidden.
 		for ( i = 0; i < len; i++ ) {
@@ -209,17 +219,17 @@ OO.ui.MenuSelectWidget.prototype.updateItemVisibility = function () {
 			section.toggle( showAll || !sectionEmpty );
 		}
 
-		if ( anyVisible && this.items.length && !exactMatch ) {
-			this.scrollItemIntoView( this.items[ 0 ] );
-		}
-
 		if ( !anyVisible ) {
 			this.highlightItem( null );
 		}
 
 		this.$element.toggleClass( 'oo-ui-menuSelectWidget-invisible', !anyVisible );
 
-		if ( this.highlightOnFilter ) {
+		if (
+			this.highlightOnFilter &&
+			!( this.lastHighlightedItem && this.lastHighlightedItem.isVisible() ) &&
+			this.isVisible()
+		) {
 			// Highlight the first item on the list
 			item = null;
 			items = this.getItems();
@@ -230,8 +240,8 @@ OO.ui.MenuSelectWidget.prototype.updateItemVisibility = function () {
 				}
 			}
 			this.highlightItem( item );
+			this.lastHighlightedItem = item;
 		}
-
 	}
 
 	// Reevaluate clipping
@@ -266,7 +276,10 @@ OO.ui.MenuSelectWidget.prototype.unbindDocumentKeyDownListener = function () {
 OO.ui.MenuSelectWidget.prototype.bindDocumentKeyPressListener = function () {
 	if ( this.$input ) {
 		if ( this.filterFromInput ) {
-			this.$input.on( 'keydown mouseup cut paste change input select', this.onInputEditHandler );
+			this.$input.on(
+				'keydown mouseup cut paste change input select',
+				this.onInputEditHandler
+			);
 			this.updateItemVisibility();
 		}
 	} else {
@@ -280,7 +293,10 @@ OO.ui.MenuSelectWidget.prototype.bindDocumentKeyPressListener = function () {
 OO.ui.MenuSelectWidget.prototype.unbindDocumentKeyPressListener = function () {
 	if ( this.$input ) {
 		if ( this.filterFromInput ) {
-			this.$input.off( 'keydown mouseup cut paste change input select', this.onInputEditHandler );
+			this.$input.off(
+				'keydown mouseup cut paste change input select',
+				this.onInputEditHandler
+			);
 			this.updateItemVisibility();
 		}
 	} else {
@@ -291,10 +307,12 @@ OO.ui.MenuSelectWidget.prototype.unbindDocumentKeyPressListener = function () {
 /**
  * Choose an item.
  *
- * When a user chooses an item, the menu is closed, unless the hideOnChoose config option is set to false.
+ * When a user chooses an item, the menu is closed, unless the hideOnChoose config option is
+ * set to false.
  *
- * Note that ‘choose’ should never be modified programmatically. A user can choose an option with the keyboard
- * or mouse and it becomes selected. To select an item programmatically, use the #selectItem method.
+ * Note that ‘choose’ should never be modified programmatically. A user can choose an option with
+ * the keyboard or mouse and it becomes selected. To select an item programmatically,
+ * use the #selectItem method.
  *
  * @param {OO.ui.OptionWidget} item Item to choose
  * @chainable
@@ -357,7 +375,7 @@ OO.ui.MenuSelectWidget.prototype.clearItems = function () {
  * @inheritdoc
  */
 OO.ui.MenuSelectWidget.prototype.toggle = function ( visible ) {
-	var change, originalHeight, flippedHeight;
+	var change, originalHeight, flippedHeight, selectedItem;
 
 	visible = ( visible === undefined ? !this.visible : !!visible ) && !!this.items.length;
 	change = visible !== this.isVisible();
@@ -422,9 +440,13 @@ OO.ui.MenuSelectWidget.prototype.toggle = function ( visible ) {
 
 			this.$focusOwner.attr( 'aria-expanded', 'true' );
 
-			if ( this.findSelectedItem() ) {
-				this.$focusOwner.attr( 'aria-activedescendant', this.findSelectedItem().getElementId() );
-				this.findSelectedItem().scrollElementIntoView( { duration: 0 } );
+			selectedItem = this.findSelectedItem();
+			if ( !this.multiselect && selectedItem ) {
+				// TODO: Verify if this is even needed; This is already done on highlight changes
+				// in SelectWidget#highlightItem, so we should just need to highlight the item
+				// we need to highlight here and not bother with attr or checking selections.
+				this.$focusOwner.attr( 'aria-activedescendant', selectedItem.getElementId() );
+				selectedItem.scrollElementIntoView( { duration: 0 } );
 			}
 
 			// Auto-hide
@@ -441,8 +463,16 @@ OO.ui.MenuSelectWidget.prototype.toggle = function ( visible ) {
 			this.getElementDocument().removeEventListener( 'mousedown', this.onDocumentMouseDownHandler, true );
 			this.togglePositioning( false );
 			this.toggleClipping( false );
+			this.lastHighlightedItem = null;
 		}
 	}
 
 	return this;
+};
+
+/**
+ * Scroll to the top of the menu
+ */
+OO.ui.MenuSelectWidget.prototype.scrollToTop = function () {
+	this.$element.scrollTop( 0 );
 };

@@ -1,4 +1,4 @@
-@import 'common';
+@import 'common.less';
 
 .theme-oo-ui-window() {
 	background-color: transparent;
@@ -141,7 +141,6 @@
 	&-navigation {
 		position: relative;
 		height: 3.4em;
-		padding: 0 1em;
 	}
 
 	&-location {
@@ -168,10 +167,6 @@
 
 				.oo-ui-labelElement-label {
 					line-height: @size-icon;
-				}
-
-				&.oo-ui-iconElement .oo-ui-iconElement-icon {
-					margin-top: -0.125em;
 				}
 
 				&.oo-ui-buttonElement-framed {
@@ -268,9 +263,17 @@
 		text-align: left;
 		margin: 1em;
 		padding: 1em;
-		border: 1px solid #ff9e9e;
-		background-color: #fff7f7;
-		border-radius: @border-radius-base;
+		border: 1px solid @border-color-error;
+		background-color: @background-color-error--framed;
+	}
+
+	// Ensure layout amendments on mobile.
+	&.oo-ui-isMobile {
+		.oo-ui-processDialog {
+			&-location {
+				text-align: left;
+			}
+		}
 	}
 }
 

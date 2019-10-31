@@ -1,7 +1,7 @@
 {
 	"selectorWithoutVariant": ".oo-ui-icon-{name}",
 	"selectorWithVariant": ".oo-ui-image-{variant}.oo-ui-icon-{name}",
-	"intro": "@import '../../../../src/styles/common';",
+	"intro": "@import '../../../../src/styles/common.less';",
 	"variants": {
 		"invert": {
 			"color": "#fff",
@@ -14,8 +14,14 @@
 		"destructive": {
 			"color": "#d33"
 		},
+		"error": {
+			"color": "#d33"
+		},
 		"warning": {
-			"color": "#ff5d00"
+			"color": "#fc3"
+		},
+		"success": {
+			"color": "#14866d"
 		}
 	},
 	"images": {
@@ -52,6 +58,9 @@
 			"file": "images/icons/unLock.svg",
 			"variants": [ "destructive" ]
 		},
+		"restore": {
+			"file": "images/icons/restore.svg"
+		},
 		"star": {
 			"file": "images/icons/star.svg"
 		},
@@ -69,7 +78,8 @@
 			"variants": [ "destructive" ]
 		},
 		"unTrash": {
-			"file": "images/icons/unTrash.svg"
+			"file": "images/icons/restore.svg",
+			"deprecated": "Changed and renamed since v0.31.1, use 'restore' instead."
 		},
 		"pushPin": {
 			"file": "images/icons/pushPin.svg"

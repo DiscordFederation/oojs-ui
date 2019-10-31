@@ -2,7 +2,8 @@
  * FieldLayouts are used with OO.ui.FieldsetLayout. Each FieldLayout requires a field-widget,
  * which is a widget that is specified by reference before any optional configuration settings.
  *
- * Field layouts can be configured with help text and/or labels. Labels are aligned in one of four ways:
+ * Field layouts can be configured with help text and/or labels. Labels are aligned in one of
+ * four ways:
  *
  * - **left**: The label is placed before the field-widget and aligned with the left margin.
  *   A left-alignment is used for forms with many fields.
@@ -16,11 +17,12 @@
  *
  * Help text can either be:
  *
- * - accessed via a help icon that appears in the upper right corner of the rendered field layout, or
+ * - accessed via a help icon that appears in the upper right corner of the rendered field layout,
+ *   or
  * - shown as a subtle explanation below the label.
  *
- * If the help text is brief, or is essential to always expose it, set `helpInline` to `true`. If it
- * is long or not essential, leave `helpInline` to its default, `false`.
+ * If the help text is brief, or is essential to always expose it, set `helpInline` to `true`.
+ * If it is long or not essential, leave `helpInline` to its default, `false`.
  *
  * Please see the [OOUI documentation on MediaWiki] [1] for examples and more information.
  *
@@ -38,6 +40,10 @@
  *  or 'inline'
  * @cfg {Array} [errors] Error messages about the widget, which will be
  *  displayed below the widget.
+ * @cfg {Array} [warnings] Warning messages about the widget, which will be
+ *  displayed below the widget.
+ * @cfg {Array} [successMessages] Success messages on user interactions with the widget,
+ *  which will be displayed below the widget.
  *  The array may contain strings or OO.ui.HtmlSnippet instances.
  * @cfg {Array} [notices] Notices about the widget, which will be displayed
  *  below the widget.
@@ -76,24 +82,28 @@ OO.ui.FieldLayout = function OoUiFieldLayout( fieldWidget, config ) {
 	OO.ui.FieldLayout.parent.call( this, config );
 
 	// Mixin constructors
-	OO.ui.mixin.LabelElement.call( this, $.extend( {}, config, {
+	OO.ui.mixin.LabelElement.call( this, $.extend( {
 		$label: $( '<label>' )
-	} ) );
-	OO.ui.mixin.TitledElement.call( this, $.extend( {}, config, { $titled: this.$label } ) );
+	}, config ) );
+	OO.ui.mixin.TitledElement.call( this, $.extend( { $titled: this.$label }, config ) );
 
 	// Properties
 	this.fieldWidget = fieldWidget;
 	this.errors = [];
+	this.warnings = [];
+	this.successMessages = [];
 	this.notices = [];
 	this.$field = this.isFieldInline() ? $( '<span>' ) : $( '<div>' );
-	this.$messages = $( '<ul>' );
+	this.$messages = $( '<div>' );
 	this.$header = $( '<span>' );
 	this.$body = $( '<div>' );
 	this.align = null;
 	this.helpInline = config.helpInline;
 
 	// Events
-	this.fieldWidget.connect( this, { disable: 'onFieldDisable' } );
+	this.fieldWidget.connect( this, {
+		disable: 'onFieldDisable'
+	} );
 
 	// Initialization
 	this.$help = config.help ?
@@ -126,6 +136,8 @@ OO.ui.FieldLayout = function OoUiFieldLayout( fieldWidget, config ) {
 		.append( this.fieldWidget.$element );
 
 	this.setErrors( config.errors || [] );
+	this.setWarnings( config.warnings || [] );
+	this.setSuccess( config.successMessages || [] );
 	this.setNotices( config.notices || [] );
 	this.setAlignment( config.align );
 	// Call this again to take into account the widget's accessKey
@@ -177,21 +189,11 @@ OO.ui.FieldLayout.prototype.isFieldInline = function () {
  * @return {jQuery}
  */
 OO.ui.FieldLayout.prototype.makeMessage = function ( kind, text ) {
-	var $listItem, $icon, message;
-	$listItem = $( '<li>' );
-	if ( kind === 'error' ) {
-		$icon = new OO.ui.IconWidget( { icon: 'alert', flags: [ 'warning' ] } ).$element;
-		$listItem.attr( 'role', 'alert' );
-	} else if ( kind === 'notice' ) {
-		$icon = new OO.ui.IconWidget( { icon: 'notice' } ).$element;
-	} else {
-		$icon = '';
-	}
-	message = new OO.ui.LabelWidget( { label: text } );
-	$listItem
-		.append( $icon, message.$element )
-		.addClass( 'oo-ui-fieldLayout-messages-' + kind );
-	return $listItem;
+	return new OO.ui.MessageWidget( {
+		type: kind,
+		inline: true,
+		label: text
+	} ).$element;
 };
 
 /**
@@ -267,6 +269,36 @@ OO.ui.FieldLayout.prototype.setErrors = function ( errors ) {
 };
 
 /**
+ * Set the list of warning messages.
+ *
+ * @param {Array} warnings Warning messages about the widget, which will be displayed below
+ *  the widget.
+ *  The array may contain strings or OO.ui.HtmlSnippet instances.
+ * @chainable
+ * @return {OO.ui.BookletLayout} The layout, for chaining
+ */
+OO.ui.FieldLayout.prototype.setWarnings = function ( warnings ) {
+	this.warnings = warnings.slice();
+	this.updateMessages();
+	return this;
+};
+
+/**
+ * Set the list of success messages.
+ *
+ * @param {Array} successMessages Success messages about the widget, which will be displayed below
+ *  the widget.
+ *  The array may contain strings or OO.ui.HtmlSnippet instances.
+ * @chainable
+ * @return {OO.ui.BookletLayout} The layout, for chaining
+ */
+OO.ui.FieldLayout.prototype.setSuccess = function ( successMessages ) {
+	this.successMessages = successMessages.slice();
+	this.updateMessages();
+	return this;
+};
+
+/**
  * Set the list of notice messages.
  *
  * @param {Array} notices Notices about the widget, which will be displayed below the widget.
@@ -281,7 +313,7 @@ OO.ui.FieldLayout.prototype.setNotices = function ( notices ) {
 };
 
 /**
- * Update the rendering of error and notice messages.
+ * Update the rendering of error, warning, success and notice messages.
  *
  * @private
  */
@@ -289,18 +321,29 @@ OO.ui.FieldLayout.prototype.updateMessages = function () {
 	var i;
 	this.$messages.empty();
 
-	if ( this.errors.length || this.notices.length ) {
+	if (
+		this.errors.length ||
+		this.warnings.length ||
+		this.successMessages.length ||
+		this.notices.length
+	) {
 		this.$body.after( this.$messages );
 	} else {
 		this.$messages.remove();
 		return;
 	}
 
-	for ( i = 0; i < this.notices.length; i++ ) {
-		this.$messages.append( this.makeMessage( 'notice', this.notices[ i ] ) );
-	}
 	for ( i = 0; i < this.errors.length; i++ ) {
 		this.$messages.append( this.makeMessage( 'error', this.errors[ i ] ) );
+	}
+	for ( i = 0; i < this.warnings.length; i++ ) {
+		this.$messages.append( this.makeMessage( 'warning', this.warnings[ i ] ) );
+	}
+	for ( i = 0; i < this.successMessages.length; i++ ) {
+		this.$messages.append( this.makeMessage( 'success', this.successMessages[ i ] ) );
+	}
+	for ( i = 0; i < this.notices.length; i++ ) {
+		this.$messages.append( this.makeMessage( 'notice', this.notices[ i ] ) );
 	}
 };
 

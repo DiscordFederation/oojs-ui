@@ -1,28 +1,33 @@
 /**
  * The TabIndexedElement class is an attribute mixin used to add additional functionality to an
  * element created by another class. The mixin provides a ‘tabIndex’ property, which specifies the
- * order in which users will navigate through the focusable elements via the "tab" key.
+ * order in which users will navigate through the focusable elements via the Tab key.
  *
  *     @example
  *     // TabIndexedElement is mixed into the ButtonWidget class
  *     // to provide a tabIndex property.
  *     var button1 = new OO.ui.ButtonWidget( {
- *         label: 'fourth',
- *         tabIndex: 4
- *     } );
- *     var button2 = new OO.ui.ButtonWidget( {
- *         label: 'second',
- *         tabIndex: 2
- *     } );
- *     var button3 = new OO.ui.ButtonWidget( {
- *         label: 'third',
- *         tabIndex: 3
- *     } );
- *     var button4 = new OO.ui.ButtonWidget( {
- *         label: 'first',
- *         tabIndex: 1
- *     } );
- *     $( 'body' ).append( button1.$element, button2.$element, button3.$element, button4.$element );
+ *             label: 'fourth',
+ *             tabIndex: 4
+ *         } ),
+ *         button2 = new OO.ui.ButtonWidget( {
+ *             label: 'second',
+ *             tabIndex: 2
+ *         } ),
+ *         button3 = new OO.ui.ButtonWidget( {
+ *             label: 'third',
+ *             tabIndex: 3
+ *         } ),
+ *         button4 = new OO.ui.ButtonWidget( {
+ *             label: 'first',
+ *             tabIndex: 1
+ *         } );
+ *     $( document.body ).append(
+ *         button1.$element,
+ *         button2.$element,
+ *         button3.$element,
+ *         button4.$element
+ *      );
  *
  * @abstract
  * @class
@@ -30,11 +35,11 @@
  * @constructor
  * @param {Object} [config] Configuration options
  * @cfg {jQuery} [$tabIndexed] The element that should use the tabindex functionality. By default,
- *  the functionality is applied to the element created by the class ($element). If a different element is specified, the tabindex
- *  functionality will be applied to it instead.
- * @cfg {string|number|null} [tabIndex=0] Number that specifies the element’s position in the tab-navigation
- *  order (e.g., 1 for the first focusable element). Use 0 to use the default navigation order; use -1
- *  to remove the element from the tab-navigation flow.
+ *  the functionality is applied to the element created by the class ($element). If a different
+ *  element is specified, the tabindex functionality will be applied to it instead.
+ * @cfg {string|number|null} [tabIndex=0] Number that specifies the element’s position in the
+ *  tab-navigation order (e.g., 1 for the first focusable element). Use 0 to use the default
+ *  navigation order; use -1 to remove the element from the tab-navigation flow.
  */
 OO.ui.mixin.TabIndexedElement = function OoUiMixinTabIndexedElement( config ) {
 	// Configuration initialization
@@ -45,7 +50,9 @@ OO.ui.mixin.TabIndexedElement = function OoUiMixinTabIndexedElement( config ) {
 	this.tabIndex = null;
 
 	// Events
-	this.connect( this, { disable: 'onTabIndexedElementDisable' } );
+	this.connect( this, {
+		disable: 'onTabIndexedElementDisable'
+	} );
 
 	// Initialization
 	this.setTabIndex( config.tabIndex );
@@ -180,7 +187,7 @@ OO.ui.mixin.TabIndexedElement.prototype.getInputId = function () {
 OO.ui.mixin.TabIndexedElement.prototype.isLabelableNode = function ( $node ) {
 	var
 		labelableTags = [ 'button', 'meter', 'output', 'progress', 'select', 'textarea' ],
-		tagName = $node.prop( 'tagName' ).toLowerCase();
+		tagName = ( $node.prop( 'tagName' ) || '' ).toLowerCase();
 
 	if ( tagName === 'input' && $node.attr( 'type' ) !== 'hidden' ) {
 		return true;
@@ -199,7 +206,7 @@ OO.ui.mixin.TabIndexedElement.prototype.isLabelableNode = function ( $node ) {
  */
 OO.ui.mixin.TabIndexedElement.prototype.focus = function () {
 	if ( !this.isDisabled() ) {
-		this.$tabIndexed.focus();
+		this.$tabIndexed.trigger( 'focus' );
 	}
 	return this;
 };
@@ -211,7 +218,7 @@ OO.ui.mixin.TabIndexedElement.prototype.focus = function () {
  * @return {OO.ui.Element} The element, for chaining
  */
 OO.ui.mixin.TabIndexedElement.prototype.blur = function () {
-	this.$tabIndexed.blur();
+	this.$tabIndexed.trigger( 'blur' );
 	return this;
 };
 
