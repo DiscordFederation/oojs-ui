@@ -1,4 +1,4 @@
-@import 'common';
+@import 'common.less';
 
 .theme-oo-ui-layout() {}
 
@@ -94,16 +94,21 @@
 		&.oo-ui-fieldLayout-align-inline > .oo-ui-fieldLayout-body > .oo-ui-fieldLayout-header {
 			padding-top: 0;
 			padding-bottom: 0;
-			padding-left: @padding-start-fieldlayout-label; // ≈`6px` is not aligned to M101 design guideline, as checkbox and radio sizes aren't either
+			padding-left: @padding-start-fieldlayout-label;
 		}
 	}
 
 	.oo-ui-fieldLayout-help { // Assuming that this is a PopupButtonWidget
-		.oo-ui-inline-spacing( 0 );
+		margin-right: 0; // Override `.oo-ui-inline-spacing()`.
 
 		.oo-ui-buttonElement-button {
 			padding-top: @size-icon;
 			padding-right: 0; // Accessible label causes triggering of `.oo-ui-labelElement`, we need to reset it here
+
+			&:hover,
+			&:active {
+				background-color: transparent;
+			}
 		}
 	}
 
@@ -123,29 +128,17 @@
 	}
 
 	&-messages {
-		list-style: none none;
 		.oo-ui-box-sizing( border-box );
 		max-width: @max-width-base;
-		margin: 0;
-		padding: @padding-vertical-label @padding-horizontal-base;
+		padding: @padding-vertical-label 0;
 
-		> li {
-			display: table;
-			margin: @padding-vertical-label 0 0;
-			padding: 0;
-		}
+		> .oo-ui-messageWidget {
+			margin-left: @margin-horizontal-fieldlayout-message;
+			margin-right: @margin-horizontal-fieldlayout-message;
 
-		.oo-ui-iconElement.oo-ui-iconElement-icon {
-			display: table-cell;
-			position: static;
-			top: auto;
-			height: @size-icon;
-		}
-
-		.oo-ui-labelWidget {
-			display: table-cell;
-			padding-left: @padding-start-fieldlayout-label;
-			vertical-align: middle;
+			&:first-child {
+				margin-top: @margin-top-message / 2;
+			}
 		}
 	}
 
@@ -182,13 +175,16 @@
 	}
 
 	// Give hovered/focussed widgets higher `z-index`, so that borders display correctly.
-	.oo-ui-actionFieldLayout-input > .oo-ui-textInputWidget > .oo-ui-inputWidget-input {
-		// Apply these styles to the element itself and all following siblings (e.g. .oo-ui-iconElement-icon)
-		&:hover,
-		&:hover ~ *,
-		&:focus,
-		&:focus ~ * {
-			z-index: 1;
+	.oo-ui-actionFieldLayout-input > .oo-ui-textInputWidget {
+		> .oo-ui-inputWidget-input:hover,
+		> .oo-ui-inputWidget-input:focus,
+		&.oo-ui-flaggedElement-invalid > .oo-ui-inputWidget-input {
+			// Apply these styles to the element itself and all following siblings (e.g. .oo-ui-iconElement-icon),
+			// otherwise the icons etc. will disappear behind the input
+			&,
+			& ~ * {
+				z-index: 1;
+			}
 		}
 	}
 
@@ -229,12 +225,15 @@
 		padding-left: @padding-start-fieldset-header-iconized;
 	}
 
-	.oo-ui-fieldsetLayout-help { // Assuming that this is a PopupButtonWidget
-		.oo-ui-inline-spacing( 0 );
+	> .oo-ui-inline-help {
+		margin-bottom: @margin-bottom-fieldset-header;
+	}
+
+	.oo-ui-fieldsetLayout-help {
+		// Assuming that this is a PopupButtonWidget.
 		// HACK: This PopupButtonWidget's `height` extends below the header's baseline (with align: top),
 		// causing the field widget to be narrower than it should be.
-		margin-right: @margin-end-fieldlayout-help;
-
+		&,
 		&:last-child {
 			margin-right: @margin-end-fieldlayout-help;
 		}
@@ -242,6 +241,11 @@
 		.oo-ui-buttonElement-button {
 			padding-top: @size-icon;
 			padding-right: 0; // Accessible label causes triggering of `.oo-ui-labelElement`, we need to reset it here
+
+			&:hover,
+			&:active {
+				background-color: transparent;
+			}
 		}
 	}
 }
@@ -286,7 +290,7 @@
 .theme-oo-ui-horizontalLayout() {
 	> .oo-ui-layout,
 	> .oo-ui-widget {
-		.oo-ui-inline-spacing( 0.5em );
+		.oo-ui-inline-spacing( @margin-end-widget );
 	}
 
 	> .oo-ui-layout {
@@ -294,6 +298,6 @@
 	}
 
 	> .oo-ui-widget {
-		margin-bottom: 0.5em;
+		margin-bottom: @margin-bottom-horizontallayout-widget;
 	}
 }
